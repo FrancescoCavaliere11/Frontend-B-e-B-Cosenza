@@ -1,0 +1,14 @@
+<div class="image-row" [class.left-align]="leftAlign()" [class.right-align]="!leftAlign()">
+  <div class="image-container" [class.is-clickable]="clickable()">
+    <img [src]="imgUrl()" [alt]="altText()">
+
+    @if (clickable()){
+      <div class="image-overlay">
+        <h3>{{ title() }}</h3>
+        <div class="spacer"></div>
+        <p>{{ description() }}</p>
+      </div>
+    }
+
+  </div>
+</div>

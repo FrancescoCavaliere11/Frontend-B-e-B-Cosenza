@@ -1,1 +1,136 @@
-/* You can add global styles to this file, and also import other style files */
+:root{
+  --white: #fff;
+
+  --background-strong: #3e2d2d;
+  --background-weak: #f1e6da;
+
+  --text-strong: #3e2d2d;
+  --text-weak: #756a6a;
+
+  --text-on-black-strong: var(--white);
+  --text-on-black-weak: rgba(255, 255, 255, 0.65);
+
+  --brand-strong: #3e2d2d;
+  --brand-weak: #6e5959;
+  --brand-stroke-strong: #574444;
+  --brand-stroke-weak: #e8e2e2;
+  --brand-fill: #f5f0f0;
+
+  --error-strong: #EF4444;
+  --error-weak: #EF4444E6;
+  --error-stroke-strong: #EF444473;
+  --error-stroke-weak: #EF444433;
+  --error-fill: #EF44441A;
+
+
+  --font-h1: clamp(2.00rem, calc(1.60rem + 2.00vw), 3.00rem);
+  --font-h2: clamp(1.60rem, calc(1.36rem + 1.20vw), 2.20rem);
+  --font-h3: clamp(1.30rem, calc(1.14rem + 0.80vw), 1.70rem);
+  --font-p:  clamp(1.00rem, calc(0.96rem + 0.20vw), 1.10rem);
+  --font-small: clamp(0.85rem, calc(0.83rem + 0.10vw), 0.90rem);
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+
+  background-color: var(--background-strong);
+  color: var(--text-on-black-strong);
+}
+
+h1 { font-size: var(--font-h1); font-weight: 700; line-height: 1.2; }
+h2 { font-size: var(--font-h2); font-weight: 600; line-height: 1.3; }
+h3 { font-size: var(--font-h3); font-weight: 600; line-height: 1.4; }
+p {font-size: var(--font-p); line-height: 1.6;}
+label {font-size: var(--font-small); font-weight: 500;}
+
+h1, h2, h3, p, label, a {
+  margin: 0;
+}
+
+h1, h2, h3, label {
+  color: var(--text-strong);
+}
+
+h1.on-black, h2.on-black, h3.on-black, label.on-black {
+  color: var(--text-on-black-strong);
+}
+
+p {
+  color: var(--text-weak);
+}
+
+p.on-black {
+  color: var(--text-on-black-weak);
+}
+
+a {
+  color: var(--text-strong);
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+a.on-black {color: var(--text-on-black-strong);}
+
+a:hover {color: var(--text-weak);}
+
+a.on-black:hover {color: var(--text-on-black-weak);}
+
+input {
+  padding: 12px;
+  border: 2px var(--brand-weak) solid;
+  font-size: var(--font-p);
+  color: var(--text-strong);
+  transition: all 0.3s ease-in-out;
+}
+
+input::placeholder {
+  font-size: var(--font-p);
+  color: var(--text-weak);
+}
+
+input:focus{
+  outline: none;
+  border-color: var(--brand-strong);
+  box-shadow: 0 0 0 2px var(--brand-stroke-weak);
+}
+
+input.error {
+  border-color: var(--error-stroke-strong);
+  background-color: var(--error-fill);
+  color: var(--error-strong);
+}
+
+input.error::placeholder {
+  color: var(--error-weak);
+}
+
+
+button {
+  background-color: var(--brand-weak);
+  color: var(--text-on-black-strong);
+  padding: 12px 24px;
+  border: 1px var(--brand-weak) solid;
+  font-size: var(--font-p);
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+button:hover {
+  background-color: var(--brand-strong);
+  border-color: var(--brand-strong);
+}
+
+button.on-black {
+  background-color: transparent;
+}
+
+button.on-black:hover{
+  background-color: var(--brand-weak);
+}
+
+.form-field-error {
+  font-size: var(--font-small);
+  color: var(--error-strong);
+}

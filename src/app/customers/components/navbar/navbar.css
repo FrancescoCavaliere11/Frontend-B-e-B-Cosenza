@@ -1,0 +1,36 @@
+:host{
+  width: 100%;
+}
+
+nav {
+  padding: 48px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.left {
+  display: flex;
+  gap: 32px;
+}
+
+a {
+  text-decoration: none;
+  color: var(--text-on-black-strong);
+  font-family: "Syne", sans-serif;
+}
+
+button {
+  border: 2px var(--text-on-black-strong) solid;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--text-on-black-strong);
+  color: var(--text-strong);
+}

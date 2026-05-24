@@ -1,0 +1,29 @@
+<app-navbar></app-navbar>
+
+<div class="logo-container">
+  <h1>VILLA RENDANO</h1>
+</div>
+
+<main class="scroll-container">
+  <div class="spacer"></div>
+
+  <div class="image-gallery">
+    <app-custom-image
+      [imgUrl]="'https://picsum.photos/600/400?random=2'"
+      [leftAlign]="true"
+      [title]="'Titolo'"
+      [description]="'Guarda i nostri servizi'"
+      [clickable]="true"
+    ></app-custom-image>
+    <app-custom-image
+      [imgUrl]="'https://picsum.photos/600/400?random=2'"
+    ></app-custom-image>
+    <app-custom-image
+      [imgUrl]="'https://picsum.photos/600/400?random=2'"
+      [leftAlign]="true"
+    ></app-custom-image>
+  </div>
+
+  <div class="spacer"></div>
+</main>
+
