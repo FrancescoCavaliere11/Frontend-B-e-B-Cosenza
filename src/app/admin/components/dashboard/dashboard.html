@@ -1,0 +1,30 @@
+<nav>
+  <h3>Pannello Admin</h3>
+  <ul>
+    <p class="text-large">Prenotazioni</p>
+    <li routerLinkActive="active" title="Calendario" routerLink="bookings">
+      <hugeicons-icon [icon]="Appointment02Icon" color="currentColor"></hugeicons-icon>
+      <p class="text-small">Calendario</p>
+    </li>
+  </ul>
+  <div class="separator"></div>
+  <ul>
+    <p class="text-large">Gestione</p>
+    <li routerLinkActive="active" title="Stanze" routerLink="rooms">
+      <hugeicons-icon [icon]="BedDoubleIcon"></hugeicons-icon>
+      <p class="text-small">Stanze</p>
+    </li>
+    <li routerLinkActive="active" title="Servizi Stanze" routerLink="rooms-services">
+      <hugeicons-icon [icon]="Wifi02Icon"></hugeicons-icon>
+      <p class="text-small">Servizi Stanze</p>
+    </li>
+    <li routerLinkActive="active" title="Servizi Extra" routerLink="extra-services">
+      <hugeicons-icon [icon]="HotelBellIcon"></hugeicons-icon>
+      <p class="text-small">Servizi Extra</p>
+    </li>
+  </ul>
+  <li class="danger">
+    <hugeicons-icon [icon]="Login02Icon"></hugeicons-icon>
+    <p>Esci</p>
+  </li>
+</nav>

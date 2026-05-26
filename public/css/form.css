@@ -1,0 +1,218 @@
+.creation-form, .update-form{
+  display: flex;
+  flex-direction: column;
+  gap: 16pt;
+}
+
+.creation-form > .form-group,
+.update-form > .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8pt;
+}
+
+.update-form > .form-group > .btn-row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 8pt;
+}
+
+.update-form > .form-group > .btn-row > button {
+  width: 100%;
+}
+
+
+.form-groups, .form-group, .form-controls {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 16pt;
+}
+
+.form-groups p.error, .form-group p.error {
+  color: var(--error-strong);
+  width: 100%;
+}
+
+.form-groups {
+  gap: 24pt;
+}
+
+.form-group {
+  gap: 4pt;
+}
+
+.form-group.row, .form-group.row-check {
+  flex-direction: row;
+}
+
+.form-controls {
+  gap: 8pt;
+}
+
+label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-strong);
+  letter-spacing: 0.01em;
+  padding-left: 4pt;
+}
+
+.error-message {
+  color: var(--error-strong);
+}
+
+input, select, textarea {
+  cursor: pointer;
+}
+
+input[type="file"] {
+  max-height: 30pt;
+  padding: 6pt !important;
+  color: var(--text-weak);
+}
+
+input:disabled, select:disabled, textarea:disabled {
+  cursor: not-allowed;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="search"],
+input[type="tel"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="file"],
+select,
+textarea {
+  width: 100%;
+  min-height: 30pt;
+  padding: 4pt 8pt;
+  font-size: 0.9375rem;
+  color: var(--text-strong);
+  background: var(--background);
+  border: 1px solid var(--stroke-strong);
+  border-radius: 8pt;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  height: 36px;
+}
+
+
+input::placeholder {
+  color: var(--text-weak);
+}
+
+input[type="checkbox"] {
+  accent-color: var(--brand-weak);
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--stroke-strong);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .3s ease-in-out;
+}
+
+input[type="checkbox"]:checked {
+  border-color: var(--brand-weak);
+  background-color: var(--brand-weak);
+}
+
+/* Focus state - Importante per accessibilità e UX */
+input:focus, select:focus, textarea:focus {
+  border-color: var(--brand-strong);
+  box-shadow: 0 0 0 3px var(--brand-fill);
+}
+
+input.invalid,
+select.invalid,
+textarea.invalid {
+  border: 1px solid var(--error-stroke-strong);
+}
+
+input.invalid:focus,
+select.invalid:focus,
+textarea.invalid:focus{
+  box-shadow: 0 0 0 3px var(--error-fill);
+}
+
+input:disabled {
+  background-color: var(--stroke-weak);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+button,
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  padding: 8pt;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+
+  border: none;
+  border-radius: 8pt;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  line-height: 1;
+  text-wrap: nowrap;
+}
+
+/* Button Primary (Accent) */
+button.primary,
+.button.primary {
+  background-color: var(--brand-strong);
+  color: var(--text-on-black-strong);
+}
+
+button.primary:hover,
+.button.primary:hover {
+  background-color: var(--brand-weak);
+}
+
+button:disabled, button:disabled:hover {
+  background-color: var(--stroke-strong);
+  cursor: not-allowed;
+}
+
+/* Button Secondary (Outline/Ghost) */
+button.secondary,
+.button.secondary {
+  background-color: var(--brand-fill);
+  color: var(--text-weak);
+}
+
+button.secondary:hover,
+.button.secondary:hover {
+  color: var(--brand-strong);
+}
+
+/* Button Danger (Delete actions) */
+button.danger,
+.button.danger {
+  background-color: var(--fill-dark);
+  color: var(--error-weak);
+  border: 1px solid var(--stroke-weak);
+}
+
+button.danger:hover,
+.button.danger:hover {
+  background-color: var(--error-fill);
+  color: var(--error-strong);
+  border: 1px solid var(--error-stroke-weak);
+}

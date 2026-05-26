@@ -1,0 +1,79 @@
+:host{
+  height: 100%;
+  padding: 8pt;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24pt;
+  width: 250px;
+  min-width: 250px;
+  background: var(--fill);
+  backdrop-filter: blur(32pt);
+  border-right: 1px solid var(--stroke-weak);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 16pt;
+}
+
+ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8pt;
+}
+
+ul > p {
+  font-weight: 500;
+  color: var(--brand-weak);
+  padding: 0 8pt;
+}
+
+.separator {
+  height: 1px;
+  background-color: var(--stroke-weak);
+  width: 100%;
+}
+
+li {
+  position: relative;
+  list-style: none;
+  padding: 8pt;
+  border-radius: 8pt;
+  transition: all .3s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 8pt;
+  color: var(--text-weak);
+  stroke: var(--text-weak);
+  cursor: pointer;
+}
+
+li > p, li > hugeicons-icon {
+  transition: all .3s ease-in-out;
+}
+
+li.active > p, li:hover > p, li.active > hugeicons-icon, li:hover > hugeicons-icon {
+  color: var(--text-strong);
+  stroke: var(--text-strong);
+}
+
+li.active {
+  stroke: var(--brand-strong);
+  background-color: var(--fill-dark);
+}
+
+li.danger {
+  border-top: 1px solid var(--stroke-weak);
+  border-radius: 0;
+}
+
+li.danger:hover > p, li.danger:hover > hugeicons-icon {
+  color: var(--error-strong);
+  stroke: var(--error-strong);
+}
+

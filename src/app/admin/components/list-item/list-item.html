@@ -1,0 +1,28 @@
+<div
+  class="list-item-container"
+  [class.is-add]="isAddButton()"
+  [class.expanded]="isOpen()">
+  @if (isAddButton()){
+    <div class="add-state-content" [class.hidden]="isOpen()">
+      <hugeicons-icon [icon]="Add01Icon" color="currentColor"></hugeicons-icon>
+    </div>
+  }
+
+  @if(!isAddButton()){
+    <small [class.danger]="action() == 'Elimina'">
+      {{ action() ? action() : 'Modifica' }}
+    </small>
+    <div class="standard-state-content" [class.hidden]="isOpen()">
+      @if (icon()) {
+        <hugeicons-icon [icon]="icon()!"></hugeicons-icon>
+      }
+      <div class="item-info">
+        <p>{{ title() }}</p>
+        <ng-content></ng-content>
+      </div>
+    </div>
+  }
+
+  <div class="form-wrapper" [class.show]="isOpen()" (click)="$event.stopPropagation()">
+    <ng-content select="[form]"></ng-content> </div>
+</div>

@@ -7,7 +7,12 @@ import {AuthService} from '../../../service/auth-service';
   selector: 'app-login-page',
   standalone: false,
   templateUrl: './login-page.html',
-  styleUrls: ['./login-page.css', '../../../../styles.css'],
+  styleUrls: [
+    './login-page.css',
+    '../../../../styles.css',
+    '../../../../../public/css/typography.css',
+    '../../../../../public/css/form.css'
+  ],
 })
 export class LoginPage {
   loginForm: FormGroup
@@ -23,11 +28,11 @@ export class LoginPage {
     })
   }
 
-  checkIsValidEmail(){
+  checkIsInvalidEmail(){
     return this.loginForm.get('email')?.touched && this.loginForm.get('email')?.invalid
   }
 
-  checkIsValidPassword(){
+  checkIsInvalidPassword(){
     return this.loginForm.get('password')?.touched && (this.loginForm.get('password')?.invalid
       || this.loginForm.get('password')?.errors?.['passwordStrength'])
   }

@@ -5,31 +5,31 @@
     <p>Inserisci le tue credenziali per accedere</p>
   </div>
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-    <div class="form-control">
+    <div class="form-group">
       <label for="email">Indirizzo Email</label>
       <input
-        [class.error]="checkIsValidEmail()"
+        [class.invalid]="checkIsInvalidEmail()"
         id="email"
         type="email"
         placeholder="Inserisci la tua email"
         formControlName="email">
 
-      @if (checkIsValidEmail()){
-        <small class="form-field-error">Inserisci un indirizzo email valido</small>
+      @if (checkIsInvalidEmail()){
+        <small class="error-message">Inserisci un indirizzo email valido</small>
       }
     </div>
 
-    <div class="form-control">
+    <div class="form-group">
       <label for="password">Password</label>
       <input
-        [class.error]="checkIsValidPassword()"
+        [class.invalid]="checkIsInvalidPassword()"
         id="password"
         type="password"
         placeholder="Inserisci la tua password"
         formControlName="password">
 
-      @if (checkIsValidPassword()) {
-        <small class="form-field-error" style="display: block;">
+      @if (checkIsInvalidPassword()) {
+        <small class="error-message" style="display: block;">
           La password deve contenere:
           <br />• Almeno una maiuscola
           <br />• Almeno una minuscola
@@ -39,10 +39,11 @@
       }
     </div>
 
-    <button type="submit">Accedi</button>
+    <button class="primary" type="submit" [disabled]="isLoading">
+      @if(isLoading) { Attendere... } @else { Accedi }
+    </button>
+
+    <p class="text-small forget-link">Hai dimenticato la password? <b>Clicca qui</b></p>
   </form>
 </section>
-<div class="forget-password">
-  <p>Password Dimenticata?</p>
-  <a href="#">Clicca qui</a>
-</div>
+

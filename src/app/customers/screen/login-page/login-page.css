@@ -5,7 +5,7 @@
   flex-direction: column;
   align-items: center;
   gap: 40px;
-  background-color: var(--background-weak);
+  background-color: var(--background);
   padding-top: 7vh;
 }
 
@@ -15,7 +15,7 @@ section {
   display: flex;
   flex-direction: column;
   gap: 32px;
-  background-color: var(--white);
+  background-color: var(--background);
   padding: 8vh 5vw;
 
   box-shadow: 0 4px 20px rgba(62, 45, 45, 0.08),
@@ -28,16 +28,22 @@ section form {
   gap: 32px;
 }
 
-.form-control {
+.forget-link {
+  margin-top: 8pt;
   display: flex;
-  gap: 8px;
-  flex-direction: column;
+  gap: 4pt;
+  cursor: pointer;
 }
 
-.forget-password {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.forget-link > b {
+  font-weight: 500;
+  color: var(--text-strong) !important;
+  transition: opacity 0.2s;
+}
+
+.forget-link:hover > b {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 

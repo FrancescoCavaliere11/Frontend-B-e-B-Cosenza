@@ -8,11 +8,25 @@ import { CustomImage } from './customers/components/custom-image/custom-image';
 import { LoginPage } from './customers/screen/login-page/login-page';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Home } from './customers/screen/home/home';
-import { AdminHome } from './admin/admin-home/admin-home';
+import { Dashboard } from './admin/components/dashboard/dashboard';
+import { AdminHome } from './admin/screen/admin-home/admin-home';
+import { HugeiconsIconComponent } from '@hugeicons/angular';
+import { RoomServiceScreen } from './admin/screen/room-service-screen/room-service-screen';
+import { ListItem } from './admin/components/list-item/list-item';
 
 @NgModule({
-  declarations: [App, Navbar, CustomImage, LoginPage, Home, AdminHome],
-  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule],
+  declarations: [
+    App,
+    Navbar,
+    CustomImage,
+    LoginPage,
+    Home,
+    AdminHome,
+    Dashboard,
+    RoomServiceScreen,
+    ListItem,
+  ],
+  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HugeiconsIconComponent],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })

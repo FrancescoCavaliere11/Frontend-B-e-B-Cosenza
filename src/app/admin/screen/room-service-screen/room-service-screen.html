@@ -1,0 +1,64 @@
+<section class="list-section">
+  <div class="header">
+    <h2>Servizi Stanze</h2>
+    <input [formControl]="searchControl" type="text" placeholder="Cerca per nome...">
+  </div>
+  <div class="list">
+    <app-list-item
+      [isAddButton]="true"
+      [isOpen]="editingServiceId === 'NEW'"
+      (click)="openCreateForm()">
+      <form form [formGroup]="form"  class="creation-form" (submit)="onCreateRoomService()">
+        <h4>Crea un nuovo servizio</h4>
+        <div class="form-group">
+          <label for="room-service-name">Nome Servizio</label>
+          <input
+            [class.invalid]="checkIsInvalidName()"
+            id="room-service-name"
+            formControlName="name"
+            type="text"
+            placeholder="Nome servizio (es. Aria Condizionata)">
+          @if (checkIsInvalidName()) {
+            <small class="error-message">Il nome deve essere lungo almeno 2 caratteri e al massimo 50</small>
+          }
+          <button type="submit" class="primary small">Salva</button>
+        </div>
+      </form>
+    </app-list-item>
+    @for (item of searchedRoomServices; track item.id) {
+      <app-list-item
+        [title]="item.name"
+        [icon]="UserIcon"
+        [isOpen]="editingServiceId === item.id"
+        (click)="openEditForm(item)">
+        <form form [formGroup]="form" class="update-form" (submit)="onUpdateRoomService()">
+          <h4>Modifica Servizio {{ item.name }}</h4>
+          <div class="form-group">
+            <label for="room-service">Nome Servizio</label>
+            <input
+              [class.invalid]="checkIsInvalidName()"
+              id="room-service"
+              formControlName="name"
+              type="text"
+              placeholder="Nome servizio (es. Aria Condizionata)">
+            @if (checkIsInvalidName()) {
+              <small class="error-message">Il nome deve essere lungo almeno 2 caratteri e al massimo 50</small>
+            }
+            <div class="btn-row">
+              <button type="submit" class="primary small">Salva</button>
+              <button class="danger" type="button" (click)="onDeleteRoomService()">Elimina</button>
+            </div>
+          </div>
+        </form>
+      </app-list-item>
+    } @empty {
+      @if (!isLoading) {
+        <p class="empty-state">Nessun Servizio per le stanze trovato</p>
+      }
+
+      @if(isLoading) {
+        <div class="loading">Caricamento in corso...</div>
+      }
+    }
+  </div>
+</section>

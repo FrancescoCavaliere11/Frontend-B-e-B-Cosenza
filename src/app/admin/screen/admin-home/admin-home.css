@@ -1,0 +1,16 @@
+:host{
+  background-color: var(--background);
+  height: 100%;
+  width: 100%;
+  display: flex;
+}
+
+.page {
+  position: relative;
+  display: flex;
+  gap: 0;
+  width: 100%;
+  height: 100%;
+  max-width: calc(100vw - 250px);
+  z-index: 1;
+}
