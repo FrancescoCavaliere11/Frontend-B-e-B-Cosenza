@@ -77,3 +77,81 @@ li.danger:hover > p, li.danger:hover > hugeicons-icon {
   stroke: var(--error-strong);
 }
 
+
+
+@media (max-width: 768px) {
+  :host {
+    width: max-content;
+    min-width: max-content;
+    z-index: 100;
+
+    transition: width .3s ease-in-out;
+  }
+
+  :host:hover {
+    position: absolute;
+    width: 250px;
+    min-width: 250px;
+  }
+
+  :host:hover nav > ul > li > p,
+  :host:hover nav > li.danger > p {
+    display: block;
+  }
+
+  nav > ul > p,
+  nav > ul > li > p,
+  nav > li.danger > p{
+    display: none;
+  }
+}
+
+
+@media (max-width: 576px) {
+  :host {
+    width: 100% !important;
+    min-width: 100% !important;
+    height: 60px;
+    min-height: 60px;
+    padding: 0 16pt;
+
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    border-right: none;
+    border-top: 1px solid var(--stroke-weak);
+    overflow-y: hidden;
+    overflow-x: auto;
+  }
+
+  nav {
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    gap: 0;
+  }
+
+  nav > ul {
+    display: contents;
+  }
+
+  nav > ul > p,
+  nav > ul > li > p,
+  li.danger > p,
+  .separator {
+    display: none !important;
+  }
+
+  li {
+    padding: 8pt;
+    justify-content: center;
+    align-items: center;
+  }
+
+  li.danger {
+    border-top: none;
+    padding: 8pt;
+  }
+}
