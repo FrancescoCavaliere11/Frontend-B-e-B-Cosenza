@@ -27,3 +27,18 @@ export const withCredentialsInterceptor: HttpInterceptorFn = (req, next) => {
     })
   );
 };
+
+
+export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  return next(req).pipe(
+    catchError((error: HttpErrorResponse) => {
+      let errorMessage = 'Si è verificato un errore imprevisto.';
+
+      if (error.error && error.error.message) {
+        errorMessage = error.error.message;
+      }
+      alert(errorMessage)
+      return throwError(() => error);
+    })
+  );
+};

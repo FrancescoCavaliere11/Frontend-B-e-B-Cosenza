@@ -14,6 +14,8 @@ import { HugeiconsIconComponent } from '@hugeicons/angular';
 import { RoomServiceScreen } from './admin/screen/room-service-screen/room-service-screen';
 import { ListItem } from './admin/components/list-item/list-item';
 import { ExtraServiceScreen } from './admin/screen/extra-service-screen/extra-service-screen';
+import {provideHttpClient, withInterceptors} from '@angular/common/http';
+import {errorInterceptor, withCredentialsInterceptor} from './security/interceptor';
 
 @NgModule({
   declarations: [
@@ -29,7 +31,12 @@ import { ExtraServiceScreen } from './admin/screen/extra-service-screen/extra-se
     ExtraServiceScreen,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HugeiconsIconComponent],
-  providers: [provideBrowserGlobalErrorListeners()],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(
+      withInterceptors([withCredentialsInterceptor, errorInterceptor])
+    )
+  ],
   bootstrap: [App],
 })
 export class AppModule {}

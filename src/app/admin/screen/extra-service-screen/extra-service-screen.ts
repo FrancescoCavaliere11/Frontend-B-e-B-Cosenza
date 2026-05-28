@@ -176,7 +176,7 @@ export class ExtraServiceScreen implements OnInit, OnDestroy{
     })
   }
 
-  onUpdateExtraService(){
+  onUpdateExtraService(service: ExtraServiceSchema){
     if(this.isLoading) return
 
     if(this.form.invalid && !this.selectedImageFile) {
@@ -184,11 +184,21 @@ export class ExtraServiceScreen implements OnInit, OnDestroy{
       return
     }
 
-    this.isLoading = true;
+    const formValue = this.form.value
 
-    const id = this.form.value.id
-    const name = this.form.value.name.trim()
-    const description = this.form.value.description?.trim() || undefined
+    const id = formValue.id
+    const name = formValue.name.trim()
+    const description = formValue.description?.trim() || undefined
+
+    const serviceDescription = service.description ? service.description : ''
+    if(name === service.name
+      && description === serviceDescription
+      && !this.selectedImageFile) {
+      alert("Nessuna modifica rilevata")
+      return
+    }
+
+    this.isLoading = true;
 
     this.extraServiceService.updateExtraService(id, name, description, this.selectedImageFile).subscribe({
       next: () => {

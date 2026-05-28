@@ -152,7 +152,7 @@ export class RoomServiceScreen implements OnInit, OnDestroy{
     })
   }
 
-  onUpdateRoomService() {
+  onUpdateRoomService(service: RoomServiceSchema) {
     if(this.isLoading) return
 
     if(this.form.invalid) {
@@ -160,10 +160,18 @@ export class RoomServiceScreen implements OnInit, OnDestroy{
       return
     }
 
+    const formValue = this.form.value
+
+    if(formValue.name === service.name){
+      alert("Non sono state apportate modifiche al servizio.")
+      return
+    }
+
     this.isLoading = true;
+
     const payload = {
-      id: this.form.value.id,
-      name: this.form.value.name.trim()
+      id: formValue.id,
+      name: formValue.name.trim()
     }
 
     this.roomServiceService.updateRoomService(payload).subscribe({

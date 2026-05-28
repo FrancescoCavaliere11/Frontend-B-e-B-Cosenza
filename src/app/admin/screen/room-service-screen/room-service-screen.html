@@ -36,7 +36,7 @@
         [icon]="UserIcon"
         [isOpen]="editingServiceId === item.id"
         (click)="openEditForm(item)">
-        <form form [formGroup]="form" class="update-form" (submit)="onUpdateRoomService()">
+        <form form [formGroup]="form" class="update-form" (submit)="onUpdateRoomService(item)">
           <div class="form-header">
             <h4>Modifica Servizio {{ item.name }}</h4>
             <hugeicons-icon class="close" [icon]="Cancel01Icon" (click)="onCloseForm()"></hugeicons-icon>
