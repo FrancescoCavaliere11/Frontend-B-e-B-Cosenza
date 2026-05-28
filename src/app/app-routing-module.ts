@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import {LoginPage} from './customers/screen/login-page/login-page';
 import {AdminHome} from './admin/screen/admin-home/admin-home';
 import {RoomServiceScreen} from './admin/screen/room-service-screen/room-service-screen';
+import {ExtraServiceScreen} from './admin/screen/extra-service-screen/extra-service-screen';
 
 const routes: Routes = [
   {
@@ -23,7 +24,7 @@ const routes: Routes = [
       { path:'bookings', component:LoginPage, title: 'Bookings Page' }, // todo
       { path:'rooms', component:LoginPage, title: 'Rooms Page' }, // todo
       { path:'rooms-services', component:RoomServiceScreen, title: 'Rooms Services Page' },
-      { path:'extra-services', component:LoginPage, title: 'Extra Services Page' }, // todo
+      { path:'extra-services', component:ExtraServiceScreen, title: 'Extra Services Page' },
     ]
   }
 

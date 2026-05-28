@@ -9,9 +9,11 @@
   }
 
   @if(!isAddButton()){
-    <small [class.danger]="action() == 'Elimina'">
-      {{ action() ? action() : 'Modifica' }}
-    </small>
+    @if (!isOpen()){
+      <small [class.danger]="action() == 'Elimina'">
+        {{ action() ? action() : 'Modifica' }}
+      </small>
+    }
     <div class="standard-state-content" [class.hidden]="isOpen()">
       @if (icon()) {
         <hugeicons-icon [icon]="icon()!"></hugeicons-icon>

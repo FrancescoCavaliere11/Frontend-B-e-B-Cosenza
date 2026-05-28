@@ -8,7 +8,7 @@ import {RoomServiceSchema} from '../schemas/room-service-schema';
   providedIn: 'root',
 })
 export class RoomServiceService {
-  private apiUrl = Environment.getInstance().apiUrl + "/room-service"
+  private apiUrl = Environment.getInstance().apiUrl + "/room-service/"
 
   private roomsServicesSubject = new BehaviorSubject<RoomServiceSchema[]>([]);
   public roomsServices$ = this.roomsServicesSubject.asObservable();

@@ -1,5 +1,5 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {UserIcon} from '@hugeicons/core-free-icons';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {Cancel01Icon, UserIcon} from '@hugeicons/core-free-icons';
 import {RoomServiceSchema} from '../../../schemas/room-service-schema';
 import {RoomServiceService} from '../../../service/room-service-service';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
@@ -17,8 +17,9 @@ import {combineLatest, map, startWith, Subject, takeUntil} from 'rxjs';
     '../../../../../public/css/layout.css'
   ],
 })
-export class RoomServiceScreen implements OnInit{
+export class RoomServiceScreen implements OnInit, OnDestroy{
   protected readonly UserIcon = UserIcon;
+  protected readonly Cancel01Icon = Cancel01Icon;
 
   form: FormGroup
   isLoading = false
@@ -47,6 +48,11 @@ export class RoomServiceScreen implements OnInit{
   ngOnInit(): void {
     this.loadAllRoomServices()
     this.setupSearchAndDataStream()
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private setupSearchAndDataStream() {
@@ -101,18 +107,22 @@ export class RoomServiceScreen implements OnInit{
   }
 
   openCreateForm() {
-    if(this.editingServiceId !== "NEW"){
-      console.log("Opening create form")
-      this.editingServiceId = "NEW";
-      this.form.reset({
-        id: null,
-        name: ''
-      });
-    }
+    if(this.editingServiceId === "NEW") return
+
+    this.editingServiceId = "NEW";
+    this.form.reset({
+      id: null,
+      name: ''
+    });
   }
 
   checkIsInvalidName() {
     return this.form.get('name')?.touched && this.form.get('name')?.invalid
+  }
+
+  onCloseForm() {
+    this.editingServiceId = null;
+    this.form.reset()
   }
 
   onCreateRoomService() {
@@ -196,4 +206,5 @@ export class RoomServiceScreen implements OnInit{
       })
     }
   }
+
 }

@@ -1,27 +1,40 @@
 .creation-form, .update-form{
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 16pt;
 }
 
-.creation-form > .form-group,
-.update-form > .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8pt;
-}
-
-.update-form > .form-group > .btn-row {
+.update-form > .form-groups > .btn-row {
   display: flex;
   flex-direction: row;
   width: 100%;
   gap: 8pt;
 }
 
-.update-form > .form-group > .btn-row > button {
+.update-form .btn-row > button {
   width: 100%;
 }
 
+.creation-form > .form-header > hugeicons-icon.close,
+.update-form > .form-header > hugeicons-icon.close{
+  cursor: pointer;
+  stroke: var(--brand-weak); /* todo cambiare colore */
+
+  transition: all 0.3s ease-in-out;
+}
+
+.creation-form > .form-header > hugeicons-icon.close:hover,
+.update-form > .form-header > hugeicons-icon.close:hover {
+  stroke: var(--brand-strong); /* todo cambiare colore */
+}
+
+.form-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
 
 .form-groups, .form-group, .form-controls {
   display: flex;
@@ -68,6 +81,11 @@ input, select, textarea {
   cursor: pointer;
 }
 
+textarea {
+  resize: vertical;
+  max-height: 200px;
+}
+
 input[type="file"] {
   max-height: 30pt;
   padding: 6pt !important;
@@ -109,7 +127,7 @@ select {
 }
 
 
-input::placeholder {
+input::placeholder, textarea::placeholder {
   color: var(--text-weak);
 }
 

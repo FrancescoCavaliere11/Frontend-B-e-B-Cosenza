@@ -1,0 +1,10 @@
+:host {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.list-section > button {
+  width: fit-content;
+}
+

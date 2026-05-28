@@ -1,0 +1,129 @@
+<section class="list-section">
+  <div class="header">
+    <h2>Servizi</h2>
+    <input [formControl]="searchControl" type="text" placeholder="Cerca per nome...">
+  </div>
+  <div class="list">
+    <app-list-item
+      [isAddButton]="true"
+      [isOpen]="editingServiceId === 'NEW'"
+      (click)="openCreateForm()">
+      <form form [formGroup]="form"  class="creation-form" (submit)="onCreateExtraService()">
+        <div class="form-header">
+          <h4>Crea un nuovo servizio</h4>
+          <hugeicons-icon class="close" [icon]="Cancel01Icon" (click)="onCloseForm()"></hugeicons-icon>
+        </div>
+        <div class="form-groups">
+          <div class="form-group">
+            <label for="new-image-file">Immagine Servizio</label>
+            <input
+              (change)="onFileSelected($event)"
+              [class.invalid]="!selectedImageFile && (form.dirty || form.touched)"
+              type="file"
+              id="new-image-file"
+              #fileInput
+              accept="image/*">
+              <!-- todo modificare estetica del file picker -->
+            @if (!selectedImageFile && (form.dirty || form.touched)) {
+              <div class="error-message">
+                <small>L'immagine è obbligatoria per la creazione.</small>
+              </div>
+            }
+          </div>
+          <div class="form-group">
+            <label for="new-service-name">Nome Servizio</label>
+            <input
+              [class.invalid]="checkIsInvalidName()"
+              id="new-service-name"
+              formControlName="name"
+              type="text"
+              placeholder="Nome servizio (es. Aria Condizionata)">
+            @if (checkIsInvalidName()) {
+              <small class="error-message">Il nome deve essere lungo almeno 2 caratteri e al massimo 50</small>
+            }
+          </div>
+          <div class="form-group">
+            <label for="new-service-description">Descrizione</label>
+            <textarea
+              [class.invalid]="checkIsInvalidDescription()"
+              id="new-service-description"
+              formControlName="description"
+              placeholder="Inserisci descrizione"
+              maxlength="200">
+            </textarea>
+
+            @if (checkIsInvalidDescription()) {
+              <small class="error-message">La descrizione deve essere lunga almeno 2 caratteri e al massimo 200 caratteri</small>
+            }
+          </div>
+
+          <button type="submit" class="primary small">Salva</button>
+        </div>
+      </form>
+    </app-list-item>
+    @for (item of searchedExtraServices; track item.id) {
+      <app-list-item
+        [title]="item.name"
+        [isOpen]="editingServiceId === item.id"
+        (click)="openEditForm(item)">
+        <form form [formGroup]="form" class="update-form" (submit)="onUpdateExtraService()">
+          <div class="form-header">
+            <h4>Modifica Servizio {{ item.name }}</h4>
+            <hugeicons-icon class="close" [icon]="Cancel01Icon" (click)="onCloseForm()"></hugeicons-icon>
+          </div>
+          <div class="form-groups">
+            <div class="form-group">
+              <label for="imageFile">Immagine Servizio</label>
+              <input
+                (change)="onFileSelected($event)"
+                type="file"
+                id="imageFile"
+                #fileInput
+                accept="image/*">
+              <!-- todo modificare estetica del file picker -->
+            </div>
+            <div class="form-group">
+              <label for="name">Nome Servizio</label>
+              <input
+                [class.invalid]="checkIsInvalidName()"
+                id="name"
+                formControlName="name"
+                type="text"
+                placeholder="Nome servizio (es. Aria Condizionata)">
+              @if (checkIsInvalidName()) {
+                <small class="error-message">Il nome deve essere lungo almeno 2 caratteri e al massimo 50</small>
+              }
+            </div>
+            <div class="form-group">
+              <label for="service-description">Descrizione</label>
+              <textarea
+                [class.invalid]="checkIsInvalidDescription()"
+                id="service-description"
+                formControlName="description"
+                placeholder="Inserisci descrizione"
+                maxlength="200">
+            </textarea>
+
+              @if (checkIsInvalidDescription()) {
+                <small class="error-message">La descrizione deve essere lunga almeno 2 caratteri e al massimo 200 caratteri</small>
+              }
+            </div>
+
+            <div class="btn-row">
+              <button type="submit" class="primary small">Salva</button>
+              <button class="danger" type="button" (click)="onDeleteExtraService()">Elimina</button>
+            </div>
+          </div>
+        </form>
+      </app-list-item>
+    } @empty {
+      @if (!isLoading) {
+        <p class="empty-state">Nessun Servizio per le stanze trovato</p>
+      }
+
+      @if(isLoading) {
+        <div class="loading">Caricamento in corso...</div>
+      }
+    }
+  </div>
+</section>

@@ -13,6 +13,7 @@ import { AdminHome } from './admin/screen/admin-home/admin-home';
 import { HugeiconsIconComponent } from '@hugeicons/angular';
 import { RoomServiceScreen } from './admin/screen/room-service-screen/room-service-screen';
 import { ListItem } from './admin/components/list-item/list-item';
+import { ExtraServiceScreen } from './admin/screen/extra-service-screen/extra-service-screen';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { ListItem } from './admin/components/list-item/list-item';
     Dashboard,
     RoomServiceScreen,
     ListItem,
+    ExtraServiceScreen,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HugeiconsIconComponent],
   providers: [provideBrowserGlobalErrorListeners()],
