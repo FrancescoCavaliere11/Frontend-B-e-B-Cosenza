@@ -1,0 +1,37 @@
+:host {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.list-section > button {
+  width: fit-content;
+}
+
+.service-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4pt;
+  background: var(--fill-dark);
+  border: 1px solid var(--stroke-weak);
+  border-radius: 12pt;
+}
+
+
+.service-item.selected {
+  background: var(--brand-fill);
+  border: 1px solid var(--brand-stroke-weak);
+}
+
+.service-item > input {
+  opacity: 0;
+  width: 80px;
+  pointer-events: none;
+}
+
+.service-item.selected > input {
+  opacity: 1;
+  pointer-events: initial;
+}

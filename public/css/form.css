@@ -234,3 +234,28 @@ button.danger:hover,
   color: var(--error-strong);
   border: 1px solid var(--error-stroke-weak);
 }
+
+
+.services {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 8pt;
+}
+
+.services > .checkbox {
+  display: flex;
+  align-items: center;
+  gap: 4pt;
+  background-color: var(--fill-dark);
+  border: 1px solid var(--stroke-weak);
+  padding: 4pt 8pt 4pt 4pt;
+  border-radius: 8pt;
+  transition: all .2s ease-in-out;
+  cursor: pointer;
+}
+
+.services > .checkbox:has(input:checked) {
+  background-color: var(--brand-fill);
+  border-color: var(--brand-stroke-weak);
+}

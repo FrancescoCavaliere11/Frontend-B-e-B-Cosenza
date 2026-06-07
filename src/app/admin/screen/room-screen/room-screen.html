@@ -1,0 +1,232 @@
+<section class="list-section">
+  <div class="header">
+    <h2>Stanze</h2>
+    <input [formControl]="searchControl" type="text" placeholder="Cerca per nome...">
+  </div>
+  <div class="list">
+    <app-list-item
+      [isAddButton]="true"
+      [isOpen]="editingRoomId === 'NEW'"
+      (click)="openCreateForm()">
+      <form form [formGroup]="form"  class="creation-form" (submit)="onCreateRoom()">
+        <div class="form-header">
+          <h4>Crea una nuova stanza</h4>
+          <hugeicons-icon class="close" [icon]="Cancel01Icon" (click)="onCloseForm()"></hugeicons-icon>
+        </div>
+        <div class="form-groups">
+          <div class="form-group">
+            <label for="new-image-file">Immagine Stanza</label>
+            <input
+              (change)="onFileSelected($event)"
+              [class.invalid]="!selectedImageFile && (form.dirty || form.touched)"
+              type="file"
+              id="new-image-file"
+              #fileInput
+              accept="image/*">
+            <!-- todo modificare estetica del file picker -->
+            @if (!selectedImageFile && (form.dirty || form.touched)) {
+              <div class="error-message">
+                <small>L'immagine è obbligatoria per la creazione.</small>
+              </div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="new-name">Nome Stanza</label>
+            <input
+              [class.invalid]="checkIsInvalidName()"
+              id="new-name"
+              formControlName="name"
+              type="text"
+              placeholder="Nome stanza">
+            @if (checkIsInvalidName()) {
+              <small class="error-message">Il nome deve essere lungo almeno 2 caratteri e al massimo 50</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="new-capacity">Capacità stanza</label>
+            <input
+              [class.invalid]="checkIsInvalidCapacity()"
+              id="new-capacity"
+              formControlName="capacity"
+              type="number"
+              min="1"
+              placeholder="Capacità stanza (es. 3)">
+            @if (checkIsInvalidCapacity()){
+              <small class="error-message">La capacità deve essere un numero maggiore di 1 e minore di 20</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="new-number">Numero Stanza</label>
+            <input
+              [class.invalid]="checkIsInvalidNumber()"
+              id="new-number"
+              formControlName="number"
+              type="number"
+              placeholder="Numero stanza (es. 101)">
+            @if (checkIsInvalidNumber()){
+              <small class="error-message">Il numero deve essere un numero positivo minore di 1000</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="new-price">Prezzo (Per notte)</label>
+            <input
+              [class.invalid]="checkIsInvalidPrice()"
+              id="new-price"
+              formControlName="price"
+              type="number"
+              step="0.50"
+              min="1"
+              placeholder="Prezzo stanza (es. 75.00)">
+          </div>
+          @if (checkIsInvalidPrice()){
+            <small class="error-message">Il prezzo deve essere un numero positivo</small>
+          }
+
+          <div class="form-group">
+            <label>Servizi</label>
+            @if (isLoadingServices) {
+              <small>Caricamento servizi...</small>
+            } @else if (roomServices.length === 0) {
+              <small>Nessun servizio disponibile.</small>
+            } @else {
+              <div id="services" class="services">
+                @for (service of roomServices; track service.id) {
+                  <div class="service-item" [class.selected]="isServiceSelected(service.id)">
+                    <label class="checkbox-label">
+                      <input
+                        type="checkbox"
+                        [checked]="isServiceSelected(service.id)"
+                        (change)="onServiceToggle(service.id, $event)">
+                      {{ service.name }}
+                    </label>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <button type="submit" class="primary small">Salva</button>
+        </div>
+      </form>
+    </app-list-item>
+    @for (item of searchedRooms; track item.id) {
+      <app-list-item
+        [title]="item.name"
+        [isOpen]="editingRoomId === item.id"
+        (click)="openEditForm(item)">
+        <form form [formGroup]="form" class="update-form" (submit)="onUpdateRoom(item)">
+          <div class="form-header">
+            <h4>Modifica Servizio {{ item.name }}</h4>
+            <hugeicons-icon class="close" [icon]="Cancel01Icon" (click)="onCloseForm()"></hugeicons-icon>
+          </div>
+          <div class="form-groups">
+            <div class="form-group">
+              <label for="imageFile">Immagine Servizio</label>
+              <input
+                (change)="onFileSelected($event)"
+                type="file"
+                id="imageFile"
+                #fileInput
+                accept="image/*">
+              <!-- todo modificare estetica del file picker -->
+            </div>
+            <div class="form-group">
+              <label for="name">Nome Servizio</label>
+              <input
+                [class.invalid]="checkIsInvalidName()"
+                id="name"
+                formControlName="name"
+                type="text"
+                placeholder="Nome stanza">
+              @if (checkIsInvalidName()) {
+                <small class="error-message">Il nome deve essere lungo almeno 2 caratteri e al massimo 50</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="capacity">Capacità stanza</label>
+              <input
+                [class.invalid]="checkIsInvalidCapacity()"
+                id="capacity"
+                formControlName="capacity"
+                type="number"
+                min="1"
+                placeholder="Capacità stanza (es. 3)">
+              @if (checkIsInvalidCapacity()){
+                <small class="error-message">La capacità deve essere un numero maggiore di 1 e minore di 20</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="number">Numero Stanza</label>
+              <input
+                [class.invalid]="checkIsInvalidNumber()"
+                id="number"
+                formControlName="number"
+                type="number"
+                placeholder="Numero stanza (es. 101)">
+              @if (checkIsInvalidNumber()){
+                <small class="error-message">Il numero deve essere un numero positivo minore di 1000</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="price">Prezzo (Per notte)</label>
+              <input
+                [class.invalid]="checkIsInvalidPrice()"
+                id="price"
+                formControlName="price"
+                type="number"
+                step="0.50"
+                min="1"
+                placeholder="Prezzo stanza (es. 75.00)">
+            </div>
+            @if (checkIsInvalidPrice()){
+              <small class="error-message">Il prezzo deve essere un numero positivo</small>
+            }
+
+            <div class="form-group">
+              <label>Servizi</label>
+              @if (isLoadingServices) {
+                <small>Caricamento servizi...</small>
+              } @else if (roomServices.length === 0) {
+                <small>Nessun servizio disponibile.</small>
+              } @else {
+                <div id="services-update" class="services">
+                  @for (service of roomServices; track service.id) {
+                    <div class="service-item" [class.selected]="isServiceSelected(service.id)">
+                      <label class="checkbox-label">
+                        <input
+                          type="checkbox"
+                          [checked]="isServiceSelected(service.id)"
+                          (change)="onServiceToggle(service.id, $event)">
+                        {{ service.name }}
+                      </label>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="btn-row">
+              <button type="submit" class="primary small">Salva</button>
+              <button class="danger" type="button" (click)="onDeleteRoom()">Elimina</button>
+            </div>
+          </div>
+        </form>
+      </app-list-item>
+    } @empty {
+      @if (!isLoading) {
+        <p class="empty-state">Nessuna stanza trovata</p>
+      }
+
+      @if(isLoading) {
+        <div class="loading">Caricamento in corso...</div>
+      }
+    }
+  </div>
+</section>

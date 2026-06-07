@@ -121,6 +121,8 @@ hugeicons-icon {
   transform: translateY(0);
   pointer-events: auto;
   padding: 4pt;
+
+  overflow-y: auto;
 }
 
 .list-item-container::before {
