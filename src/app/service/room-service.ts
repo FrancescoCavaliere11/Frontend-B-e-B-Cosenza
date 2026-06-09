@@ -58,4 +58,36 @@ export class RoomService {
     );
 
   }
+
+  updateRoom(
+    payload: any,
+    imageFile?: File
+  ): Observable<any> {
+    const formData = new FormData();
+
+    const roomData = {
+      id: payload.id,
+      name: payload.name,
+      capacity: payload.capacity,
+      number: payload.number,
+      price: payload.price,
+      room_services_ids: payload.room_services_ids
+    };
+
+    formData.append('room_form', JSON.stringify(roomData));
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+
+    return this.http.put<any>(this.apiUrl, formData).pipe(
+      tap(updatedRoom => {
+        const currentRooms = this.roomsSubject.getValue();
+        const index = currentRooms.findIndex(room => room.id === updatedRoom.id);
+        if (index !== -1) {
+          currentRooms[index] = new RoomSchema(updatedRoom);
+          this.roomsSubject.next([...currentRooms]);
+        }
+      })
+    );
+  }
 }

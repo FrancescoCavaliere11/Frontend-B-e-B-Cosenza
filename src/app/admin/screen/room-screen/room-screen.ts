@@ -149,6 +149,7 @@ export class RoomScreen implements OnDestroy, OnInit{
   }
 
   openEditForm(room: RoomSchema) {
+    console.log("Aprendo form di modifica per la stanza:", room);
     if (this.editingRoomId === room.id) return;
 
     this.editingRoomId = room.id;
@@ -213,7 +214,57 @@ export class RoomScreen implements OnDestroy, OnInit{
   }
 
   onUpdateRoom(room: RoomSchema) {
-    // todo
+    if (this.isLoading) return;
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const formValue = this.form.value;
+
+    const currentServices = room.services || [];
+    const currentServiceIds = currentServices.map(s => s.id) || [];
+    const newServiceIds = formValue.room_services_ids || [];
+
+    const isServicesEqual = currentServiceIds.length === newServiceIds.length &&
+      currentServiceIds.every(id => newServiceIds.includes(id));
+
+    if (
+      formValue.name.trim() === room.name &&
+      formValue.capacity === room.capacity &&
+      formValue.number === room.number &&
+      Number(formValue.price) === Number(room.price) &&
+      isServicesEqual &&
+      !this.selectedImageFile
+    ) {
+      alert("Non sono state apportate modifiche alla stanza.");
+      return;
+    }
+
+    this.isLoading = true;
+
+    const payload = {
+      id: room.id,
+      name: formValue.name.trim(),
+      capacity: formValue.capacity,
+      number: formValue.number,
+      price: formValue.price,
+      room_services_ids: newServiceIds
+    };
+
+    this.roomService.updateRoom(payload, this.selectedImageFile).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.onCloseForm();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error("Errore durante la modifica della stanza:", err);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   onDeleteRoom(){
