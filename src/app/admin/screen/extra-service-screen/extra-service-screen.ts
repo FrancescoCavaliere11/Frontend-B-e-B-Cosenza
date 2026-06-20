@@ -1,9 +1,9 @@
-import {ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {combineLatest, map, startWith, Subject, takeUntil} from 'rxjs';
-import {ExtraServiceService} from '../../../service/extra-service-service';
-import {ExtraServiceSchema} from '../../../schemas/extra-service-schema';
-import {Cancel01Icon} from '@hugeicons/core-free-icons';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { combineLatest, map, startWith, Subject, takeUntil } from 'rxjs';
+import { ExtraServiceService } from '../../../service/extra-service-service';
+import { ExtraServiceSchema } from '../../../schemas/extra-service-schema';
+import { Cancel01Icon } from '@hugeicons/core-free-icons';
 
 @Component({
   selector: 'app-extra-service-screen',
@@ -17,7 +17,7 @@ import {Cancel01Icon} from '@hugeicons/core-free-icons';
     '../../../../../public/css/layout.css'
   ],
 })
-export class ExtraServiceScreen implements OnInit, OnDestroy{
+export class ExtraServiceScreen implements OnInit, OnDestroy {
   protected readonly Cancel01Icon = Cancel01Icon;
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -71,7 +71,7 @@ export class ExtraServiceScreen implements OnInit, OnDestroy{
           extraService.name.toLowerCase().includes(value));
       })
     ).subscribe({
-      next: filteredExtraServices =>  {
+      next: filteredExtraServices => {
         this.searchedExtraServices = filteredExtraServices;
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -80,7 +80,7 @@ export class ExtraServiceScreen implements OnInit, OnDestroy{
   }
 
   loadAllExtraServices() {
-    if(this.isLoading) return
+    if (this.isLoading) return
     this.isLoading = true
 
     this.extraServiceService.loadAllExtraServices().subscribe({
@@ -96,8 +96,8 @@ export class ExtraServiceScreen implements OnInit, OnDestroy{
     })
   }
 
-  openCreateForm(){
-    if(this.editingServiceId === "NEW") return
+  openCreateForm() {
+    if (this.editingServiceId === "NEW") return
 
     this.editingServiceId = "NEW";
     this.form.reset({
@@ -108,7 +108,7 @@ export class ExtraServiceScreen implements OnInit, OnDestroy{
   }
 
   openEditForm(extraService: ExtraServiceSchema) {
-    if(this.editingServiceId === extraService.id) return
+    if (this.editingServiceId === extraService.id) return
 
     this.editingServiceId = extraService.id;
 
@@ -151,9 +151,9 @@ export class ExtraServiceScreen implements OnInit, OnDestroy{
   }
 
   onCreateExtraService() {
-    if(this.isLoading) return
+    if (this.isLoading) return
 
-    if(this.form.invalid && !this.selectedImageFile) {
+    if (this.form.invalid && !this.selectedImageFile) {
       this.form.markAllAsTouched()
       return
     }
@@ -176,10 +176,10 @@ export class ExtraServiceScreen implements OnInit, OnDestroy{
     })
   }
 
-  onUpdateExtraService(service: ExtraServiceSchema){
-    if(this.isLoading) return
+  onUpdateExtraService(service: ExtraServiceSchema) {
+    if (this.isLoading) return
 
-    if(this.form.invalid && !this.selectedImageFile) {
+    if (this.form.invalid && !this.selectedImageFile) {
       this.form.markAllAsTouched()
       return
     }
@@ -191,7 +191,7 @@ export class ExtraServiceScreen implements OnInit, OnDestroy{
     const description = formValue.description?.trim() || undefined
 
     const serviceDescription = service.description ? service.description : ''
-    if(name === service.name
+    if (name === service.name
       && description === serviceDescription
       && !this.selectedImageFile) {
       alert("Nessuna modifica rilevata")
@@ -214,14 +214,9 @@ export class ExtraServiceScreen implements OnInit, OnDestroy{
   }
 
   onDeleteExtraService() {
-    if(this.isLoading) return
+    if (this.isLoading) return
 
-    if(this.form.invalid) {
-      this.form.markAllAsTouched()
-      return
-    }
-
-    if(confirm("Sei sicuro di voler eliminare questo servizio?")) {
+    if (confirm("Sei sicuro di voler eliminare questo servizio?")) {
       this.isLoading = true
       const id = this.form.value.id
 

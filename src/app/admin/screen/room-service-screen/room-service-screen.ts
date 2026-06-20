@@ -1,9 +1,9 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {Cancel01Icon, UserIcon} from '@hugeicons/core-free-icons';
-import {RoomServiceSchema} from '../../../schemas/room-service-schema';
-import {RoomServiceService} from '../../../service/room-service-service';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {combineLatest, map, startWith, Subject, takeUntil} from 'rxjs';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Cancel01Icon, UserIcon } from '@hugeicons/core-free-icons';
+import { RoomServiceSchema } from '../../../schemas/room-service-schema';
+import { RoomServiceService } from '../../../service/room-service-service';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { combineLatest, map, startWith, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-room-service-screen',
@@ -17,7 +17,7 @@ import {combineLatest, map, startWith, Subject, takeUntil} from 'rxjs';
     '../../../../../public/css/layout.css'
   ],
 })
-export class RoomServiceScreen implements OnInit, OnDestroy{
+export class RoomServiceScreen implements OnInit, OnDestroy {
   protected readonly UserIcon = UserIcon;
   protected readonly Cancel01Icon = Cancel01Icon;
 
@@ -68,7 +68,7 @@ export class RoomServiceScreen implements OnInit, OnDestroy{
           roomService.name.toLowerCase().includes(value));
       })
     ).subscribe({
-      next: filteredRoomServices =>  {
+      next: filteredRoomServices => {
         this.searchedRoomServices = filteredRoomServices;
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -77,7 +77,7 @@ export class RoomServiceScreen implements OnInit, OnDestroy{
   }
 
   loadAllRoomServices() {
-    if(this.isLoading) return
+    if (this.isLoading) return
     this.isLoading = true
 
     this.roomServiceService.loadAllRoomServices().subscribe({
@@ -94,7 +94,7 @@ export class RoomServiceScreen implements OnInit, OnDestroy{
   }
 
   openEditForm(roomService: RoomServiceSchema) {
-    if(this.editingServiceId === roomService.id) return
+    if (this.editingServiceId === roomService.id) return
 
     this.editingServiceId = roomService.id;
 
@@ -107,7 +107,7 @@ export class RoomServiceScreen implements OnInit, OnDestroy{
   }
 
   openCreateForm() {
-    if(this.editingServiceId === "NEW") return
+    if (this.editingServiceId === "NEW") return
 
     this.editingServiceId = "NEW";
     this.form.reset({
@@ -126,9 +126,9 @@ export class RoomServiceScreen implements OnInit, OnDestroy{
   }
 
   onCreateRoomService() {
-    if(this.isLoading) return
+    if (this.isLoading) return
 
-    if(this.form.invalid) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched()
       return
     }
@@ -153,16 +153,16 @@ export class RoomServiceScreen implements OnInit, OnDestroy{
   }
 
   onUpdateRoomService(service: RoomServiceSchema) {
-    if(this.isLoading) return
+    if (this.isLoading) return
 
-    if(this.form.invalid) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched()
       return
     }
 
     const formValue = this.form.value
 
-    if(formValue.name === service.name){
+    if (formValue.name === service.name) {
       alert("Non sono state apportate modifiche al servizio.")
       return
     }
@@ -189,14 +189,9 @@ export class RoomServiceScreen implements OnInit, OnDestroy{
   }
 
   onDeleteRoomService() {
-    if(this.isLoading) return
+    if (this.isLoading) return
 
-    if(this.form.invalid) {
-      this.form.markAllAsTouched()
-      return
-    }
-
-    if(confirm("Sei sicuro di voler eliminare questo servizio?")) {
+    if (confirm("Sei sicuro di voler eliminare questo servizio?")) {
       this.isLoading = true
       const id = this.form.value.id
 

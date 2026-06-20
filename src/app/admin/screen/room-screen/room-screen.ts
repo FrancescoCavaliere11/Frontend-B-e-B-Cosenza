@@ -1,11 +1,11 @@
-import {ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Cancel01Icon} from '@hugeicons/core-free-icons';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {combineLatest, map, startWith, Subject, takeUntil} from 'rxjs';
-import {RoomService} from '../../../service/room-service';
-import {RoomServiceSchema} from '../../../schemas/room-service-schema';
-import {RoomSchema} from '../../../schemas/room-schema';
-import {RoomServiceService} from '../../../service/room-service-service';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Cancel01Icon } from '@hugeicons/core-free-icons';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { combineLatest, map, startWith, Subject, takeUntil } from 'rxjs';
+import { RoomService } from '../../../service/room-service';
+import { RoomServiceSchema } from '../../../schemas/room-service-schema';
+import { RoomSchema } from '../../../schemas/room-schema';
+import { RoomServiceService } from '../../../service/room-service-service';
 
 @Component({
   selector: 'app-room-screen',
@@ -19,7 +19,7 @@ import {RoomServiceService} from '../../../service/room-service-service';
     '../../../../../public/css/layout.css'
   ]
 })
-export class RoomScreen implements OnDestroy, OnInit{
+export class RoomScreen implements OnDestroy, OnInit {
   protected readonly Cancel01Icon = Cancel01Icon;
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -110,7 +110,7 @@ export class RoomScreen implements OnDestroy, OnInit{
   }
 
   private loadAvailableServices(): void {
-    if(this.isLoadingServices) return
+    if (this.isLoadingServices) return
 
     this.isLoadingServices = true;
 
@@ -267,8 +267,28 @@ export class RoomScreen implements OnDestroy, OnInit{
     });
   }
 
-  onDeleteRoom(){
-    // todo
+  onDeleteRoom() {
+    if (this.isLoading) return;
+
+    if (confirm("Sei sicuro di voler eliminare questa stanza?")) {
+      this.isLoading = true;
+      const id = this.form.value.id;
+
+      this.roomService.deleteRoom(id).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.editingRoomId = null;
+          this.resetFilePicker();
+          this.form.reset();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error("Errore durante l'eliminazione della stanza:", err);
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
 
 
@@ -307,7 +327,7 @@ export class RoomScreen implements OnDestroy, OnInit{
 
     let newServices;
     if (isChecked) {
-      newServices = [...currentServices, serviceId ];
+      newServices = [...currentServices, serviceId];
     } else {
       newServices = currentServices.filter(s => s !== serviceId);
     }

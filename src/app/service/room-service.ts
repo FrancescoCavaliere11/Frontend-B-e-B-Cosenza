@@ -90,4 +90,14 @@ export class RoomService {
       })
     );
   }
+
+  deleteRoom(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}${id}`, { withCredentials: true }).pipe(
+      tap(() => {
+        const currentRooms = this.roomsSubject.getValue();
+        const updatedList = currentRooms.filter(room => room.id !== id);
+        this.roomsSubject.next(updatedList);
+      })
+    );
+  }
 }
