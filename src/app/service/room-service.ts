@@ -44,16 +44,17 @@ export class RoomService {
       capacity: payload.capacity,
       number: payload.number,
       price: payload.price,
-      room_services_ids: payload.room_services_ids
+      room_services_ids: payload.room_services_ids,
+      enabled: payload.enabled
     };
 
     formData.append('room_form', JSON.stringify(roomData));
     formData.append('image', imageFile);
 
-    return this.http.post<RoomSchema>(this.apiUrl, formData).pipe(
+    return this.http.post<any>(this.apiUrl, formData).pipe(
       tap(newRoom => {
         const currentRooms = this.roomsSubject.getValue()
-        this.roomsSubject.next([newRoom, ...currentRooms])
+        this.roomsSubject.next([new RoomSchema(newRoom), ...currentRooms])
       })
     );
 
@@ -71,7 +72,8 @@ export class RoomService {
       capacity: payload.capacity,
       number: payload.number,
       price: payload.price,
-      room_services_ids: payload.room_services_ids
+      room_services_ids: payload.room_services_ids,
+      enabled: payload.enabled
     };
 
     formData.append('room_form', JSON.stringify(roomData));

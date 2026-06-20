@@ -35,3 +35,38 @@
   opacity: 1;
   pointer-events: initial;
 }
+
+.enabled-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8pt 10pt;
+  background: var(--fill-dark);
+  border: 1px solid var(--stroke-weak);
+  border-radius: 8pt;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  margin-top: 4pt;
+}
+
+.enabled-toggle:hover {
+  border-color: var(--brand-strong);
+  background: var(--fill-medium);
+}
+
+.enabled-toggle label {
+  cursor: pointer;
+  margin: 0;
+  padding-left: 0;
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-strong);
+}
+
+.enabled-toggle input[type="checkbox"] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}

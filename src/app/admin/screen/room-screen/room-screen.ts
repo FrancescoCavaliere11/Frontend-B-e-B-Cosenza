@@ -54,7 +54,8 @@ export class RoomScreen implements OnDestroy, OnInit {
       capacity: [1, [Validators.required, Validators.min(1), Validators.max(20)]],
       number: [1, [Validators.required, Validators.min(1), Validators.max(1000)]],
       price: [0.01, [Validators.required, Validators.min(0.01)]],
-      room_services_ids: [[], [Validators.maxLength(50)]]
+      room_services_ids: [[], [Validators.maxLength(50)]],
+      enabled: [true]
     })
   }
 
@@ -144,7 +145,8 @@ export class RoomScreen implements OnDestroy, OnInit {
       capacity: 1,
       number: 1,
       price: 0.01,
-      room_services_ids: []
+      room_services_ids: [],
+      enabled: true
     });
   }
 
@@ -163,7 +165,8 @@ export class RoomScreen implements OnDestroy, OnInit {
       capacity: room.capacity,
       number: room.number,
       price: room.price,
-      room_services_ids: currentServiceIds
+      room_services_ids: currentServiceIds,
+      enabled: room.enabled
     });
 
     this.cdr.detectChanges();
@@ -197,7 +200,8 @@ export class RoomScreen implements OnDestroy, OnInit {
       capacity: this.form.value.capacity,
       number: this.form.value.number,
       price: this.form.value.price,
-      room_services_ids: this.form.value.room_services_ids
+      room_services_ids: this.form.value.room_services_ids,
+      enabled: this.form.value.enabled
     };
 
     this.roomService.createRoom(payload, this.selectedImageFile!).subscribe({
@@ -235,6 +239,7 @@ export class RoomScreen implements OnDestroy, OnInit {
       formValue.capacity === room.capacity &&
       formValue.number === room.number &&
       Number(formValue.price) === Number(room.price) &&
+      formValue.enabled === room.enabled &&
       isServicesEqual &&
       !this.selectedImageFile
     ) {
@@ -250,7 +255,8 @@ export class RoomScreen implements OnDestroy, OnInit {
       capacity: formValue.capacity,
       number: formValue.number,
       price: formValue.price,
-      room_services_ids: newServiceIds
+      room_services_ids: newServiceIds,
+      enabled: formValue.enabled
     };
 
     this.roomService.updateRoom(payload, this.selectedImageFile).subscribe({

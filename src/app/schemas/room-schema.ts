@@ -6,6 +6,7 @@ export class RoomSchema{
   capacity: number;
   number: number
   price: number;
+  enabled: boolean;
   services: RoomServiceSchema[];
 
   constructor(
@@ -16,6 +17,7 @@ export class RoomSchema{
     this.capacity = data.capacity;
     this.number = data.number;
     this.price = data.price;
+    this.enabled = data.enabled !== undefined ? data.enabled : true;
     this.services = data.services.map((rs: any) => new RoomServiceSchema(rs));
   }
 }
