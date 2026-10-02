@@ -55,7 +55,7 @@ export class RoomScreen implements OnDestroy, OnInit {
       number: [1, [Validators.required, Validators.min(1), Validators.max(1000)]],
       price: [0.01, [Validators.required, Validators.min(0.01)]],
       room_services_ids: [[], [Validators.maxLength(50)]],
-      enabled: [true]
+      enabled: [true, [Validators.required]]
     })
   }
 

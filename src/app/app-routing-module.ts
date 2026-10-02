@@ -5,6 +5,8 @@ import {AdminHome} from './admin/screen/admin-home/admin-home';
 import {RoomServiceScreen} from './admin/screen/room-service-screen/room-service-screen';
 import {ExtraServiceScreen} from './admin/screen/extra-service-screen/extra-service-screen';
 import {RoomScreen} from './admin/screen/room-screen/room-screen';
+import {BookingScreen} from './admin/screen/booking-screen/booking-screen';
+import {adminGuard} from './security/admin-guard';
 
 const routes: Routes = [
   {
@@ -20,12 +22,17 @@ const routes: Routes = [
     path: 'admin',
     component: AdminHome,
     title: 'Admin Home',
+    canActivate: [adminGuard],
     children: [
       { path:'', redirectTo: 'bookings', pathMatch: 'full' },
-      { path:'bookings', component:LoginPage, title: 'Bookings Page' }, // todo
+      { path:'bookings', component:BookingScreen, title: 'Bookings Page' },
       { path:'rooms', component:RoomScreen, title: 'Rooms Page' },
       { path:'rooms-services', component:RoomServiceScreen, title: 'Rooms Services Page' },
       { path:'extra-services', component:ExtraServiceScreen, title: 'Extra Services Page' },
+      // Deve restare l'ultima: le rotte si provano nell'ordine in cui sono
+      // scritte. Un indirizzo sconosciuto sotto /admin passa comunque dalla
+      // guard del genitore, quindi chi non è admin finisce su /login.
+      { path:'**', redirectTo: 'bookings' },
     ]
   }
 

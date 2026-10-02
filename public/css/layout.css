@@ -6,6 +6,8 @@
   flex-direction: column;
   gap: 8pt;
   overflow-y: auto;
+  /* Lo scorrimento della lista non si propaga alla pagina che la contiene. */
+  overscroll-behavior-y: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding-bottom: 16pt;
@@ -42,4 +44,16 @@
   align-items: center;
   gap: 8pt;
   padding: 8pt 8pt 8pt 8pt;
+}
+
+/*
+ * Su schermi piccoli la testata fissa usa uno sfondo pieno invece della
+ * sfocatura: `backdrop-filter` va ricalcolato a ogni frame di scorrimento, ed
+ * è la causa più comune di uno scorrimento a scatti sui telefoni.
+ */
+@media (max-width: 768px) {
+  .list-section > .header {
+    background: var(--background);
+    backdrop-filter: none;
+  }
 }

@@ -1,0 +1,122 @@
+<section class="list-section">
+  <div class="header">
+    <h2>Prenotazioni</h2>
+    <input
+      [formControl]="searchControl"
+      [class.invalid]="searchError"
+      type="text"
+      aria-label="Cerca prenotazioni"
+      placeholder="Codice (BB-2026-…) o email esatta">
+  </div>
+
+  <div class="filters" [formGroup]="filtersForm">
+    <!-- Spazio riservato: l'avviso compare e sparisce senza spostare i filtri. -->
+    <div class="search-feedback" aria-live="polite">
+      @if (searchError) {
+        <small class="error-message">{{ searchError }}</small>
+      }
+    </div>
+
+    <div class="filter-row">
+      <div class="form-group">
+        <label for="filter-date-from">Soggiorni dal</label>
+        <input id="filter-date-from" type="date" formControlName="date_from"
+               [class.invalid]="checkIsInvalidDateRange()">
+      </div>
+      <div class="form-group">
+        <label for="filter-date-to">al</label>
+        <input id="filter-date-to" type="date" formControlName="date_to"
+               [class.invalid]="checkIsInvalidDateRange()">
+      </div>
+      <div class="form-group">
+        <label for="filter-room">Camera</label>
+        <select id="filter-room" formControlName="room_id">
+          <option value="">Tutte le camere</option>
+          @for (room of rooms; track room.id) {
+            <option [value]="room.id">{{ room.number }} · {{ room.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="filter-sort">Ordina per</label>
+        <select id="filter-sort" formControlName="sort">
+          @for (option of sortOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    @if (checkIsInvalidDateRange()) {
+      <small class="error-message">La data finale non può precedere quella iniziale</small>
+    }
+
+    <div class="services">
+      @for (status of statusOrder; track status) {
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            [checked]="isStatusSelected(status)"
+            (change)="onStatusToggle(status, $event)">
+          {{ statusLabels[status] }}
+        </label>
+      }
+    </div>
+
+    @if (hasActiveFilters()) {
+      <button type="button" class="secondary" (click)="onResetFilters()">Azzera filtri</button>
+    }
+  </div>
+
+  <div class="list" [class.refreshing]="isLoading && bookings.length > 0">
+    @for (item of bookings; track item.id) {
+      <app-list-item
+        [title]="guestName(item)"
+        [action]="'Dettagli'">
+        <div class="booking-meta">
+          <p class="text-small">
+            <span class="code">{{ item.code }}</span> · {{ roomsLabel(item) }}
+          </p>
+          <p class="text-small">
+            {{ formatStayRange(item.check_in, item.check_out) }}
+            · {{ nightsBetween(item.check_in, item.check_out) }}
+            {{ nightsBetween(item.check_in, item.check_out) === 1 ? 'notte' : 'notti' }}
+            · {{ item.guest_count }} {{ item.guest_count === 1 ? 'ospite' : 'ospiti' }}
+            · {{ item.guest_email }}
+          </p>
+          <div class="badges">
+            <span class="badge" [class]="statusTones[item.status]">{{ statusLabels[item.status] }}</span>
+            <span class="badge" [class]="paymentTones[item.payment_status]">
+              {{ paymentLabels[item.payment_status] }}
+            </span>
+            <span class="amount">{{ formatAmount(item.total_price) }}</span>
+          </div>
+        </div>
+      </app-list-item>
+    } @empty {
+      @if (!isLoading) {
+        <p class="empty-state">
+          {{ hasActiveFilters() ? 'Nessuna prenotazione corrisponde ai filtri' : 'Nessuna prenotazione trovata' }}
+        </p>
+      }
+
+      @if (isLoading) {
+        <div class="loading">Caricamento in corso...</div>
+      }
+    }
+  </div>
+
+  @if (currentPage && currentPage.total > 0) {
+    <div class="pagination">
+      <button type="button" class="secondary"
+              [disabled]="isLoading || page <= 1"
+              (click)="goToPage(page - 1)">Precedente</button>
+      <p class="text-small">
+        Pagina {{ currentPage.page }} di {{ currentPage.pages }} · {{ currentPage.total }}
+        {{ currentPage.total === 1 ? 'prenotazione' : 'prenotazioni' }}
+      </p>
+      <button type="button" class="secondary"
+              [disabled]="isLoading || page >= currentPage.pages"
+              (click)="goToPage(page + 1)">Successiva</button>
+    </div>
+  }
+</section>
