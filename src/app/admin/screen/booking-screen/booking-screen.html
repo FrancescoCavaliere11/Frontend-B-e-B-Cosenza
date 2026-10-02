@@ -71,10 +71,12 @@
     @for (item of bookings; track item.id) {
       <app-list-item
         [title]="guestName(item)"
-        [action]="'Dettagli'">
+        [action]="'Dettagli'"
+        [isOpen]="openBookingId === item.id"
+        (click)="openDetail(item)">
         <div class="booking-meta">
           <p class="text-small">
-            <span class="code">{{ item.code }}</span> · {{ roomsLabel(item) }}
+            <span class="code text-code">{{ item.code }}</span> · {{ roomsLabel(item) }}
           </p>
           <p class="text-small">
             {{ formatStayRange(item.check_in, item.check_out) }}
@@ -85,12 +87,25 @@
           </p>
           <div class="badges">
             <span class="badge" [class]="statusTones[item.status]">{{ statusLabels[item.status] }}</span>
-            <span class="badge" [class]="paymentTones[item.payment_status]">
-              {{ paymentLabels[item.payment_status] }}
-            </span>
+            @if (visiblePaymentStatus(item.status, item.payment_status); as payment) {
+              <span class="badge" [class]="paymentTones[payment]">{{ paymentLabels[payment] }}</span>
+            }
             <span class="amount">{{ formatAmount(item.total_price) }}</span>
           </div>
         </div>
+
+        @if (hasDetail(item)) {
+          <app-booking-detail
+            form
+            [headline]="guestName(item)"
+            [code]="item.code"
+            [booking]="detailOf(item)"
+            [isLoading]="isDetailLoadingFor(item)"
+            [error]="detailErrorFor(item)"
+            (close)="closeDetail()"
+            (retry)="retryDetail()">
+          </app-booking-detail>
+        }
       </app-list-item>
     } @empty {
       @if (!isLoading) {

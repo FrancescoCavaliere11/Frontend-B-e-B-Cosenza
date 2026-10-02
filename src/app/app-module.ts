@@ -18,6 +18,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { errorInterceptor, withCredentialsInterceptor } from './security/interceptor';
 import { RoomScreen } from './admin/screen/room-screen/room-screen';
 import { BookingScreen } from './admin/screen/booking-screen/booking-screen';
+import { BookingDetail } from './admin/components/booking-detail/booking-detail';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { BookingScreen } from './admin/screen/booking-screen/booking-screen';
     ExtraServiceScreen,
     RoomScreen,
     BookingScreen,
+    BookingDetail,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HugeiconsIconComponent],
   providers: [

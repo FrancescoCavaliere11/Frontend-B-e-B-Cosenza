@@ -35,14 +35,30 @@
 
   --warning-strong: #EAB308;
   --warning-fill: #EAB30812;
+  --warning-stroke: #EAB30840;
   --warning-text: #854D0E;
+
+  --success-fill: #22C55E14;
+  --success-stroke: #22C55E40;
+  --success-text: #166534;
+
+  --shadow-soft: rgba(0, 0, 0, 0.1);
+
+  /* Tipografia: famiglie e dimensioni del testo riusate fra i componenti. */
+  --font-family-base: "Inter", sans-serif;
+  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --font-size-2xs: 0.7rem;     /* badge, codice in lista */
+  --font-size-xs: 0.75rem;     /* testo piccolo, etichette */
+  --font-size-sm: 0.8125rem;   /* valori nelle schede di dettaglio */
+  --font-size-md: 0.875rem;    /* importi in evidenza */
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-family-base);
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
 }

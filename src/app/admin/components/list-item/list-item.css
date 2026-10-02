@@ -22,7 +22,7 @@
 }
 
 .list-item-container:hover{
-  box-shadow: 0 4px 32px -12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 32px -12px var(--shadow-soft);
 }
 
 .list-item-container > small {
@@ -51,7 +51,14 @@
   align-items: flex-start;
   position: relative;
   z-index: 2;
-  transition: width 0.2s ease 1s;
+  /*
+   * Alla chiusura il contenuto torna largo solo dopo che il pannello si è
+   * richiuso (1 s), e diventa visibile solo quando la larghezza è di nuovo
+   * piena: se comparisse prima, il testo verrebbe impaginato in una colonna
+   * larga zero, una parola per riga sul bordo sinistro.
+   */
+  transition: width 0.2s ease 1s,
+              opacity 0.3s ease 1.2s;
 }
 
 hugeicons-icon {
@@ -100,21 +107,34 @@ hugeicons-icon {
   background-color: var(--fill-dark);
   cursor: default;
   align-items: flex-start;
+  
 }
 
 
 .form-wrapper {
+  /*
+   * Da chiuso non deve occupare spazio accanto al contenuto della riga, anche
+   * se dentro resta qualcosa (la scheda di una prenotazione, un form): torna
+   * largo zero, ma solo dopo essersi richiuso (1 s), per non guastare
+   * l'animazione di chiusura.
+   */
+  width: 0;
   max-height: 0;
   opacity: 0;
   overflow: hidden;
   transform: translateY(-10px);
   transition: max-height 1s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 1s ease-in-out;
+              opacity 1s ease-in-out,
+              width 0s linear 1s;
   pointer-events: none;
 }
 
 .form-wrapper.show {
   width: 100%;
+  /* In apertura la larghezza è piena subito. */
+  transition: max-height 1s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 1s ease-in-out,
+              width 0s;
   display: block;
   max-height: 500px;
   opacity: 1;
@@ -123,6 +143,13 @@ hugeicons-icon {
   padding: 4pt;
 
   overflow-y: auto;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.form-wrapper.show::-webkit-scrollbar {
+  display: none;
 }
 
 .list-item-container::before {

@@ -1,20 +1,17 @@
 .list-section{
+  /*
+   * Non scorre da sola: scorre `.page` di AdminHome, che occupa tutta l'area
+   * a destra della sidebar. Così la rotella funziona anche sulle zone vuote
+   * ai lati della colonna centrale, e la testata `sticky` resta agganciata
+   * in cima a quell'area.
+   */
   max-width: 800px;
   width: 100%;
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 8pt;
-  overflow-y: auto;
-  /* Lo scorrimento della lista non si propaga alla pagina che la contiene. */
-  overscroll-behavior-y: contain;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
   padding-bottom: 16pt;
-}
-
-.list-section::-webkit-scrollbar {
-  display: none;
 }
 
 .list-section > .header {

@@ -2,7 +2,11 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {BehaviorSubject, map, Observable, tap} from 'rxjs';
 import {Environment} from '../utils/environments';
-import {BookingSearchFilters, PaginatedBookingsSchema} from '../schemas/booking-schema';
+import {
+  BookingDetailSchema,
+  BookingSearchFilters,
+  PaginatedBookingsSchema,
+} from '../schemas/booking-schema';
 
 /**
  * Accesso alle API amministrative delle prenotazioni (`/admin/bookings`).
@@ -27,6 +31,18 @@ export class BookingService {
     return this.http.get<any>(this.apiUrl, {params: this.buildSearchParams(filters)}).pipe(
       map(response => new PaginatedBookingsSchema(response)),
       tap(page => this.currentPageSubject.next(page))
+    );
+  }
+
+  /**
+   * `GET /admin/bookings/{id}` — dettaglio completo con cronologia.
+   *
+   * Nessuna cache: dagli incrementi successivi la prenotazione cambia
+   * mentre l'admin la guarda, e una copia vecchia sarebbe un errore.
+   */
+  getBooking(id: string): Observable<BookingDetailSchema> {
+    return this.http.get<any>(`${this.apiUrl}${encodeURIComponent(id)}`).pipe(
+      map(response => new BookingDetailSchema(response))
     );
   }
 

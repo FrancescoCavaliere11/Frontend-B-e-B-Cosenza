@@ -1,4 +1,12 @@
-import {BookingSortOrder, BookingStatus, PaymentStatus} from './booking-enums';
+import {
+  AuditActorType,
+  BookingChannel,
+  BookingSortOrder,
+  BookingStatus,
+  PaymentMethod,
+  PaymentOption,
+  PaymentStatus,
+} from './booking-enums';
 
 /**
  * Contratti del modulo Booking lato back-office.
@@ -86,3 +94,136 @@ export const DEFAULT_SORT = BookingSortOrder.CREATED_DESC;
 
 /** Lunghezza massima del codice, come `BookingSearchFiltersSchema.code` nel backend. */
 export const CODE_MAX_LENGTH = 20;
+
+// ------------------------------------------------------------------ //
+// Dettaglio — `GET /admin/bookings/{id}`                              //
+// ------------------------------------------------------------------ //
+
+/** Riga camera della prenotazione — `BookingRoomItemSchema`. */
+export class BookingRoomItemSchema {
+  room_id: string;
+  room_name: string;
+  room_number: number;
+  check_in: string;
+  check_out: string;
+  nights: number;
+  unit_price: string;
+  line_total: string;
+
+  constructor(data: any) {
+    this.room_id = data.room_id;
+    this.room_name = data.room_name;
+    this.room_number = data.room_number;
+    this.check_in = data.check_in;
+    this.check_out = data.check_out;
+    this.nights = data.nights;
+    this.unit_price = String(data.unit_price);
+    this.line_total = String(data.line_total);
+  }
+}
+
+/** Voce della cronologia — `BookingStatusHistorySchema`. `from_status` è nullo sulla creazione. */
+export class BookingStatusHistorySchema {
+  from_status: BookingStatus | null;
+  to_status: BookingStatus;
+  actor_type: AuditActorType;
+  reason: string | null;
+  created_at: string;
+
+  constructor(data: any) {
+    this.from_status = data.from_status ?? null;
+    this.to_status = data.to_status;
+    this.actor_type = data.actor_type;
+    this.reason = data.reason ?? null;
+    this.created_at = data.created_at;
+  }
+}
+
+/**
+ * Vista completa per il back-office — `BookingSchema`.
+ *
+ * Gli istanti (`created_at`, `hold_expires_at`, …) restano stringhe ISO:
+ * si formattano solo per la vista, nel fuso della struttura.
+ * `created_by`, `last_updated_by` e `version` non sono letti: per un admin
+ * sono un UUID che a schermo non dice nulla, e nessuna rotta usa la versione.
+ */
+export class BookingDetailSchema {
+  id: string;
+  code: string;
+  status: BookingStatus;
+  source_channel: BookingChannel;
+  check_in: string;
+  check_out: string;
+  nights: number;
+  guest_count: number;
+
+  user_id: string | null;
+  guest_firstname: string;
+  guest_lastname: string;
+  guest_email: string;
+  guest_phone: string;
+
+  rooms: BookingRoomItemSchema[];
+
+  base_price: string;
+  discount_amount: string;
+  total_price: string;
+  currency: string;
+
+  payment_option: PaymentOption;
+  payment_status: PaymentStatus;
+  payment_method: PaymentMethod | null;
+
+  hold_expires_at: string | null;
+  confirmed_at: string | null;
+  cancelled_at: string | null;
+  cancellation_deadline: string | null;
+  cancellation_reason: string | null;
+  admin_notes: string | null;
+
+  created_at: string;
+  updated_at: string;
+
+  status_history: BookingStatusHistorySchema[];
+
+  constructor(data: any) {
+    this.id = data.id;
+    this.code = data.code;
+    this.status = data.status;
+    this.source_channel = data.source_channel;
+    this.check_in = data.check_in;
+    this.check_out = data.check_out;
+    this.nights = data.nights;
+    this.guest_count = data.guest_count;
+
+    this.user_id = data.user_id ?? null;
+    this.guest_firstname = data.guest_firstname;
+    this.guest_lastname = data.guest_lastname;
+    this.guest_email = data.guest_email;
+    this.guest_phone = data.guest_phone;
+
+    this.rooms = (data.rooms ?? []).map((room: any) => new BookingRoomItemSchema(room));
+
+    this.base_price = String(data.base_price);
+    this.discount_amount = String(data.discount_amount);
+    this.total_price = String(data.total_price);
+    this.currency = data.currency;
+
+    this.payment_option = data.payment_option;
+    this.payment_status = data.payment_status;
+    this.payment_method = data.payment_method ?? null;
+
+    this.hold_expires_at = data.hold_expires_at ?? null;
+    this.confirmed_at = data.confirmed_at ?? null;
+    this.cancelled_at = data.cancelled_at ?? null;
+    this.cancellation_deadline = data.cancellation_deadline ?? null;
+    this.cancellation_reason = data.cancellation_reason ?? null;
+    this.admin_notes = data.admin_notes ?? null;
+
+    this.created_at = data.created_at;
+    this.updated_at = data.updated_at;
+
+    this.status_history = (data.status_history ?? [])
+      .map((entry: any) => new BookingStatusHistorySchema(entry));
+  }
+}

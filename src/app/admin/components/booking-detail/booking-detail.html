@@ -1,0 +1,145 @@
+<div class="booking-detail">
+  <div class="form-header detail-header">
+    <div class="detail-title">
+      <h4>{{ booking() ? guestName(booking()!) : headline() }}</h4>
+      <span class="code text-code">{{ booking()?.code ?? code() }}</span>
+    </div>
+    <hugeicons-icon
+      class="close"
+      role="button"
+      aria-label="Chiudi dettaglio"
+      [icon]="Cancel01Icon"
+      (click)="close.emit()">
+    </hugeicons-icon>
+  </div>
+
+  @if (isLoading()) {
+    <p class="text-small detail-state">Caricamento in corso...</p>
+  } @else if (error()) {
+    <div class="detail-state">
+      <small class="error-message">{{ error() }}</small>
+      <button type="button" class="secondary" (click)="retry.emit()">Riprova</button>
+    </div>
+  } @else if (booking(); as b) {
+    <div class="badges">
+      <span class="badge" [class]="statusTones[b.status]">{{ statusLabels[b.status] }}</span>
+      @if (paymentBadge(); as payment) {
+        <span class="badge" [class]="paymentTones[payment]">{{ paymentLabels[payment] }}</span>
+      }
+    </div>
+
+    <div class="detail-grid">
+      <section>
+        <h5>Soggiorno</h5>
+        <dl>
+          <dt>Date</dt>
+          <dd>{{ formatStayDate(b.check_in) }} → {{ formatStayDate(b.check_out) }}</dd>
+          <dt>Notti</dt>
+          <dd>{{ b.nights }}</dd>
+          <dt>Ospiti</dt>
+          <dd>{{ b.guest_count }}</dd>
+          <dt>Origine</dt>
+          <dd>{{ channelLabels[b.source_channel] }}</dd>
+        </dl>
+      </section>
+
+      <section>
+        <h5>Ospite</h5>
+        <dl>
+          <dt>Email</dt>
+          <dd><a [href]="'mailto:' + b.guest_email">{{ b.guest_email }}</a></dd>
+          <dt>Telefono</dt>
+          <dd><a [href]="phoneHref(b.guest_phone)">{{ b.guest_phone }}</a></dd>
+          @if (b.user_id) {
+            <dt>Account</dt>
+            <dd>Utente registrato</dd>
+          }
+        </dl>
+      </section>
+
+      <section>
+        <h5>Importi e pagamento</h5>
+        <dl>
+          @if (hasDiscount()) {
+            <dt>Prezzo pieno</dt>
+            <dd>{{ formatAmount(b.base_price, b.currency) }}</dd>
+            <dt>Sconto</dt>
+            <dd>− {{ formatAmount(b.discount_amount, b.currency) }}</dd>
+          }
+          <dt>Totale</dt>
+          <dd class="strong">{{ formatAmount(b.total_price, b.currency) }}</dd>
+          <dt>Opzione</dt>
+          <dd>{{ paymentOptionLabels[b.payment_option] }}</dd>
+          @if (b.payment_method) {
+            <dt>Metodo</dt>
+            <dd>{{ paymentMethodLabels[b.payment_method] }}</dd>
+          }
+          <dt>Pagamento</dt>
+          <dd>{{ paymentBadge() ? paymentLabels[paymentBadge()!] : 'Nessun incasso' }}</dd>
+        </dl>
+      </section>
+
+      <section>
+        <h5>Date</h5>
+        <dl>
+          @for (date of keyDates(); track date.label) {
+            <dt>{{ date.label }}</dt>
+            <dd>{{ date.value }}</dd>
+          }
+        </dl>
+      </section>
+
+      <section class="wide">
+        <h5>Camere</h5>
+        <!-- Stesso schema etichetta | valore delle altre sezioni: i prezzi si allineano ai valori. -->
+        <dl class="rooms">
+          @for (room of b.rooms; track room.room_id) {
+            <dt>{{ room.room_number }} · {{ room.room_name }}</dt>
+            <dd>
+              <span class="strong">{{ formatAmount(room.line_total, b.currency) }}</span>
+              <span class="text-small">
+                ({{ formatAmount(room.unit_price, b.currency) }} × {{ room.nights }}
+                {{ room.nights === 1 ? 'notte' : 'notti' }})
+              </span>
+            </dd>
+          }
+        </dl>
+      </section>
+
+      @if (b.cancellation_reason) {
+        <section class="wide">
+          <h5>Motivo dell'annullamento</h5>
+          <p class="note">{{ b.cancellation_reason }}</p>
+        </section>
+      }
+
+      @if (b.admin_notes) {
+        <section class="wide">
+          <h5>Note interne</h5>
+          <p class="note">{{ b.admin_notes }}</p>
+        </section>
+      }
+
+      <section class="wide">
+        <h5>Cronologia</h5>
+        <ol class="timeline">
+          @for (entry of b.status_history; track $index) {
+            <li>
+              <p class="text-small">
+                {{ formatInstant(entry.created_at) }} · {{ actorLabels[entry.actor_type] }}
+              </p>
+              <p>
+                {{ historyFrom(entry) }} → <strong>{{ statusLabels[entry.to_status] }}</strong>
+              </p>
+              @if (entry.reason) {
+                <p class="text-small reason">{{ entry.reason }}</p>
+              }
+            </li>
+          } @empty {
+            <li><p class="text-small">Nessuna voce registrata</p></li>
+          }
+        </ol>
+      </section>
+    </div>
+  }
+</div>

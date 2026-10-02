@@ -1,0 +1,150 @@
+:host {
+  display: block;
+  width: 100%;
+  /* Spazio fra le due colonne: condiviso dalla griglia delle sezioni e dalle camere. */
+  --detail-column-gap: 16pt;
+}
+
+.booking-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12pt;
+  cursor: default;
+}
+
+/* --- Testata --- */
+.detail-header {
+  align-items: flex-start;
+  gap: 8pt;
+}
+
+.detail-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2pt;
+}
+
+.code {
+  font-size: var(--font-size-xs);
+  color: var(--text-weak);
+}
+
+hugeicons-icon.close {
+  flex-shrink: 0;
+  width: 20pt;
+  height: 20pt;
+  cursor: pointer;
+  stroke: var(--brand-weak);
+  transition: stroke 0.3s ease-in-out;
+}
+
+hugeicons-icon.close:hover {
+  stroke: var(--brand-strong);
+}
+
+.detail-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8pt;
+}
+
+/* --- Sezioni --- */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12pt var(--detail-column-gap);
+}
+
+.detail-grid > .wide {
+  grid-column: 1 / -1;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 4pt;
+  min-width: 0;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2pt 8pt;
+  margin: 0;
+}
+
+dt {
+  font-size: var(--font-size-xs);
+  color: var(--text-weak);
+}
+
+dd {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-strong);
+  overflow-wrap: anywhere;
+}
+
+.strong {
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.note {
+  font-size: var(--font-size-sm);
+  white-space: pre-line;
+}
+
+/*
+ * Camere: stesse due colonne della griglia delle sezioni, così i prezzi
+ * iniziano esattamente dove iniziano le sezioni Ospite e Date.
+ */
+dl.rooms {
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--detail-column-gap);
+}
+
+/* --- Cronologia --- */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 12pt;
+  border-left: 2px solid var(--stroke-weak);
+  display: flex;
+  flex-direction: column;
+  gap: 8pt;
+}
+
+.timeline > li {
+  position: relative;
+}
+
+.timeline > li::before {
+  content: '';
+  position: absolute;
+  left: calc(-12pt - 5px);
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-weak);
+}
+
+.timeline p {
+  font-size: var(--font-size-sm);
+}
+
+.timeline .reason {
+  font-style: italic;
+}
+
+@media (max-width: 576px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  dl.rooms {
+    grid-template-columns: max-content 1fr;
+  }
+}

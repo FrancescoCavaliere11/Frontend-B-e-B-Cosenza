@@ -124,9 +124,9 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
 };
 
 export const BOOKING_CHANNEL_LABELS: Record<BookingChannel, string> = {
-  [BookingChannel.PUBLIC_GUEST]: 'Sito — ospite',
-  [BookingChannel.PUBLIC_USER]: 'Sito — utente registrato',
-  [BookingChannel.ADMIN_BACKOFFICE]: 'Back-office',
+  [BookingChannel.PUBLIC_GUEST]: 'Sito web (ospite)',
+  [BookingChannel.PUBLIC_USER]: 'Sito web (utente registrato)',
+  [BookingChannel.ADMIN_BACKOFFICE]: 'Inserita dalla struttura',
 };
 
 export const AUDIT_ACTOR_LABELS: Record<AuditActorType, string> = {
@@ -147,3 +147,28 @@ export const BOOKING_STATUS_ORDER: BookingStatus[] = [
   BookingStatus.CANCELLED,
   BookingStatus.EXPIRED,
 ];
+
+/**
+ * Stati chiusi senza che nulla sia stato incassato: lo stato del pagamento
+ * resta `PENDING` nel database, ma «Da incassare» sarebbe fuorviante.
+ * `NO_SHOW` non c'è di proposito: lì un incasso (o una penale) può essere
+ * ancora dovuto. Gestione definitiva nel backend: debito tecnico #31.
+ */
+const CLOSED_WITHOUT_PAYMENT: ReadonlySet<BookingStatus> = new Set([
+  BookingStatus.EXPIRED,
+  BookingStatus.CANCELLED,
+]);
+
+/**
+ * Stato del pagamento da mostrare come badge, oppure `null` se il badge va
+ * nascosto. Unico punto in cui vive questa regola: lista e dettaglio la
+ * leggono da qui.
+ */
+export function visiblePaymentStatus(
+  status: BookingStatus,
+  paymentStatus: PaymentStatus
+): PaymentStatus | null {
+  return paymentStatus === PaymentStatus.PENDING && CLOSED_WITHOUT_PAYMENT.has(status)
+    ? null
+    : paymentStatus;
+}

@@ -1,0 +1,45 @@
+/*
+ * Badge di stato (prenotazioni, pagamenti). Condiviso fra l'elenco e la
+ * scheda di dettaglio: il tono corrisponde a `BadgeTone` in booking-enums.ts.
+ */
+.badges {
+  margin-top: 2pt;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4pt;
+}
+
+.badge {
+  font-size: var(--font-size-2xs);
+  font-weight: 500;
+  padding: 2pt 6pt;
+  border-radius: 6pt;
+  border: 1px solid var(--stroke-weak);
+  background: var(--fill-dark);
+  color: var(--text-weak);
+}
+
+.badge.brand {
+  background: var(--brand-fill);
+  border-color: var(--brand-stroke-weak);
+  color: var(--brand-strong);
+}
+
+.badge.success {
+  background: var(--success-fill);
+  border-color: var(--success-stroke);
+  color: var(--success-text);
+}
+
+.badge.warning {
+  background: var(--warning-fill);
+  border-color: var(--warning-stroke);
+  color: var(--warning-text);
+}
+
+.badge.danger {
+  background: var(--error-fill);
+  border-color: var(--error-stroke-weak);
+  color: var(--error-strong);
+}

@@ -5,6 +5,7 @@ import {BookingService} from '../../../service/booking-service';
 import {RoomService} from '../../../service/room-service';
 import {RoomSchema} from '../../../schemas/room-schema';
 import {
+  BookingDetailSchema,
   BookingListItemSchema,
   BookingSearchFilters,
   CODE_MAX_LENGTH,
@@ -20,6 +21,7 @@ import {
   BookingStatus,
   PAYMENT_STATUS_LABELS,
   PAYMENT_STATUS_TONES,
+  visiblePaymentStatus,
 } from '../../../schemas/booking-enums';
 import {formatAmount, formatStayRange, nightsBetween} from '../../../utils/booking-format';
 import {dateRangeValidator} from '../../../validators/validators';
@@ -36,7 +38,8 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     '../../../../styles.css',
     '../../../../../public/css/typography.css',
     '../../../../../public/css/form.css',
-    '../../../../../public/css/layout.css'
+    '../../../../../public/css/layout.css',
+    '../../../../../public/css/badge.css',
   ]
 })
 export class BookingScreen implements OnInit, OnDestroy {
@@ -49,6 +52,7 @@ export class BookingScreen implements OnInit, OnDestroy {
   protected readonly formatStayRange = formatStayRange;
   protected readonly formatAmount = formatAmount;
   protected readonly nightsBetween = nightsBetween;
+  protected readonly visiblePaymentStatus = visiblePaymentStatus;
 
   searchControl: FormControl<string | null>;
   filtersForm: FormGroup;
@@ -66,8 +70,22 @@ export class BookingScreen implements OnInit, OnDestroy {
 
   isLoading = false;
 
+  /** Riga aperta: al massimo una alla volta, come nelle altre schermate admin. */
+  openBookingId: string | null = null;
+  /**
+   * Dettagli già caricati nella pagina corrente. Non è una cache di lettura —
+   * a ogni apertura si rilegge dal backend — ma tiene la scheda dentro la
+   * riga anche da chiusa, così la riga si richiude con l'animazione invece
+   * di perdere altezza di colpo. Si svuota a ogni ricarica della lista.
+   */
+  private details = new Map<string, BookingDetailSchema>();
+  isDetailLoading = false;
+  detailError: string | null = null;
+
   /** Ogni emissione rilancia la ricerca; `switchMap` annulla quella in volo. */
   private query$ = new Subject<void>();
+  /** Id da caricare, o `null` per chiudere: `switchMap` annulla la richiesta precedente. */
+  private detail$ = new Subject<string | null>();
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -90,6 +108,7 @@ export class BookingScreen implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.setupQueryStream();
+    this.setupDetailStream();
     this.setupFilterTriggers();
     this.loadRooms();
     this.query$.next();
@@ -107,6 +126,9 @@ export class BookingScreen implements OnInit, OnDestroy {
   private setupQueryStream(): void {
     this.query$.pipe(
       switchMap(() => {
+        // La riga aperta potrebbe non esserci più nella nuova pagina.
+        this.closeDetail();
+        this.details.clear();
         this.isLoading = true;
         this.cdr.detectChanges();
 
@@ -125,6 +147,34 @@ export class BookingScreen implements OnInit, OnDestroy {
       this.currentPage = page;
       this.bookings = page.items;
       this.isLoading = false;
+      this.cdr.detectChanges();
+    });
+  }
+
+  private setupDetailStream(): void {
+    this.detail$.pipe(
+      switchMap(id => {
+        if (!id) return EMPTY;
+
+        this.detailError = null;
+        this.isDetailLoading = true;
+        this.cdr.detectChanges();
+
+        return this.bookingService.getBooking(id).pipe(
+          catchError(err => {
+            // Solo lo stato HTTP: il messaggio lo mostra l'interceptor globale.
+            console.error('Errore nel caricamento della prenotazione:', err?.status);
+            this.detailError = 'Impossibile caricare la prenotazione';
+            this.isDetailLoading = false;
+            this.cdr.detectChanges();
+            return EMPTY;
+          })
+        );
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe(booking => {
+      this.details.set(booking.id, booking);
+      this.isDetailLoading = false;
       this.cdr.detectChanges();
     });
   }
@@ -255,6 +305,48 @@ export class BookingScreen implements OnInit, OnDestroy {
 
   checkIsInvalidDateRange(): boolean {
     return this.filtersForm.hasError('dateRange');
+  }
+
+  // ------------------------------------------------------------------ //
+  // Dettaglio                                                           //
+  // ------------------------------------------------------------------ //
+
+  /** Apre la riga e ne carica il dettaglio; un secondo clic sulla stessa riga non fa nulla. */
+  openDetail(item: BookingListItemSchema): void {
+    if (this.openBookingId === item.id) return;
+    this.openBookingId = item.id;
+    this.detail$.next(item.id);
+  }
+
+  closeDetail(): void {
+    if (this.openBookingId === null) return;
+    this.openBookingId = null;
+    this.detailError = null;
+    this.isDetailLoading = false;
+    this.detail$.next(null);
+    this.cdr.detectChanges();
+  }
+
+  /** La scheda resta nella riga aperta e in quelle già caricate (vedi `details`). */
+  hasDetail(item: BookingListItemSchema): boolean {
+    return this.openBookingId === item.id || this.details.has(item.id);
+  }
+
+  detailOf(item: BookingListItemSchema): BookingDetailSchema | null {
+    return this.details.get(item.id) ?? null;
+  }
+
+  /** Caricamento ed errore riguardano solo la riga aperta. */
+  isDetailLoadingFor(item: BookingListItemSchema): boolean {
+    return this.openBookingId === item.id && this.isDetailLoading;
+  }
+
+  detailErrorFor(item: BookingListItemSchema): string | null {
+    return this.openBookingId === item.id ? this.detailError : null;
+  }
+
+  retryDetail(): void {
+    if (this.openBookingId) this.detail$.next(this.openBookingId);
   }
 
   // ------------------------------------------------------------------ //

@@ -21,7 +21,7 @@
 }
 
 .search-feedback > .error-message {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 /* --- Filtri --- */
@@ -56,57 +56,13 @@
 }
 
 .booking-meta .code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.02em;
+  font-size: var(--font-size-2xs);
   color: var(--text-strong);
-}
-
-.badges {
-  margin-top: 2pt;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4pt;
-}
-
-.badge {
-  font-size: 0.7rem;
-  font-weight: 500;
-  padding: 2pt 6pt;
-  border-radius: 6pt;
-  border: 1px solid var(--stroke-weak);
-  background: var(--fill-dark);
-  color: var(--text-weak);
-}
-
-.badge.brand {
-  background: var(--brand-fill);
-  border-color: var(--brand-stroke-weak);
-  color: var(--brand-strong);
-}
-
-.badge.success {
-  background: #22C55E14;
-  border-color: #22C55E40;
-  color: #166534;
-}
-
-.badge.warning {
-  background: var(--warning-fill);
-  border-color: #EAB30840;
-  color: var(--warning-text);
-}
-
-.badge.danger {
-  background: var(--error-fill);
-  border-color: var(--error-stroke-weak);
-  color: var(--error-strong);
 }
 
 .amount {
   margin-left: auto;
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--text-strong);
 }
