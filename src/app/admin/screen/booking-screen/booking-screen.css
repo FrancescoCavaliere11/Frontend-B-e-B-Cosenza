@@ -42,6 +42,22 @@
   width: fit-content;
 }
 
+/* --- Creazione --- */
+/* Il form di creazione è più alto dei pannelli delle altre schermate. */
+app-list-item.create-row {
+  --list-item-panel-max-height: 80vh;
+}
+
+.created-message {
+  margin: 0 8pt;
+  padding: 6pt 8pt;
+  border-radius: 8pt;
+  border: 1px solid var(--success-stroke);
+  background: var(--success-fill);
+  color: var(--success-text);
+  font-size: var(--font-size-sm);
+}
+
 /* --- Righe --- */
 .list.refreshing {
   opacity: 0.5;

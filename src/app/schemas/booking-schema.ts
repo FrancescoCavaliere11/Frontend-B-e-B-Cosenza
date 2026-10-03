@@ -227,3 +227,157 @@ export class BookingDetailSchema {
       .map((entry: any) => new BookingStatusHistorySchema(entry));
   }
 }
+
+// ------------------------------------------------------------------ //
+// Creazione da back-office — incremento 3                             //
+// ------------------------------------------------------------------ //
+
+/**
+ * Regole di soggiorno replicate dal backend (`src/config/config.py` e
+ * `booking_schema.py`). Servono solo a evitare errori prevedibili: se il
+ * backend cambia, decide comunque lui, e il frontend mostra il suo messaggio.
+ */
+export const BOOKING_RULES = {
+  MIN_NIGHTS: 1,
+  MAX_NIGHTS: 30,
+  MAX_ADVANCE_DAYS: 365,
+  MAX_ROOMS: 5,
+  MAX_GUESTS: 100,
+  NOTES_MAX_LENGTH: 2000,
+  NAME_MIN_LENGTH: 2,
+  NAME_MAX_LENGTH: 50,
+  PHONE_LENGTH: 10,
+  /** `online_payment_discount_percent`: sconto del pagamento anticipato. */
+  PAY_NOW_DISCOUNT_PERCENT: 10,
+} as const;
+
+/** Parametri di una ricerca per date — `AvailabilityRequestSchema`. */
+export interface StaySearch {
+  check_in: string;
+  check_out: string;
+  guest_count: number;
+}
+
+/** Camera libera nell'intervallo — `AvailableRoomSchema`. */
+export class AvailableRoomSchema {
+  id: string;
+  name: string;
+  number: number;
+  capacity: number;
+  price_per_night: string;
+  nights: number;
+  subtotal: string;
+  fits_all_guests: boolean;
+
+  constructor(data: any) {
+    this.id = data.id;
+    this.name = data.name;
+    this.number = data.number;
+    this.capacity = data.capacity;
+    this.price_per_night = String(data.price_per_night);
+    this.nights = data.nights;
+    this.subtotal = String(data.subtotal);
+    this.fits_all_guests = !!data.fits_all_guests;
+  }
+}
+
+/** Combinazione minima di camere che ospita tutti — `RoomCombinationSchema`. */
+export class RoomCombinationSchema {
+  room_ids: string[];
+  rooms_count: number;
+  total_capacity: number;
+  total_price: string;
+  wasted_capacity: number;
+
+  constructor(data: any) {
+    this.room_ids = [...(data.room_ids ?? [])];
+    this.rooms_count = data.rooms_count;
+    this.total_capacity = data.total_capacity;
+    this.total_price = String(data.total_price);
+    this.wasted_capacity = data.wasted_capacity;
+  }
+}
+
+/** Esito di `GET /bookings/availability`. Le combinazioni arrivano già ordinate. */
+export class AvailabilityResponseSchema {
+  check_in: string;
+  check_out: string;
+  nights: number;
+  guest_count: number;
+  rooms: AvailableRoomSchema[];
+  suggested_combinations: RoomCombinationSchema[];
+
+  constructor(data: any) {
+    this.check_in = data.check_in;
+    this.check_out = data.check_out;
+    this.nights = data.nights;
+    this.guest_count = data.guest_count;
+    this.rooms = (data.rooms ?? []).map((room: any) => new AvailableRoomSchema(room));
+    this.suggested_combinations = (data.suggested_combinations ?? [])
+      .map((combination: any) => new RoomCombinationSchema(combination));
+  }
+}
+
+/** Richiesta di preventivo — `BookingQuoteRequestSchema`. */
+export interface BookingQuoteRequest extends StaySearch {
+  room_ids: string[];
+  payment_option: PaymentOption;
+}
+
+/** Riga del preventivo, una per camera — `PriceLineSchema`. */
+export class QuoteLineSchema {
+  room_id: string;
+  room_name: string;
+  unit_price: string;
+  nights: number;
+  line_total: string;
+
+  constructor(data: any) {
+    this.room_id = data.room_id;
+    this.room_name = data.room_name;
+    this.unit_price = String(data.unit_price);
+    this.nights = data.nights;
+    this.line_total = String(data.line_total);
+  }
+}
+
+/**
+ * Preventivo — `BookingQuoteResponseSchema`, ridotto a righe e importi.
+ * Il `quote_token` non viene letto: la creazione da back-office ricalcola il
+ * prezzo da sola e non lo richiede.
+ */
+export class BookingQuoteSchema {
+  nights: number;
+  payment_option: PaymentOption;
+  lines: QuoteLineSchema[];
+  base_price: string;
+  discount_amount: string;
+  total_price: string;
+  currency: string;
+
+  constructor(data: any) {
+    this.nights = data.nights;
+    this.payment_option = data.payment_option;
+    this.lines = (data.lines ?? []).map((line: any) => new QuoteLineSchema(line));
+    this.base_price = String(data.base_price);
+    this.discount_amount = String(data.discount_amount);
+    this.total_price = String(data.total_price);
+    this.currency = data.currency;
+  }
+}
+
+/** Corpo di `POST /admin/bookings/` — `AdminBookingCreateSchema`, intestatario solo ospite. */
+export interface AdminBookingCreateRequest extends StaySearch {
+  room_ids: string[];
+  payment_option: PaymentOption;
+  payment_method?: PaymentMethod;
+  guest: {
+    firstname: string;
+    lastname: string;
+    email: string;
+    phone_number: string;
+  };
+  skip_email_confirmation: boolean;
+  mark_as_paid: boolean;
+  admin_notes?: string;
+}

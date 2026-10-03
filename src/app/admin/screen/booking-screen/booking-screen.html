@@ -67,7 +67,25 @@
     }
   </div>
 
+  @if (createdCode) {
+    <p class="created-message" role="status">
+      Prenotazione <span class="text-code">{{ createdCode }}</span> creata
+    </p>
+  }
+
   <div class="list" [class.refreshing]="isLoading && bookings.length > 0">
+    <app-list-item
+      class="create-row"
+      [isAddButton]="true"
+      [isOpen]="isCreateOpen"
+      (click)="openCreate()">
+      <app-booking-create-form
+        form
+        (created)="onBookingCreated($event)"
+        (cancel)="closeCreate()">
+      </app-booking-create-form>
+    </app-list-item>
+
     @for (item of bookings; track item.id) {
       <app-list-item
         [title]="guestName(item)"

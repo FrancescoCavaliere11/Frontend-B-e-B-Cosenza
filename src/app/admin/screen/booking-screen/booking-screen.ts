@@ -24,10 +24,7 @@ import {
   visiblePaymentStatus,
 } from '../../../schemas/booking-enums';
 import {formatAmount, formatStayRange, nightsBetween} from '../../../utils/booking-format';
-import {dateRangeValidator} from '../../../validators/validators';
-
-/** Controllo sintattico minimo: il resto lo valida il backend (`EmailStr`). */
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import {dateRangeValidator, EMAIL_PATTERN} from '../../../validators/validators';
 
 @Component({
   selector: 'app-booking-screen',
@@ -72,6 +69,13 @@ export class BookingScreen implements OnInit, OnDestroy {
 
   /** Riga aperta: al massimo una alla volta, come nelle altre schermate admin. */
   openBookingId: string | null = null;
+  /** Riga «+» di creazione aperta. Esclusiva con `openBookingId`. */
+  isCreateOpen = false;
+  /** Codice dell'ultima prenotazione creata, per il messaggio di conferma. */
+  createdCode: string | null = null;
+  /** Prenotazione appena creata da aprire quando la lista ricaricata la contiene. */
+  private pendingOpenId: string | null = null;
+  private createdMessageTimer: ReturnType<typeof setTimeout> | null = null;
   /**
    * Dettagli già caricati nella pagina corrente. Non è una cache di lettura —
    * a ogni apertura si rilegge dal backend — ma tiene la scheda dentro la
@@ -115,6 +119,7 @@ export class BookingScreen implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.createdMessageTimer) clearTimeout(this.createdMessageTimer);
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -147,6 +152,7 @@ export class BookingScreen implements OnInit, OnDestroy {
       this.currentPage = page;
       this.bookings = page.items;
       this.isLoading = false;
+      this.openPendingBooking();
       this.cdr.detectChanges();
     });
   }
@@ -314,6 +320,7 @@ export class BookingScreen implements OnInit, OnDestroy {
   /** Apre la riga e ne carica il dettaglio; un secondo clic sulla stessa riga non fa nulla. */
   openDetail(item: BookingListItemSchema): void {
     if (this.openBookingId === item.id) return;
+    this.isCreateOpen = false;
     this.openBookingId = item.id;
     this.detail$.next(item.id);
   }
@@ -347,6 +354,52 @@ export class BookingScreen implements OnInit, OnDestroy {
 
   retryDetail(): void {
     if (this.openBookingId) this.detail$.next(this.openBookingId);
+  }
+
+  // ------------------------------------------------------------------ //
+  // Creazione                                                           //
+  // ------------------------------------------------------------------ //
+
+  openCreate(): void {
+    if (this.isCreateOpen) return;
+    this.closeDetail();
+    this.isCreateOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeCreate(): void {
+    this.isCreateOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Dopo la creazione: pannello chiuso, messaggio con il codice, lista
+   * ricaricata. Se la nuova prenotazione compare nella pagina (con «Ultime
+   * inserite» e senza filtri è la prima) la sua scheda si apre da sola.
+   */
+  onBookingCreated(booking: BookingDetailSchema): void {
+    this.isCreateOpen = false;
+    this.pendingOpenId = booking.id;
+    this.showCreatedMessage(booking.code);
+    this.page = 1;
+    this.query$.next();
+  }
+
+  private openPendingBooking(): void {
+    const id = this.pendingOpenId;
+    this.pendingOpenId = null;
+    const item = id ? this.bookings.find(booking => booking.id === id) : undefined;
+    if (item) this.openDetail(item);
+  }
+
+  private showCreatedMessage(code: string): void {
+    this.createdCode = code;
+    if (this.createdMessageTimer) clearTimeout(this.createdMessageTimer);
+    this.createdMessageTimer = setTimeout(() => {
+      this.createdCode = null;
+      this.createdMessageTimer = null;
+      this.cdr.detectChanges();
+    }, 6000);
   }
 
   // ------------------------------------------------------------------ //

@@ -136,7 +136,8 @@ hugeicons-icon {
               opacity 1s ease-in-out,
               width 0s;
   display: block;
-  max-height: 500px;
+  /* Sovrascrivibile dalla schermata per i pannelli più alti (es. creazione prenotazione). */
+  max-height: var(--list-item-panel-max-height, 500px);
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;

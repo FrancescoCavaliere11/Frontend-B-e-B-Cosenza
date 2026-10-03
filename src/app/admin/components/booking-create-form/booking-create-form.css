@@ -1,0 +1,269 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.booking-create {
+  cursor: default;
+  /* Più respiro fra le sezioni rispetto ai form brevi delle altre schermate. */
+  gap: 24pt;
+}
+
+.form-header > hugeicons-icon.close {
+  width: 20pt;
+  height: 20pt;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 8pt;
+}
+
+/* Una linea sottile separa ogni sezione dalla precedente. */
+section + section {
+  border-top: 1px solid var(--stroke-weak);
+  padding-top: 16pt;
+}
+
+section > h5 {
+  margin-bottom: 2pt;
+}
+
+h5 .text-small {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+}
+
+/* --- Griglie dei campi --- */
+.row {
+  display: grid;
+  gap: 8pt;
+}
+
+.row.three {
+  grid-template-columns: 1fr 1fr 0.6fr;
+}
+
+.row.two {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* --- Avvisi --- */
+.notice {
+  font-size: var(--font-size-xs);
+  padding: 6pt 8pt;
+  border-radius: 8pt;
+  border: 1px solid;
+}
+
+.notice.warning {
+  background: var(--warning-fill);
+  border-color: var(--warning-stroke);
+  color: var(--warning-text);
+}
+
+.notice.info {
+  background: var(--brand-fill);
+  border-color: var(--brand-stroke-weak);
+  color: var(--text-weak);
+}
+
+.inline-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8pt;
+}
+
+/* --- Soluzioni (combinazioni) --- */
+.combinations {
+  display: flex;
+  flex-direction: column;
+  gap: 4pt;
+}
+
+.combination {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8pt;
+  padding: 6pt 8pt;
+  border: 1px solid var(--stroke-weak);
+  border-radius: 8pt;
+  background: var(--fill-dark);
+  cursor: pointer;
+  transition: background-color .2s ease-in-out, border-color .2s ease-in-out;
+}
+
+.combination.selected {
+  background: var(--brand-fill);
+  border-color: var(--brand-stroke-weak);
+}
+
+.combination > input {
+  accent-color: var(--brand-weak);
+}
+
+/* Nome (numero) sopra, ospiti ammessi sotto: stesso schema per soluzioni e chip. */
+.room-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1pt;
+}
+
+.services > .checkbox.room-chip {
+  align-items: flex-start;
+}
+
+.services > .checkbox.room-chip > input {
+  margin-top: 2pt;
+}
+
+.combination-rooms {
+  font-size: var(--font-size-sm);
+  color: var(--text-strong);
+}
+
+.combination-price {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.link-button {
+  align-self: flex-start;
+  padding: 2pt 0;
+  background: none;
+  border: none;
+  font-size: var(--font-size-xs);
+  color: var(--brand-weak);
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--brand-strong);
+}
+
+/* --- Pagamento --- */
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12pt;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 4pt;
+  padding-left: 0;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.option > input {
+  accent-color: var(--brand-weak);
+}
+
+.services.toggles > .checkbox:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.method {
+  max-width: 260px;
+}
+
+/* --- Prezzo: una riga per camera, poi i totali --- */
+.price-table {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  column-gap: 16pt;
+  row-gap: 4pt;
+  align-items: baseline;
+}
+
+/* Le righe non creano una griglia propria: le colonne restano allineate fra camere e totali. */
+.price-row {
+  display: contents;
+}
+
+.room-name {
+  font-size: var(--font-size-sm);
+  color: var(--text-strong);
+}
+
+.amount {
+  font-size: var(--font-size-sm);
+  color: var(--text-strong);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-row.summary > .label {
+  grid-column: 1 / 4;
+  font-size: var(--font-size-xs);
+  color: var(--text-weak);
+}
+
+/* Il primo totale è separato dalle camere da una linea. */
+.price-row:not(.summary) + .price-row.summary > * {
+  border-top: 1px solid var(--stroke-weak);
+  padding-top: 6pt;
+  margin-top: 2pt;
+}
+
+.price-row.total > .label,
+.price-row.total > .amount {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+/* --- Note --- */
+.counter {
+  align-self: flex-end;
+}
+
+/* --- Conferma e pulsanti --- */
+.past-confirmation {
+  display: flex;
+  flex-direction: column;
+  gap: 8pt;
+  padding: 8pt;
+  border-radius: 8pt;
+  border: 1px solid var(--warning-stroke);
+  background: var(--warning-fill);
+}
+
+.past-confirmation > p {
+  color: var(--warning-text);
+  font-size: var(--font-size-sm);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8pt;
+}
+
+@media (max-width: 576px) {
+  .price-table {
+    grid-template-columns: 1fr auto;
+  }
+
+  .price-row:not(.summary) > .text-small {
+    grid-column: 1;
+  }
+
+  .price-row.summary > .label {
+    grid-column: 1;
+  }
+
+  .row.three,
+  .row.two {
+    grid-template-columns: 1fr;
+  }
+
+}

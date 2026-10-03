@@ -3,6 +3,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {BehaviorSubject, map, Observable, tap} from 'rxjs';
 import {Environment} from '../utils/environments';
 import {
+  AdminBookingCreateRequest,
   BookingDetailSchema,
   BookingSearchFilters,
   PaginatedBookingsSchema,
@@ -43,6 +44,19 @@ export class BookingService {
   getBooking(id: string): Observable<BookingDetailSchema> {
     return this.http.get<any>(`${this.apiUrl}${encodeURIComponent(id)}`).pipe(
       map(response => new BookingDetailSchema(response))
+    );
+  }
+
+  /**
+   * `POST /admin/bookings/` — crea una prenotazione per conto di un ospite.
+   *
+   * La risposta contiene anche il `confirmation_token` quando la conferma via
+   * email non è saltata: è la credenziale dell'ospite, viaggia solo nella sua
+   * email e qui viene scartata, senza mostrarla né registrarla.
+   */
+  createBooking(request: AdminBookingCreateRequest): Observable<BookingDetailSchema> {
+    return this.http.post<any>(this.apiUrl, request).pipe(
+      map(response => new BookingDetailSchema(response.booking))
     );
   }
 

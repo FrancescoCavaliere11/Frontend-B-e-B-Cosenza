@@ -66,6 +66,17 @@ export function nightsBetween(checkIn: string, checkOut: string): number {
   return Math.round((end - start) / 86_400_000);
 }
 
+/**
+ * Aggiunge (o toglie) giorni a una data `YYYY-MM-DD`, restando in UTC: nessun
+ * fuso orario può spostare il risultato di un giorno.
+ */
+export function addDaysIso(value: string, days: number): string {
+  const match = ISO_DATE.exec(value);
+  if (!match) return value;
+  const date = new Date(Date.UTC(+match[1], +match[2] - 1, +match[3] + days));
+  return date.toISOString().slice(0, 10);
+}
+
 /** Istante ISO 8601 (UTC) → `01/12/2026, 14:30` nel fuso della struttura. */
 export function formatInstant(value: string | null | undefined): string {
   if (!value) return '—';

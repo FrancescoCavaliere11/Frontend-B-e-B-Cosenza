@@ -19,6 +19,7 @@ import { errorInterceptor, withCredentialsInterceptor } from './security/interce
 import { RoomScreen } from './admin/screen/room-screen/room-screen';
 import { BookingScreen } from './admin/screen/booking-screen/booking-screen';
 import { BookingDetail } from './admin/components/booking-detail/booking-detail';
+import { BookingCreateForm } from './admin/components/booking-create-form/booking-create-form';
 
 @NgModule({
   declarations: [
@@ -35,6 +36,7 @@ import { BookingDetail } from './admin/components/booking-detail/booking-detail'
     RoomScreen,
     BookingScreen,
     BookingDetail,
+    BookingCreateForm,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HugeiconsIconComponent],
   providers: [

@@ -1,4 +1,12 @@
 import {AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
+import {addDaysIso, nightsBetween, todayIso} from '../utils/booking-format';
+
+/**
+ * Controllo sintattico minimo di un indirizzo email (testo@dominio.tld): il
+ * resto lo valida il backend (`EmailStr`). Più severo di `Validators.email`,
+ * che accetta anche `nome@dominio` senza estensione.
+ */
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function passwordStrengthValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -47,5 +55,38 @@ export function dateRangeValidator(fromKey: string, toKey: string, strict = fals
 
     const isInvalid = strict ? to <= from : to < from;
     return isInvalid ? { dateRange: true } : null;
+  };
+}
+
+/** Regole di soggiorno controllate da `stayRulesValidator`. */
+export interface StayRules {
+  minNights: number;
+  maxNights: number;
+  maxAdvanceDays: number;
+}
+
+/**
+ * Validatore di gruppo per un soggiorno: partenza dopo l'arrivo, notti fra
+ * minimo e massimo, arrivo entro l'anticipo massimo da oggi (fuso della
+ * struttura). Le date nel passato sono ammesse: il back-office può
+ * registrare soggiorni già avvenuti.
+ *
+ * @returns `{ stay: 'order' | 'minNights' | 'maxNights' | 'advance' }`, il
+ *   primo problema trovato, oppure `null`.
+ */
+export function stayRulesValidator(checkInKey: string, checkOutKey: string, rules: StayRules): ValidatorFn {
+  return (group: AbstractControl): ValidationErrors | null => {
+    const checkIn: string | null = group.get(checkInKey)?.value || null;
+    const checkOut: string | null = group.get(checkOutKey)?.value || null;
+    if (!checkIn || !checkOut) return null;
+
+    if (checkOut <= checkIn) return {stay: 'order'};
+
+    const nights = nightsBetween(checkIn, checkOut);
+    if (nights < rules.minNights) return {stay: 'minNights'};
+    if (nights > rules.maxNights) return {stay: 'maxNights'};
+
+    if (checkIn > addDaysIso(todayIso(), rules.maxAdvanceDays)) return {stay: 'advance'};
+    return null;
   };
 }
