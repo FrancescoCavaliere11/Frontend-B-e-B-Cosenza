@@ -249,7 +249,27 @@ export const BOOKING_RULES = {
   PHONE_LENGTH: 10,
   /** `online_payment_discount_percent`: sconto del pagamento anticipato. */
   PAY_NOW_DISCOUNT_PERCENT: 10,
+  /** `occupancy_max_window_days`: ampiezza massima della finestra del calendario. */
+  OCCUPANCY_MAX_WINDOW_DAYS: 92,
 } as const;
+
+/**
+ * Notti non disponibili per un insieme di camere — `OccupancyResponseSchema`.
+ * Finestra `[date_from, date_to)`; solo date, già unite fra le camere.
+ */
+export class OccupancyResponseSchema {
+  date_from: string;
+  date_to: string;
+  room_ids: string[];
+  unavailable_nights: string[];
+
+  constructor(data: any) {
+    this.date_from = data.date_from;
+    this.date_to = data.date_to;
+    this.room_ids = [...(data.room_ids ?? [])];
+    this.unavailable_nights = [...(data.unavailable_nights ?? [])];
+  }
+}
 
 /** Parametri di una ricerca per date — `AvailabilityRequestSchema`. */
 export interface StaySearch {

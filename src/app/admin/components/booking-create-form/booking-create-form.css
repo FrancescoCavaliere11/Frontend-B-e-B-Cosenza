@@ -36,6 +36,59 @@ h5 .text-small {
   font-weight: 400;
 }
 
+/* --- Modalità di ricerca --- */
+.mode-tabs {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 2pt;
+  padding: 2pt;
+  border: 1px solid var(--stroke-weak);
+  border-radius: 8pt;
+  background: var(--fill-dark);
+}
+
+.mode-tab {
+  padding: 6pt 12pt;
+  border: none;
+  border-radius: 6pt;
+  background: transparent;
+  color: var(--text-weak);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color .2s ease-in-out, color .2s ease-in-out;
+}
+
+.mode-tab:hover {
+  color: var(--text-strong);
+}
+
+.mode-tab.active {
+  background: var(--brand-fill);
+  color: var(--brand-strong);
+  box-shadow: 0 0 0 1px var(--brand-stroke-weak);
+}
+
+.mode-tab:focus-visible {
+  outline: 2px solid var(--brand-strong);
+  outline-offset: 1px;
+}
+
+/* Il primo blocco dopo le schede non ha la linea di separazione. */
+.mode-tabs + section {
+  border-top: none;
+  padding-top: 0;
+}
+
+.guests {
+  max-width: 120px;
+}
+
+.stay-summary {
+  font-size: var(--font-size-sm);
+  color: var(--text-strong);
+}
+
 /* --- Griglie dei campi --- */
 .row {
   display: grid;

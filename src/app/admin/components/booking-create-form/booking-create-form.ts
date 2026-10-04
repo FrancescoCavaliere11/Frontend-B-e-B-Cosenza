@@ -21,7 +21,8 @@ import {
   PaymentMethod,
   PaymentOption,
 } from '../../../schemas/booking-enums';
-import {addDaysIso, formatAmount, formatStayDate, nightsBetween, todayIso} from '../../../utils/booking-format';
+import {addDaysIso, formatAmount, formatStayDate, formatStayRange, nightsBetween, todayIso} from '../../../utils/booking-format';
+import {StayRange, VisibleRange} from '../../../shared/components/stay-calendar/stay-calendar';
 import {EMAIL_PATTERN, stayRulesValidator} from '../../../validators/validators';
 
 /** Camera proposta nel form: dalla disponibilità (date future) o dall'elenco camere (passate). */
@@ -42,6 +43,13 @@ const MANUAL_PAYMENT_METHODS: PaymentMethod[] = [
 
 /** Attesa dopo l'ultima modifica prima di interrogare il backend (API con limite per IP). */
 const LOOKUP_DEBOUNCE_MS = 400;
+
+/**
+ * Le due strade per scegliere camere e date (decisione H1):
+ * - `dates`: prima le date, poi le camere libere (predefinita);
+ * - `rooms`: prima le camere, poi le date libere per tutte da un calendario.
+ */
+export type SearchMode = 'dates' | 'rooms';
 
 /**
  * Form di creazione di una prenotazione per conto di un ospite.
@@ -79,6 +87,8 @@ export class BookingCreateForm implements OnInit {
   protected readonly paymentMethodLabels = PAYMENT_METHOD_LABELS;
   protected readonly formatAmount = formatAmount;
   protected readonly formatStayDate = formatStayDate;
+  protected readonly formatStayRange = formatStayRange;
+  protected readonly today = todayIso();
 
   form: FormGroup;
 
@@ -100,7 +110,20 @@ export class BookingCreateForm implements OnInit {
   protected readonly isConfirmingPast = signal(false);
   protected readonly isSaving = signal(false);
 
+  /** Modalità di ricerca corrente. */
+  protected readonly searchMode = signal<SearchMode>('dates');
+
+  /** Modalità «Per camera»: notti occupate dei mesi mostrati dal calendario. */
+  protected readonly unavailableNights = signal<ReadonlySet<string>>(new Set<string>());
+  protected readonly isLoadingOccupancy = signal(false);
+  protected readonly occupancyError = signal<string | null>(null);
+  /** Date azzerate perché non più libere per tutte le camere scelte. */
+  protected readonly datesClearedNotice = signal<string | null>(null);
+  /** Mesi mostrati dal calendario; non letta dal template. */
+  private visibleRange: VisibleRange | null = null;
+
   private readonly lookup$ = new Subject<void>();
+  private readonly occupancy$ = new Subject<void>();
   private readonly quote$ = new Subject<void>();
   private readonly destroyRef = inject(DestroyRef);
 
@@ -144,6 +167,7 @@ export class BookingCreateForm implements OnInit {
 
   ngOnInit(): void {
     this.setupLookupStream();
+    this.setupOccupancyStream();
     this.setupQuoteStream();
     this.setupPaymentRules();
     this.loadEnabledRooms();
@@ -155,6 +179,14 @@ export class BookingCreateForm implements OnInit {
     merge(this.roomIdsControl.valueChanges, this.paymentOptionControl.valueChanges)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.quote$.next());
+
+    // «Per camera»: cambiare camere cambia sia il calendario sia la verifica
+    // delle date già scelte.
+    this.roomIdsControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      if (this.searchMode() !== 'rooms') return;
+      this.occupancy$.next();
+      if (this.currentStay()) this.lookup$.next();
+    });
   }
 
   // ------------------------------------------------------------------ //
@@ -270,7 +302,11 @@ export class BookingCreateForm implements OnInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(availability => {
       this.availability.set(availability);
-      this.pruneSelection();
+      if (this.searchMode() === 'rooms') {
+        this.clearDatesIfRoomsNotFree(availability);
+      } else {
+        this.pruneSelection();
+      }
       this.quote$.next();
     });
   }
@@ -325,9 +361,12 @@ export class BookingCreateForm implements OnInit {
     });
   }
 
-  /** Camere selezionabili: le libere per le date future, tutte le attive per quelle passate. */
+  /**
+   * Camere selezionabili: le libere per le date future, tutte le attive per
+   * quelle passate e per la modalità «Per camera» (dove le date si scelgono dopo).
+   */
   roomOptions(): RoomOption[] {
-    if (this.isPastStay()) return this.enabledRooms();
+    if (this.isPastStay() || this.searchMode() === 'rooms') return this.enabledRooms();
 
     return (this.availability()?.rooms ?? []).map(room => ({
       id: room.id,
@@ -339,7 +378,8 @@ export class BookingCreateForm implements OnInit {
   }
 
   combinations(): RoomCombinationSchema[] {
-    return this.isPastStay() ? [] : this.availability()?.suggested_combinations ?? [];
+    if (this.isPastStay() || this.searchMode() === 'rooms') return [];
+    return this.availability()?.suggested_combinations ?? [];
   }
 
   /** `Girasole (101)`: il numero tra parentesi accanto al nome. */
@@ -417,6 +457,144 @@ export class BookingCreateForm implements OnInit {
   }
 
   // ------------------------------------------------------------------ //
+  // Modalità «Per camera» (incremento 3b)                               //
+  // ------------------------------------------------------------------ //
+
+  /**
+   * Cambio di modalità: camere e date si azzerano, perché le due strade le
+   * scelgono in ordine opposto (J5). Ospiti, pagamento, ospite e note restano.
+   */
+  setSearchMode(mode: SearchMode): void {
+    if (mode === this.searchMode()) return;
+    this.searchMode.set(mode);
+    this.clearRoomsAndDates();
+  }
+
+  private clearRoomsAndDates(): void {
+    this.roomIdsControl.setValue([]);
+    this.roomIdsControl.markAsUntouched();
+    this.stayGroup.patchValue({check_in: '', check_out: ''});
+    this.stayGroup.get('check_in')?.markAsUntouched();
+    this.stayGroup.get('check_out')?.markAsUntouched();
+    this.availability.set(null);
+    this.availabilityError.set(null);
+    this.quote.set(null);
+    this.quoteError.set(null);
+    this.removedRoomsNotice.set(null);
+    this.datesClearedNotice.set(null);
+    this.isManualSelectionOpen.set(false);
+    this.isConfirmingPast.set(false);
+    this.unavailableNights.set(new Set<string>());
+    this.occupancyError.set(null);
+  }
+
+  /** Il calendario ha cambiato mesi: si ricarica l'occupazione di quelli mostrati. */
+  onVisibleRangeChange(range: VisibleRange): void {
+    this.visibleRange = range;
+    this.occupancy$.next();
+  }
+
+  /** Arrivo e partenza scelti sul calendario finiscono negli stessi campi della modalità «Per date». */
+  onCalendarRangeChange(range: StayRange): void {
+    this.datesClearedNotice.set(null);
+    this.stayGroup.patchValue({check_in: range.checkIn ?? '', check_out: range.checkOut ?? ''});
+  }
+
+  checkInValue(): string | null {
+    return this.stayGroup.get('check_in')?.value || null;
+  }
+
+  checkOutValue(): string | null {
+    return this.stayGroup.get('check_out')?.value || null;
+  }
+
+  retryOccupancy(): void {
+    this.occupancy$.next();
+  }
+
+  private setupOccupancyStream(): void {
+    this.occupancy$.pipe(
+      debounceTime(LOOKUP_DEBOUNCE_MS),
+      switchMap(() => {
+        this.occupancyError.set(null);
+        const roomIds = [...this.roomIdsControl.value];
+        const range = this.occupancyWindow();
+
+        if (this.searchMode() !== 'rooms' || !range
+          || roomIds.length === 0 || roomIds.length > BOOKING_RULES.MAX_ROOMS) {
+          this.isLoadingOccupancy.set(false);
+          return EMPTY;
+        }
+
+        this.isLoadingOccupancy.set(true);
+        return this.availabilityService.getOccupancy(roomIds, range.from, range.to).pipe(
+          catchError(err => {
+            console.error('Errore nel caricamento del calendario:', err?.status);
+            this.occupancyError.set('Impossibile caricare le disponibilità del calendario');
+            return EMPTY;
+          }),
+          finalize(() => this.isLoadingOccupancy.set(false))
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(occupancy => {
+      const nights = new Set(occupancy.unavailable_nights);
+      this.unavailableNights.set(nights);
+      this.clearDatesIfNightsTaken(nights);
+    });
+  }
+
+  /**
+   * Finestra da chiedere al backend: i mesi mostrati, senza il passato e
+   * senza superare l'ultimo giorno prenotabile. Due mesi stanno sempre
+   * sotto il limite di 92 giorni.
+   */
+  private occupancyWindow(): VisibleRange | null {
+    if (!this.visibleRange) return null;
+    const lastDay = addDaysIso(this.today, BOOKING_RULES.MAX_ADVANCE_DAYS + BOOKING_RULES.MAX_NIGHTS);
+    const from = this.visibleRange.from < this.today ? this.today : this.visibleRange.from;
+    const to = this.visibleRange.to > lastDay ? lastDay : this.visibleRange.to;
+    return to > from ? {from, to} : null;
+  }
+
+  /**
+   * Dopo aver cambiato camere, con il solo arrivo scelto: se quella notte ora
+   * è occupata, l'arrivo si rifà. Con arrivo e partenza decide la verifica di
+   * disponibilità, che sa anche *quali* camere non sono libere.
+   */
+  private clearDatesIfNightsTaken(nights: ReadonlySet<string>): void {
+    const checkIn = this.checkInValue();
+    if (!checkIn || this.checkOutValue() || !nights.has(checkIn)) return;
+    this.clearDates(
+      `Il ${formatStayDate(checkIn)} non è libero per tutte le camere scelte: scegli un altro giorno di arrivo.`
+    );
+  }
+
+  /**
+   * Seconda verifica, sulla disponibilità del backend: copre anche notti
+   * fuori dai mesi mostrati e prenotazioni arrivate nel frattempo.
+   */
+  private clearDatesIfRoomsNotFree(availability: AvailabilityResponseSchema): void {
+    const free = new Set(availability.rooms.map(room => room.id));
+    const busy = this.roomIdsControl.value.filter(id => !free.has(id));
+    if (busy.length === 0) return;
+
+    const names = busy.map(id => this.lastKnownRoomName(id)).join(', ');
+    const range = formatStayRange(availability.check_in, availability.check_out);
+    this.clearDates(
+      `Per il soggiorno ${range} ${busy.length === 1 ? 'non è libera' : 'non sono libere'}: ${names}. `
+      + 'Scegli nuove date, oppure togli la camera.'
+    );
+  }
+
+  private clearDates(notice: string): void {
+    this.stayGroup.patchValue({check_in: '', check_out: ''});
+    this.availability.set(null);
+    this.quote.set(null);
+    this.datesClearedNotice.set(notice);
+  }
+
+  // ------------------------------------------------------------------ //
   // Preventivo                                                          //
   // ------------------------------------------------------------------ //
 
@@ -427,7 +605,10 @@ export class BookingCreateForm implements OnInit {
         this.quoteError.set(null);
         const stay = this.currentStay();
 
-        if (!stay || this.isPastStay() || !this.availability() || !this.areRoomsValid()) {
+        // Il preventivo parte solo se la disponibilità più recente conferma
+        // tutte le camere scelte: altrimenti il backend risponderebbe 409, con
+        // l'avviso dell'interceptor, mentre la verifica le sta già togliendo.
+        if (!stay || this.isPastStay() || !this.areRoomsValid() || !this.allSelectedRoomsFree()) {
           this.quote.set(null);
           this.isQuoting.set(false);
           return EMPTY;
@@ -450,6 +631,13 @@ export class BookingCreateForm implements OnInit {
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(quote => this.quote.set(quote));
+  }
+
+  private allSelectedRoomsFree(): boolean {
+    const availability = this.availability();
+    if (!availability) return false;
+    const free = new Set(availability.rooms.map(room => room.id));
+    return this.roomIdsControl.value.every(id => free.has(id));
   }
 
   retryQuote(): void {
@@ -649,5 +837,9 @@ export class BookingCreateForm implements OnInit {
     this.removedRoomsNotice.set(null);
     this.isManualSelectionOpen.set(false);
     this.isConfirmingPast.set(false);
+    this.searchMode.set('dates');
+    this.unavailableNights.set(new Set<string>());
+    this.occupancyError.set(null);
+    this.datesClearedNotice.set(null);
   }
 }

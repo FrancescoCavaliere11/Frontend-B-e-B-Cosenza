@@ -1,0 +1,74 @@
+<div class="stay-calendar" [class.loading]="isLoading()" [attr.aria-busy]="isLoading()"
+     (pointerdown)="onPointerDown()">
+  <div class="calendar-nav">
+    <button type="button" class="nav-button" aria-label="Mese precedente"
+            [disabled]="!canGoBack()" (click)="previousMonth()">‹</button>
+    @if (isLoading()) {
+      <span class="text-small" role="status">Aggiorno le disponibilità…</span>
+    }
+    <button type="button" class="nav-button" aria-label="Mese successivo"
+            [disabled]="!canGoForward()" (click)="nextMonth()">›</button>
+  </div>
+
+  <div class="months">
+    @for (month of months(); track month.start; let monthIndex = $index) {
+      <div class="month">
+        <p class="month-label" [id]="'month-' + month.start">{{ month.label }}</p>
+
+        <table class="grid" role="grid" [attr.aria-labelledby]="'month-' + month.start">
+          <thead>
+            <tr>
+              @for (weekday of weekdays; track $index) {
+                <th scope="col" class="weekday" aria-hidden="true">{{ weekday }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (week of month.weeks; track $index) {
+              <tr>
+                @for (cell of week; track $index) {
+                  <td role="gridcell" [attr.aria-selected]="cell ? (cell.isStart || cell.isEnd || cell.isInRange) : null"
+                      [class.in-range]="cell?.isInRange"
+                      [class.range-start]="cell?.isStart && !!checkOut()"
+                      [class.range-end]="cell?.isEnd">
+                    @if (cell) {
+                      <button
+                        type="button"
+                        class="day"
+                        [attr.data-date]="cell.date"
+                        [attr.aria-label]="cell.label"
+                        [attr.aria-disabled]="!cell.isSelectable"
+                        [tabindex]="tabIndexFor(cell, month, monthIndex)"
+                        [class.unavailable]="cell.showUnavailable"
+                        [class.start]="cell.isStart"
+                        [class.end]="cell.isEnd"
+                        [class.today]="cell.isToday"
+                        [class.selectable]="cell.isSelectable"
+                        [class.keyboard-focus]="isKeyboardFocused(cell)"
+                        (click)="select(cell.date)"
+                        (focus)="onDayFocus(cell.date)"
+                        (keydown)="onKeydown($event, cell.date)">
+                        {{ cell.day }}
+                      </button>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  @if (checkOutHint(); as hint) {
+    <p class="hint text-small" role="status">{{ hint }}</p>
+  }
+
+  <!-- Legenda: campioni identici ai giorni veri, così si leggono senza spiegazioni. -->
+  <ul class="legend text-small">
+    <li><span class="sample day unavailable" aria-hidden="true">12</span> Notte occupata</li>
+    <li><span class="sample day start" aria-hidden="true">5</span> Arrivo e partenza</li>
+    <li><span class="sample-band" aria-hidden="true"><span class="sample day in-range-sample">6</span></span> Notti del soggiorno</li>
+  </ul>
+</div>

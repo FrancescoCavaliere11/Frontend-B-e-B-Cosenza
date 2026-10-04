@@ -6,6 +6,7 @@ import {
   AvailabilityResponseSchema,
   BookingQuoteRequest,
   BookingQuoteSchema,
+  OccupancyResponseSchema,
   StaySearch,
 } from '../schemas/booking-schema';
 
@@ -35,6 +36,21 @@ export class BookingAvailabilityService {
 
     return this.http.get<any>(`${this.apiUrl}availability`, {params}).pipe(
       map(response => new AvailabilityResponseSchema(response))
+    );
+  }
+
+  /**
+   * `GET /bookings/occupancy` — notti non disponibili per le camere indicate
+   * nella finestra `[dateFrom, dateTo)` (al massimo 92 giorni, da oggi).
+   * `room_ids` si ripete una volta per camera, come si aspetta FastAPI.
+   */
+  getOccupancy(roomIds: string[], dateFrom: string, dateTo: string): Observable<OccupancyResponseSchema> {
+    let params = new HttpParams().set('date_from', dateFrom).set('date_to', dateTo);
+    for (const roomId of roomIds) {
+      params = params.append('room_ids', roomId);
+    }
+    return this.http.get<any>(`${this.apiUrl}occupancy`, {params}).pipe(
+      map(response => new OccupancyResponseSchema(response))
     );
   }
 

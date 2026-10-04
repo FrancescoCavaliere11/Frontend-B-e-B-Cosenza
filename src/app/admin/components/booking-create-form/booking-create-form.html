@@ -10,6 +10,32 @@
     </hugeicons-icon>
   </div>
 
+  <!-- Modalità di ricerca: «Per date» o «Per camera» (H1) -->
+  <div class="mode-tabs" role="tablist" aria-label="Come vuoi cercare">
+    <button type="button" role="tab" class="mode-tab"
+            [class.active]="searchMode() === 'dates'"
+            [attr.aria-selected]="searchMode() === 'dates'"
+            (click)="setSearchMode('dates')">Per date</button>
+    <button type="button" role="tab" class="mode-tab"
+            [class.active]="searchMode() === 'rooms'"
+            [attr.aria-selected]="searchMode() === 'rooms'"
+            (click)="setSearchMode('rooms')">Per camera</button>
+  </div>
+
+  <!-- Chip di una camera: stesso aspetto nelle due modalità -->
+  <ng-template #roomChip let-room>
+    <label class="checkbox room-chip">
+      <input type="checkbox"
+             [checked]="isRoomSelected(room.id)"
+             (change)="toggleRoom(room.id, $event)">
+      <span class="room-text">
+        <span>{{ roomLabel(room) }} · {{ formatAmount(room.pricePerNight) }}/notte</span>
+        <span class="text-small">fino a {{ room.capacity }} ospiti</span>
+      </span>
+    </label>
+  </ng-template>
+
+  @if (searchMode() === 'dates') {
   <!-- 1. Soggiorno -->
   <section formGroupName="stay">
     <h5>Soggiorno</h5>
@@ -90,15 +116,7 @@
       @if (showManualSelection()) {
         <div class="services rooms">
           @for (room of roomOptions(); track room.id) {
-            <label class="checkbox room-chip">
-              <input type="checkbox"
-                     [checked]="isRoomSelected(room.id)"
-                     (change)="toggleRoom(room.id, $event)">
-              <span class="room-text">
-                <span>{{ roomLabel(room) }} · {{ formatAmount(room.pricePerNight) }}/notte</span>
-                <span class="text-small">fino a {{ room.capacity }} ospiti</span>
-              </span>
-            </label>
+            <ng-container *ngTemplateOutlet="roomChip; context: {$implicit: room}"></ng-container>
           }
         </div>
       }
@@ -112,6 +130,82 @@
       }
     }
   </section>
+  } @else {
+  <!-- 1. Camere (modalità «Per camera») -->
+  <section>
+    <h5>Camere</h5>
+    @if (roomOptions().length === 0) {
+      <p class="text-small">Nessuna camera attiva.</p>
+    } @else {
+      <div class="services rooms">
+        @for (room of roomOptions(); track room.id) {
+          <ng-container *ngTemplateOutlet="roomChip; context: {$implicit: room}"></ng-container>
+        }
+      </div>
+    }
+
+    <div class="form-group guests" formGroupName="stay">
+      <label for="create-guests-rooms">Ospiti</label>
+      <input id="create-guests-rooms" type="number" formControlName="guest_count"
+             min="1" [max]="rules.MAX_GUESTS">
+    </div>
+
+    @if (roomsError(); as error) {
+      <small class="error-message">{{ error }}</small>
+    } @else if (roomIdsControl.value.length > 0) {
+      <p class="text-small">
+        Capienza scelta: {{ selectedCapacity() }} posti per {{ stayGroup.get('guest_count')?.value }} ospiti
+      </p>
+    }
+  </section>
+
+  <!-- 2. Date libere per tutte le camere scelte -->
+  <section>
+    <h5>Date libere per tutte le camere scelte</h5>
+
+    @if (roomIdsControl.value.length === 0) {
+      <p class="text-small">Scegli almeno una camera per vedere le date libere.</p>
+    } @else if (roomIdsControl.value.length > rules.MAX_ROOMS) {
+      <p class="text-small">Togli qualche camera per vedere le date libere.</p>
+    } @else {
+      @if (occupancyError(); as error) {
+        <div class="inline-error">
+          <small class="error-message">{{ error }}</small>
+          <button type="button" class="secondary" (click)="retryOccupancy()">Riprova</button>
+        </div>
+      }
+      @if (datesClearedNotice(); as notice) {
+        <p class="notice warning" role="status">{{ notice }}</p>
+      }
+
+      <app-stay-calendar
+        [unavailableNights]="unavailableNights()"
+        [checkIn]="checkInValue()"
+        [checkOut]="checkOutValue()"
+        [minDate]="today"
+        [maxDate]="maxCheckIn()"
+        [maxNights]="rules.MAX_NIGHTS"
+        [isLoading]="isLoadingOccupancy()"
+        (visibleRangeChange)="onVisibleRangeChange($event)"
+        (rangeChange)="onCalendarRangeChange($event)">
+      </app-stay-calendar>
+
+      <p class="stay-summary" role="status">
+        @if (checkInValue() && checkOutValue()) {
+          Soggiorno: <strong>{{ formatStayRange(checkInValue()!, checkOutValue()!) }}</strong>
+          · {{ nights() }} {{ nights() === 1 ? 'notte' : 'notti' }}
+          @if (isCheckingAvailability()) {
+            <span class="text-small"> · verifico…</span>
+          }
+        } @else if (checkInValue()) {
+          Arrivo il <strong>{{ formatStayDate(checkInValue()) }}</strong>: scegli la partenza.
+        } @else {
+          <span class="text-small">Scegli il giorno di arrivo, poi quello di partenza.</span>
+        }
+      </p>
+    }
+  </section>
+  }
 
   <!-- 3. Pagamento -->
   <section formGroupName="payment">

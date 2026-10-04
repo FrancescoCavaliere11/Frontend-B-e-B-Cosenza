@@ -1,0 +1,216 @@
+:host {
+  display: block;
+  width: 100%;
+  /* Lato di un giorno: unico valore per celle, pulsanti e fascia del soggiorno. */
+  --day-size: 32px;
+}
+
+.stay-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 8pt;
+}
+
+/* Durante il caricamento i giorni non si possono scegliere: i dati sono vecchi. */
+.stay-calendar.loading .months {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* --- Navigazione --- */
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8pt;
+}
+
+.nav-button {
+  width: var(--day-size);
+  height: var(--day-size);
+  padding: 0;
+  border: 1px solid var(--stroke-weak);
+  border-radius: 8pt;
+  background: var(--fill-dark);
+  color: var(--text-strong);
+  font-size: var(--font-size-md);
+  cursor: pointer;
+}
+
+.nav-button:hover:not(:disabled) {
+  background: var(--brand-fill);
+}
+
+.nav-button:disabled {
+  background: var(--fill-dark);
+  color: var(--text-weak);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- Mesi --- */
+.months {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16pt;
+  transition: opacity .2s ease-in-out;
+}
+
+.month-label {
+  margin-bottom: 4pt;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--text-strong);
+}
+
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.weekday {
+  padding-bottom: 4pt;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--text-weak);
+  text-align: center;
+}
+
+td {
+  padding: 1px 0;
+  text-align: center;
+}
+
+/*
+ * Fascia del soggiorno: unisce arrivo, notti intermedie e partenza. Colore
+ * pieno (non il fondo chiaro del form): la riga aperta è già --brand-fill.
+ */
+td.in-range,
+td.range-start,
+td.range-end {
+  background: var(--brand-range);
+}
+
+td.in-range .day {
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+
+td.range-start {
+  border-radius: 50% 0 0 50%;
+}
+
+td.range-end {
+  border-radius: 0 50% 50% 0;
+}
+
+/* --- Giorni --- */
+.day {
+  width: var(--day-size);
+  height: var(--day-size);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-weak);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.day.selectable {
+  color: var(--text-strong);
+  cursor: pointer;
+  opacity: 1;
+}
+
+.day.selectable:hover {
+  background: var(--brand-fill);
+  border-color: var(--brand-stroke-weak);
+}
+
+/*
+ * Giorno su cui si trova chi usa la tastiera: anello spesso e fondo, ben
+ * visibili su qualunque stato del giorno (libero, occupato, nella fascia).
+ * Non si affida solo a :focus-visible, che alcuni browser non applicano al
+ * focus spostato da codice.
+ */
+.day:focus-visible,
+.day.keyboard-focus {
+  outline: 3px solid var(--brand-strong);
+  outline-offset: 2px;
+}
+
+.day.keyboard-focus:not(.start):not(.end) {
+  background: var(--brand-stroke-weak);
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+
+.day.today {
+  border-color: var(--stroke-strong);
+}
+
+/* Non solo colore: la barratura segnala la notte occupata anche a chi non distingue i colori. */
+.day.unavailable {
+  text-decoration: line-through;
+}
+
+.day.start,
+.day.end {
+  background: var(--brand-strong);
+  border-color: var(--brand-strong);
+  color: var(--text-on-black-strong);
+  opacity: 1;
+}
+
+/* --- Suggerimento e legenda --- */
+.hint {
+  color: var(--text-strong);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4pt 16pt;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend > li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6pt;
+}
+
+/* Campioni: stessi stili dei giorni veri, in formato ridotto e non cliccabili. */
+.sample.day {
+  --day-size: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2xs);
+  cursor: default;
+  opacity: 1;
+}
+
+.sample.day.unavailable {
+  color: var(--text-weak);
+}
+
+.sample-band {
+  display: inline-flex;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--brand-range);
+}
+
+.sample.in-range-sample {
+  color: var(--brand-strong);
+  font-weight: 600;
+}

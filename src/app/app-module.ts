@@ -20,6 +20,7 @@ import { RoomScreen } from './admin/screen/room-screen/room-screen';
 import { BookingScreen } from './admin/screen/booking-screen/booking-screen';
 import { BookingDetail } from './admin/components/booking-detail/booking-detail';
 import { BookingCreateForm } from './admin/components/booking-create-form/booking-create-form';
+import { StayCalendar } from './shared/components/stay-calendar/stay-calendar';
 
 @NgModule({
   declarations: [
@@ -37,6 +38,7 @@ import { BookingCreateForm } from './admin/components/booking-create-form/bookin
     BookingScreen,
     BookingDetail,
     BookingCreateForm,
+    StayCalendar,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HugeiconsIconComponent],
   providers: [

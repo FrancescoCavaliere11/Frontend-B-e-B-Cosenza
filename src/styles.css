@@ -23,6 +23,8 @@
   --brand-stroke-strong: #574444;
   --brand-stroke-weak: #e8e2e2;
   --brand-fill: #f5f0f0;
+  /* Fascia di un intervallo selezionato (calendario): visibile anche sopra --brand-fill. */
+  --brand-range: #6e595933;
 
   --error-strong: #EF4444;
   --error-weak: #EF4444E6;
