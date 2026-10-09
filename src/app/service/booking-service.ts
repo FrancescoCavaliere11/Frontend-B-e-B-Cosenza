@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpContext, HttpParams} from '@angular/common/http';
 import {BehaviorSubject, map, Observable, tap} from 'rxjs';
 import {Environment} from '../utils/environments';
 import {
@@ -8,6 +8,8 @@ import {
   BookingSearchFilters,
   PaginatedBookingsSchema,
 } from '../schemas/booking-schema';
+import {BookingStatus} from '../schemas/booking-enums';
+import {SHOWS_OWN_ERRORS} from '../security/interceptor';
 
 /**
  * Accesso alle API amministrative delle prenotazioni (`/admin/bookings`).
@@ -57,6 +59,25 @@ export class BookingService {
   createBooking(request: AdminBookingCreateRequest): Observable<BookingDetailSchema> {
     return this.http.post<any>(this.apiUrl, request).pipe(
       map(response => new BookingDetailSchema(response.booking))
+    );
+  }
+
+  /**
+   * `POST /admin/bookings/{id}/status` — cambio di stato disposto dall'admin.
+   *
+   * La risposta è la prenotazione aggiornata, cronologia compresa: non serve
+   * rileggerla. L'errore lo mostra la scheda accanto ai pulsanti, quindi
+   * niente alert globale (`SHOWS_OWN_ERRORS`).
+   *
+   * La motivazione si invia solo se c'è: il backend la vuole assente, non
+   * vuota, quando è facoltativa.
+   */
+  changeStatus(id: string, newStatus: BookingStatus, reason?: string): Observable<BookingDetailSchema> {
+    const body = reason ? {new_status: newStatus, reason} : {new_status: newStatus};
+    return this.http.post<any>(`${this.apiUrl}${encodeURIComponent(id)}/status`, body, {
+      context: new HttpContext().set(SHOWS_OWN_ERRORS, true),
+    }).pipe(
+      map(response => new BookingDetailSchema(response))
     );
   }
 

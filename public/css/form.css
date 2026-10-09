@@ -5,14 +5,60 @@
   gap: 16pt;
 }
 
-.update-form > .form-groups > .btn-row {
+/*
+ * Intestazione e pulsanti restano fermi, scorre solo il corpo del form.
+ *
+ * Il form non supera l'altezza del pannello della riga aperta
+ * (`--list-item-panel-max-height` di app-list-item, meno il suo padding), e il
+ * corpo (`.form-groups`, o `.form-body` nei form a sezioni) prende lo spazio
+ * che resta e scorre da sé. Intestazione e pulsanti stanno fuori dall'area che
+ * scorre: nessuno sfondo da sovrapporre, nessuna fessura da cui si vedano i
+ * campi passare.
+ */
+.creation-form,
+.update-form {
+  max-height: calc(var(--list-item-panel-max-height, 500px) - 8pt);
+}
+
+.creation-form > .form-groups,
+.creation-form > .form-body,
+.update-form > .form-groups,
+.update-form > .form-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  /* `auto` e non 100%: il margine negativo deve allargarla, non spostarla. */
+  width: auto;
+  overflow-y: auto;
+  /* Margine per l'alone di focus dei campi, che altrimenti verrebbe tagliato. */
+  padding: 4px;
+  margin: -4px;
+  scrollbar-width: none;
+}
+
+.creation-form > .form-groups::-webkit-scrollbar,
+.creation-form > .form-body::-webkit-scrollbar,
+.update-form > .form-groups::-webkit-scrollbar,
+.update-form > .form-body::-webkit-scrollbar {
+  display: none;
+}
+
+.form-header,
+.form-footer {
+  flex-shrink: 0;
+}
+
+.form-footer {
   display: flex;
-  flex-direction: row;
-  width: 100%;
+  flex-direction: column;
   gap: 8pt;
 }
 
-.update-form .btn-row > button {
+/* Salva ed Elimina affiancati, larghi metà ciascuno. */
+.form-footer.btn-row {
+  flex-direction: row;
+}
+
+.form-footer.btn-row > button {
   width: 100%;
 }
 

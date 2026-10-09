@@ -10,116 +10,147 @@
     </hugeicons-icon>
   </div>
 
-  <!-- Modalità di ricerca: «Per date» o «Per camera» (H1) -->
-  <div class="mode-tabs" role="tablist" aria-label="Come vuoi cercare">
-    <button type="button" role="tab" class="mode-tab"
-            [class.active]="searchMode() === 'dates'"
-            [attr.aria-selected]="searchMode() === 'dates'"
-            (click)="setSearchMode('dates')">Per date</button>
-    <button type="button" role="tab" class="mode-tab"
-            [class.active]="searchMode() === 'rooms'"
-            [attr.aria-selected]="searchMode() === 'rooms'"
-            (click)="setSearchMode('rooms')">Per camera</button>
-  </div>
-
-  <!-- Chip di una camera: stesso aspetto nelle due modalità -->
-  <ng-template #roomChip let-room>
-    <label class="checkbox room-chip">
-      <input type="checkbox"
-             [checked]="isRoomSelected(room.id)"
-             (change)="toggleRoom(room.id, $event)">
-      <span class="room-text">
-        <span>{{ roomLabel(room) }} · {{ formatAmount(room.pricePerNight) }}/notte</span>
-        <span class="text-small">fino a {{ room.capacity }} ospiti</span>
-      </span>
-    </label>
-  </ng-template>
-
-  @if (searchMode() === 'dates') {
-  <!-- 1. Soggiorno -->
-  <section formGroupName="stay">
-    <h5>Soggiorno</h5>
-    <div class="row three">
-      <div class="form-group">
-        <label for="create-check-in">Arrivo</label>
-        <input id="create-check-in" type="date" formControlName="check_in"
-               [max]="maxCheckIn()" [class.invalid]="stayError()">
-      </div>
-      <div class="form-group">
-        <label for="create-check-out">Partenza</label>
-        <input id="create-check-out" type="date" formControlName="check_out"
-               [min]="minCheckOut()" [class.invalid]="stayError()">
-      </div>
-      <div class="form-group">
-        <label for="create-guests">Ospiti</label>
-        <input id="create-guests" type="number" formControlName="guest_count"
-               min="1" [max]="rules.MAX_GUESTS">
-      </div>
+  <!-- Corpo: l'unica parte che scorre. -->
+  <div class="form-body">
+    <!-- Modalità di ricerca: «Per date» o «Per camera» (H1) -->
+    <div class="mode-tabs" role="tablist" aria-label="Come vuoi cercare">
+      <button type="button" role="tab" class="mode-tab"
+              [class.active]="searchMode() === 'dates'"
+              [attr.aria-selected]="searchMode() === 'dates'"
+              (click)="setSearchMode('dates')">Per date</button>
+      <button type="button" role="tab" class="mode-tab"
+              [class.active]="searchMode() === 'rooms'"
+              [attr.aria-selected]="searchMode() === 'rooms'"
+              (click)="setSearchMode('rooms')">Per camera</button>
     </div>
-    @if (stayError(); as error) {
-      <small class="error-message">{{ error }}</small>
-    } @else if (nights() > 0) {
-      <p class="text-small">{{ nights() }} {{ nights() === 1 ? 'notte' : 'notti' }}</p>
-    }
-    @if (isPastStay()) {
-      <p class="notice warning" role="status">
-        Arrivo nel passato: non viene verificata la disponibilità né calcolato un preventivo.
-        Il prezzo sarà calcolato con le tariffe attuali delle camere.
-      </p>
-    }
-  </section>
 
-  <!-- 2. Camere -->
-  <section>
-    <h5>Camere</h5>
+    <!-- Chip di una camera: stesso aspetto nelle due modalità -->
+    <ng-template #roomChip let-room>
+      <label class="checkbox room-chip">
+        <input type="checkbox"
+               [checked]="isRoomSelected(room.id)"
+               (change)="toggleRoom(room.id, $event)">
+        <span class="room-text">
+          <span>{{ roomLabel(room) }} · {{ formatAmount(room.pricePerNight) }}/notte</span>
+          <span class="text-small">fino a {{ room.capacity }} ospiti</span>
+        </span>
+      </label>
+    </ng-template>
 
-    @if (!stayGroup.valid) {
-      <p class="text-small">Inserisci arrivo, partenza e ospiti per vedere le camere.</p>
-    } @else if (isCheckingAvailability()) {
-      <p class="text-small" role="status">Verifico la disponibilità…</p>
-    } @else if (availabilityError()) {
-      <div class="inline-error">
-        <small class="error-message">{{ availabilityError() }}</small>
-        <button type="button" class="secondary" (click)="retryAvailability()">Riprova</button>
-      </div>
-    } @else if (roomOptions().length === 0) {
-      <p class="text-small">Nessuna camera disponibile in queste date.</p>
-    } @else {
-      @if (removedRoomsNotice(); as notice) {
-        <p class="notice warning" role="status">{{ notice }}</p>
-      }
-
-      @if (combinations().length > 0) {
-        <p class="text-small">Soluzioni disponibili ({{ combinations().length }})</p>
-        <div class="combinations" role="radiogroup" aria-label="Soluzioni disponibili">
-          @for (combination of combinations(); track $index) {
-            <label class="combination" [class.selected]="isCombinationSelected(combination)">
-              <input type="radio" name="combination"
-                     [checked]="isCombinationSelected(combination)"
-                     (change)="selectCombination(combination)">
-              <span class="room-text">
-                <span class="combination-rooms">{{ combinationLabel(combination) }}</span>
-                <span class="text-small">fino a {{ combination.total_capacity }} ospiti</span>
-              </span>
-              <span class="combination-price">{{ formatAmount(combination.total_price) }}</span>
-            </label>
-          }
+    @if (searchMode() === 'dates') {
+    <!-- 1. Soggiorno -->
+    <section formGroupName="stay">
+      <h5>Soggiorno</h5>
+      <div class="row three">
+        <div class="form-group">
+          <label for="create-check-in">Arrivo</label>
+          <input id="create-check-in" type="date" formControlName="check_in"
+                 [max]="maxCheckIn()" [class.invalid]="stayError()">
         </div>
-
-        <button type="button" class="link-button"
-                [attr.aria-expanded]="isManualSelectionOpen()"
-                (click)="toggleManualSelection()">
-          {{ isManualSelectionOpen() ? '▾' : '▸' }} Oppure scegli le camere a mano
-        </button>
+        <div class="form-group">
+          <label for="create-check-out">Partenza</label>
+          <input id="create-check-out" type="date" formControlName="check_out"
+                 [min]="minCheckOut()" [class.invalid]="stayError()">
+        </div>
+        <div class="form-group">
+          <label for="create-guests">Ospiti</label>
+          <input id="create-guests" type="number" formControlName="guest_count"
+                 min="1" [max]="rules.MAX_GUESTS">
+        </div>
+      </div>
+      @if (stayError(); as error) {
+        <small class="error-message">{{ error }}</small>
+      } @else if (nights() > 0) {
+        <p class="text-small">{{ nights() }} {{ nights() === 1 ? 'notte' : 'notti' }}</p>
       }
+      @if (isPastStay()) {
+        <p class="notice warning" role="status">
+          Arrivo nel passato: non viene verificata la disponibilità né calcolato un preventivo.
+          Il prezzo sarà calcolato con le tariffe attuali delle camere.
+        </p>
+      }
+    </section>
 
-      @if (showManualSelection()) {
+    <!-- 2. Camere -->
+    <section>
+      <h5>Camere</h5>
+
+      @if (!stayGroup.valid) {
+        <p class="text-small">Inserisci arrivo, partenza e ospiti per vedere le camere.</p>
+      } @else if (isCheckingAvailability()) {
+        <p class="text-small" role="status">Verifico la disponibilità…</p>
+      } @else if (availabilityError()) {
+        <div class="inline-error">
+          <small class="error-message">{{ availabilityError() }}</small>
+          <button type="button" class="secondary" (click)="retryAvailability()">Riprova</button>
+        </div>
+      } @else if (roomOptions().length === 0) {
+        <p class="text-small">Nessuna camera disponibile in queste date.</p>
+      } @else {
+        @if (removedRoomsNotice(); as notice) {
+          <p class="notice warning" role="status">{{ notice }}</p>
+        }
+
+        @if (combinations().length > 0) {
+          <p class="text-small">Soluzioni disponibili ({{ combinations().length }})</p>
+          <div class="combinations" role="radiogroup" aria-label="Soluzioni disponibili">
+            @for (combination of combinations(); track $index) {
+              <label class="combination" [class.selected]="isCombinationSelected(combination)">
+                <input type="radio" name="combination"
+                       [checked]="isCombinationSelected(combination)"
+                       (change)="selectCombination(combination)">
+                <span class="room-text">
+                  <span class="combination-rooms">{{ combinationLabel(combination) }}</span>
+                  <span class="text-small">fino a {{ combination.total_capacity }} ospiti</span>
+                </span>
+                <span class="combination-price">{{ formatAmount(combination.total_price) }}</span>
+              </label>
+            }
+          </div>
+
+          <button type="button" class="link-button"
+                  [attr.aria-expanded]="isManualSelectionOpen()"
+                  (click)="toggleManualSelection()">
+            {{ isManualSelectionOpen() ? '▾' : '▸' }} Oppure scegli le camere a mano
+          </button>
+        }
+
+        @if (showManualSelection()) {
+          <div class="services rooms">
+            @for (room of roomOptions(); track room.id) {
+              <ng-container *ngTemplateOutlet="roomChip; context: {$implicit: room}"></ng-container>
+            }
+          </div>
+        }
+
+        @if (roomsError(); as error) {
+          <small class="error-message">{{ error }}</small>
+        } @else if (roomIdsControl.value.length > 0) {
+          <p class="text-small">
+            Capienza scelta: {{ selectedCapacity() }} posti per {{ stayGroup.get('guest_count')?.value }} ospiti
+          </p>
+        }
+      }
+    </section>
+    } @else {
+    <!-- 1. Camere (modalità «Per camera») -->
+    <section>
+      <h5>Camere</h5>
+      @if (roomOptions().length === 0) {
+        <p class="text-small">Nessuna camera attiva.</p>
+      } @else {
         <div class="services rooms">
           @for (room of roomOptions(); track room.id) {
             <ng-container *ngTemplateOutlet="roomChip; context: {$implicit: room}"></ng-container>
           }
         </div>
       }
+
+      <div class="form-group guests" formGroupName="stay">
+        <label for="create-guests-rooms">Ospiti</label>
+        <input id="create-guests-rooms" type="number" formControlName="guest_count"
+               min="1" [max]="rules.MAX_GUESTS">
+      </div>
 
       @if (roomsError(); as error) {
         <small class="error-message">{{ error }}</small>
@@ -128,259 +159,234 @@
           Capienza scelta: {{ selectedCapacity() }} posti per {{ stayGroup.get('guest_count')?.value }} ospiti
         </p>
       }
-    }
-  </section>
-  } @else {
-  <!-- 1. Camere (modalità «Per camera») -->
-  <section>
-    <h5>Camere</h5>
-    @if (roomOptions().length === 0) {
-      <p class="text-small">Nessuna camera attiva.</p>
-    } @else {
-      <div class="services rooms">
-        @for (room of roomOptions(); track room.id) {
-          <ng-container *ngTemplateOutlet="roomChip; context: {$implicit: room}"></ng-container>
+    </section>
+
+    <!-- 2. Date libere per tutte le camere scelte -->
+    <section>
+      <h5>Date libere per tutte le camere scelte</h5>
+
+      @if (roomIdsControl.value.length === 0) {
+        <p class="text-small">Scegli almeno una camera per vedere le date libere.</p>
+      } @else if (roomIdsControl.value.length > rules.MAX_ROOMS) {
+        <p class="text-small">Togli qualche camera per vedere le date libere.</p>
+      } @else {
+        @if (occupancyError(); as error) {
+          <div class="inline-error">
+            <small class="error-message">{{ error }}</small>
+            <button type="button" class="secondary" (click)="retryOccupancy()">Riprova</button>
+          </div>
         }
-      </div>
-    }
-
-    <div class="form-group guests" formGroupName="stay">
-      <label for="create-guests-rooms">Ospiti</label>
-      <input id="create-guests-rooms" type="number" formControlName="guest_count"
-             min="1" [max]="rules.MAX_GUESTS">
-    </div>
-
-    @if (roomsError(); as error) {
-      <small class="error-message">{{ error }}</small>
-    } @else if (roomIdsControl.value.length > 0) {
-      <p class="text-small">
-        Capienza scelta: {{ selectedCapacity() }} posti per {{ stayGroup.get('guest_count')?.value }} ospiti
-      </p>
-    }
-  </section>
-
-  <!-- 2. Date libere per tutte le camere scelte -->
-  <section>
-    <h5>Date libere per tutte le camere scelte</h5>
-
-    @if (roomIdsControl.value.length === 0) {
-      <p class="text-small">Scegli almeno una camera per vedere le date libere.</p>
-    } @else if (roomIdsControl.value.length > rules.MAX_ROOMS) {
-      <p class="text-small">Togli qualche camera per vedere le date libere.</p>
-    } @else {
-      @if (occupancyError(); as error) {
-        <div class="inline-error">
-          <small class="error-message">{{ error }}</small>
-          <button type="button" class="secondary" (click)="retryOccupancy()">Riprova</button>
-        </div>
-      }
-      @if (datesClearedNotice(); as notice) {
-        <p class="notice warning" role="status">{{ notice }}</p>
-      }
-
-      <app-stay-calendar
-        [unavailableNights]="unavailableNights()"
-        [checkIn]="checkInValue()"
-        [checkOut]="checkOutValue()"
-        [minDate]="today"
-        [maxDate]="maxCheckIn()"
-        [maxNights]="rules.MAX_NIGHTS"
-        [isLoading]="isLoadingOccupancy()"
-        (visibleRangeChange)="onVisibleRangeChange($event)"
-        (rangeChange)="onCalendarRangeChange($event)">
-      </app-stay-calendar>
-
-      <p class="stay-summary" role="status">
-        @if (checkInValue() && checkOutValue()) {
-          Soggiorno: <strong>{{ formatStayRange(checkInValue()!, checkOutValue()!) }}</strong>
-          · {{ nights() }} {{ nights() === 1 ? 'notte' : 'notti' }}
-          @if (isCheckingAvailability()) {
-            <span class="text-small"> · verifico…</span>
-          }
-        } @else if (checkInValue()) {
-          Arrivo il <strong>{{ formatStayDate(checkInValue()) }}</strong>: scegli la partenza.
-        } @else {
-          <span class="text-small">Scegli il giorno di arrivo, poi quello di partenza.</span>
+        @if (datesClearedNotice(); as notice) {
+          <p class="notice warning" role="status">{{ notice }}</p>
         }
-      </p>
-    }
-  </section>
-  }
 
-  <!-- 3. Pagamento -->
-  <section formGroupName="payment">
-    <h5>Pagamento</h5>
-    <div class="options" role="radiogroup" aria-label="Opzione di pagamento">
-      @for (option of paymentOptions; track option) {
-        <label class="option">
-          <input type="radio" formControlName="payment_option" [value]="option">
-          {{ paymentOptionLabels[option] }}
-        </label>
-      }
-    </div>
+        <app-stay-calendar
+          [unavailableNights]="unavailableNights()"
+          [checkIn]="checkInValue()"
+          [checkOut]="checkOutValue()"
+          [minDate]="today"
+          [maxDate]="maxCheckIn()"
+          [maxNights]="rules.MAX_NIGHTS"
+          [isLoading]="isLoadingOccupancy()"
+          (visibleRangeChange)="onVisibleRangeChange($event)"
+          (rangeChange)="onCalendarRangeChange($event)">
+        </app-stay-calendar>
 
-    @if (isPayNow()) {
-      <p class="notice info" role="status">
-        Sconto del {{ rules.PAY_NOW_DISCOUNT_PERCENT }}% sul totale. In caso di annullamento
-        l'importo pagato non è rimborsabile.
-      </p>
-    }
-
-    <div class="services toggles">
-      <label class="checkbox">
-        <input type="checkbox" formControlName="skip_email_confirmation">
-        Salta la conferma via email
-      </label>
-      <label class="checkbox">
-        <input type="checkbox" formControlName="mark_as_paid">
-        Segna come pagata
-      </label>
-    </div>
-
-    @if (isMarkedAsPaid()) {
-      <div class="form-group method">
-        <label for="create-method">Metodo</label>
-        <select id="create-method" formControlName="payment_method"
-                [class.invalid]="fieldError('payment.payment_method')">
-          <option value="" disabled>Scegli il metodo</option>
-          @for (method of paymentMethods; track method) {
-            <option [value]="method">{{ paymentMethodLabels[method] }}</option>
-          }
-        </select>
-        @if (fieldError('payment.payment_method'); as error) {
-          <small class="error-message">{{ error }}</small>
-        }
-      </div>
-    }
-
-    @if (willWaitForConfirmation()) {
-      <p class="notice info" role="status">
-        La prenotazione resterà «In attesa di conferma» per 15 minuti: l'ospite riceverà un'email con il link per confermarla.
-      </p>
-    }
-  </section>
-
-  <!-- 4. Prezzo -->
-  <section>
-    <h5>Prezzo</h5>
-    @if (isPastStay()) {
-      <p class="text-small">Il prezzo sarà calcolato al salvataggio.</p>
-    } @else if (isQuoting()) {
-      <p class="text-small" role="status">Calcolo il prezzo…</p>
-    } @else if (quoteError()) {
-      <div class="inline-error">
-        <small class="error-message">{{ quoteError() }}</small>
-        <button type="button" class="secondary" (click)="retryQuote()">Riprova</button>
-      </div>
-    } @else if (quote(); as q) {
-      <!-- Righe e importi arrivano dal backend: nessun calcolo qui. -->
-      <div class="price-table">
-        @for (line of q.lines; track line.room_id) {
-          <div class="price-row">
-            @if (roomOf(line.room_id); as room) {
-              <span class="room-name">{{ roomLabel(room) }}</span>
-              <span class="text-small">fino a {{ room.capacity }} ospiti</span>
-            } @else {
-              <span class="room-name">{{ line.room_name }}</span>
-              <span class="text-small"></span>
+        <p class="stay-summary" role="status">
+          @if (checkInValue() && checkOutValue()) {
+            Soggiorno: <strong>{{ formatStayRange(checkInValue()!, checkOutValue()!) }}</strong>
+            · {{ nights() }} {{ nights() === 1 ? 'notte' : 'notti' }}
+            @if (isCheckingAvailability()) {
+              <span class="text-small"> · verifico…</span>
             }
-            <span class="text-small">
-              {{ formatAmount(line.unit_price, q.currency) }} × {{ line.nights }}
-              {{ line.nights === 1 ? 'notte' : 'notti' }}
-            </span>
-            <span class="amount">{{ formatAmount(line.line_total, q.currency) }}</span>
-          </div>
-        }
+          } @else if (checkInValue()) {
+            Arrivo il <strong>{{ formatStayDate(checkInValue()) }}</strong>: scegli la partenza.
+          } @else {
+            <span class="text-small">Scegli il giorno di arrivo, poi quello di partenza.</span>
+          }
+        </p>
+      }
+    </section>
+    }
 
-        @if (hasDiscount()) {
-          <div class="price-row summary">
-            <span class="label">Prezzo pieno</span>
-            <span class="amount">{{ formatAmount(q.base_price, q.currency) }}</span>
-          </div>
-          <div class="price-row summary">
-            <span class="label">Sconto pagamento anticipato ({{ rules.PAY_NOW_DISCOUNT_PERCENT }}%)</span>
-            <span class="amount">− {{ formatAmount(q.discount_amount, q.currency) }}</span>
-          </div>
+    <!-- 3. Pagamento -->
+    <section formGroupName="payment">
+      <h5>Pagamento</h5>
+      <div class="options" role="radiogroup" aria-label="Opzione di pagamento">
+        @for (option of paymentOptions; track option) {
+          <label class="option">
+            <input type="radio" formControlName="payment_option" [value]="option">
+            {{ paymentOptionLabels[option] }}
+          </label>
         }
-        <div class="price-row summary total">
-          <span class="label">Totale</span>
-          <span class="amount">{{ formatAmount(q.total_price, q.currency) }}</span>
+      </div>
+
+      @if (isPayNow()) {
+        <p class="notice info" role="status">
+          Sconto del {{ rules.PAY_NOW_DISCOUNT_PERCENT }}% sul totale. In caso di annullamento
+          l'importo pagato non è rimborsabile.
+        </p>
+      }
+
+      <div class="services toggles">
+        <label class="checkbox">
+          <input type="checkbox" formControlName="skip_email_confirmation">
+          Salta la conferma via email
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" formControlName="mark_as_paid">
+          Segna come pagata
+        </label>
+      </div>
+
+      @if (isMarkedAsPaid()) {
+        <div class="form-group method">
+          <label for="create-method">Metodo</label>
+          <select id="create-method" formControlName="payment_method"
+                  [class.invalid]="fieldError('payment.payment_method')">
+            <option value="" disabled>Scegli il metodo</option>
+            @for (method of paymentMethods; track method) {
+              <option [value]="method">{{ paymentMethodLabels[method] }}</option>
+            }
+          </select>
+          @if (fieldError('payment.payment_method'); as error) {
+            <small class="error-message">{{ error }}</small>
+          }
+        </div>
+      }
+
+      @if (willWaitForConfirmation()) {
+        <p class="notice info" role="status">
+          La prenotazione resterà «In attesa di conferma» per 15 minuti: l'ospite riceverà un'email con il link per confermarla.
+        </p>
+      }
+    </section>
+
+    <!-- 4. Prezzo -->
+    <section>
+      <h5>Prezzo</h5>
+      @if (isPastStay()) {
+        <p class="text-small">Il prezzo sarà calcolato al salvataggio.</p>
+      } @else if (isQuoting()) {
+        <p class="text-small" role="status">Calcolo il prezzo…</p>
+      } @else if (quoteError()) {
+        <div class="inline-error">
+          <small class="error-message">{{ quoteError() }}</small>
+          <button type="button" class="secondary" (click)="retryQuote()">Riprova</button>
+        </div>
+      } @else if (quote(); as q) {
+        <!-- Righe e importi arrivano dal backend: nessun calcolo qui. -->
+        <div class="price-table">
+          @for (line of q.lines; track line.room_id) {
+            <div class="price-row">
+              @if (roomOf(line.room_id); as room) {
+                <span class="room-name">{{ roomLabel(room) }}</span>
+                <span class="text-small">fino a {{ room.capacity }} ospiti</span>
+              } @else {
+                <span class="room-name">{{ line.room_name }}</span>
+                <span class="text-small"></span>
+              }
+              <span class="text-small">
+                {{ formatAmount(line.unit_price, q.currency) }} × {{ line.nights }}
+                {{ line.nights === 1 ? 'notte' : 'notti' }}
+              </span>
+              <span class="amount">{{ formatAmount(line.line_total, q.currency) }}</span>
+            </div>
+          }
+
+          @if (hasDiscount()) {
+            <div class="price-row summary">
+              <span class="label">Prezzo pieno</span>
+              <span class="amount">{{ formatAmount(q.base_price, q.currency) }}</span>
+            </div>
+            <div class="price-row summary">
+              <span class="label">Sconto pagamento anticipato ({{ rules.PAY_NOW_DISCOUNT_PERCENT }}%)</span>
+              <span class="amount">− {{ formatAmount(q.discount_amount, q.currency) }}</span>
+            </div>
+          }
+          <div class="price-row summary total">
+            <span class="label">Totale</span>
+            <span class="amount">{{ formatAmount(q.total_price, q.currency) }}</span>
+          </div>
+        </div>
+      } @else {
+        <p class="text-small">Scegli le camere per vedere il prezzo.</p>
+      }
+    </section>
+
+    <!-- 5. Ospite -->
+    <section formGroupName="guest">
+      <h5>Ospite</h5>
+      <div class="row two">
+        <div class="form-group">
+          <label for="create-firstname">Nome</label>
+          <input id="create-firstname" type="text" formControlName="firstname" autocomplete="off"
+                 [class.invalid]="fieldError('guest.firstname')">
+          @if (fieldError('guest.firstname'); as error) {
+            <small class="error-message">{{ error }}</small>
+          }
+        </div>
+        <div class="form-group">
+          <label for="create-lastname">Cognome</label>
+          <input id="create-lastname" type="text" formControlName="lastname" autocomplete="off"
+                 [class.invalid]="fieldError('guest.lastname')">
+          @if (fieldError('guest.lastname'); as error) {
+            <small class="error-message">{{ error }}</small>
+          }
+        </div>
+        <div class="form-group">
+          <label for="create-email">Email</label>
+          <input id="create-email" type="email" formControlName="email" autocomplete="off"
+                 [class.invalid]="fieldError('guest.email')">
+          @if (fieldError('guest.email'); as error) {
+            <small class="error-message">{{ error }}</small>
+          }
+        </div>
+        <div class="form-group">
+          <label for="create-phone">Telefono</label>
+          <input id="create-phone" type="tel" inputmode="numeric" formControlName="phone_number"
+                 autocomplete="off" [attr.maxlength]="rules.PHONE_LENGTH"
+                 [class.invalid]="fieldError('guest.phone_number')">
+          @if (fieldError('guest.phone_number'); as error) {
+            <small class="error-message">{{ error }}</small>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Note -->
+    <section>
+      <h5>Note interne <span class="text-small">(facoltative)</span></h5>
+      <textarea formControlName="admin_notes" rows="3" aria-label="Note interne"
+                [class.invalid]="fieldError('admin_notes')"></textarea>
+      <p class="text-small counter" [class.error-message]="fieldError('admin_notes')">
+        {{ notesLength() }}/{{ rules.NOTES_MAX_LENGTH }}
+      </p>
+    </section>
+  </div>
+
+  <!-- Fisso in fondo al pannello: azioni e conferma della data passata restano sempre in vista. -->
+  <div class="form-footer">
+    @if (isConfirmingPast()) {
+      <div class="past-confirmation" role="alertdialog" aria-labelledby="past-confirmation-text">
+        <p id="past-confirmation-text">
+          Stai registrando una prenotazione con arrivo il
+          <strong>{{ formatStayDate(stayGroup.get('check_in')?.value) }}</strong>, nel passato. Confermi?
+        </p>
+        <div class="actions">
+          <button type="button" class="secondary" (click)="cancelPastConfirmation()">Torna al form</button>
+          <button type="button" class="primary" [disabled]="isSaving()" (click)="onSubmit()">
+            {{ isSaving() ? 'Salvataggio…' : 'Conferma e salva' }}
+          </button>
         </div>
       </div>
     } @else {
-      <p class="text-small">Scegli le camere per vedere il prezzo.</p>
-    }
-  </section>
-
-  <!-- 5. Ospite -->
-  <section formGroupName="guest">
-    <h5>Ospite</h5>
-    <div class="row two">
-      <div class="form-group">
-        <label for="create-firstname">Nome</label>
-        <input id="create-firstname" type="text" formControlName="firstname" autocomplete="off"
-               [class.invalid]="fieldError('guest.firstname')">
-        @if (fieldError('guest.firstname'); as error) {
-          <small class="error-message">{{ error }}</small>
-        }
-      </div>
-      <div class="form-group">
-        <label for="create-lastname">Cognome</label>
-        <input id="create-lastname" type="text" formControlName="lastname" autocomplete="off"
-               [class.invalid]="fieldError('guest.lastname')">
-        @if (fieldError('guest.lastname'); as error) {
-          <small class="error-message">{{ error }}</small>
-        }
-      </div>
-      <div class="form-group">
-        <label for="create-email">Email</label>
-        <input id="create-email" type="email" formControlName="email" autocomplete="off"
-               [class.invalid]="fieldError('guest.email')">
-        @if (fieldError('guest.email'); as error) {
-          <small class="error-message">{{ error }}</small>
-        }
-      </div>
-      <div class="form-group">
-        <label for="create-phone">Telefono</label>
-        <input id="create-phone" type="tel" inputmode="numeric" formControlName="phone_number"
-               autocomplete="off" [attr.maxlength]="rules.PHONE_LENGTH"
-               [class.invalid]="fieldError('guest.phone_number')">
-        @if (fieldError('guest.phone_number'); as error) {
-          <small class="error-message">{{ error }}</small>
-        }
-      </div>
-    </div>
-  </section>
-
-  <!-- 6. Note -->
-  <section>
-    <h5>Note interne <span class="text-small">(facoltative)</span></h5>
-    <textarea formControlName="admin_notes" rows="3" aria-label="Note interne"
-              [class.invalid]="fieldError('admin_notes')"></textarea>
-    <p class="text-small counter" [class.error-message]="fieldError('admin_notes')">
-      {{ notesLength() }}/{{ rules.NOTES_MAX_LENGTH }}
-    </p>
-  </section>
-
-  @if (isConfirmingPast()) {
-    <div class="past-confirmation" role="alertdialog" aria-labelledby="past-confirmation-text">
-      <p id="past-confirmation-text">
-        Stai registrando una prenotazione con arrivo il
-        <strong>{{ formatStayDate(stayGroup.get('check_in')?.value) }}</strong>, nel passato. Confermi?
-      </p>
       <div class="actions">
-        <button type="button" class="secondary" (click)="cancelPastConfirmation()">Torna al form</button>
-        <button type="button" class="primary" [disabled]="isSaving()" (click)="onSubmit()">
-          {{ isSaving() ? 'Salvataggio…' : 'Conferma e salva' }}
+        <button type="button" class="secondary" (click)="onCancel()">Annulla</button>
+        <button type="submit" class="primary" [disabled]="!canSubmit()">
+          {{ isSaving() ? 'Salvataggio…' : 'Crea prenotazione' }}
         </button>
       </div>
-    </div>
-  } @else {
-    <div class="actions">
-      <button type="button" class="secondary" (click)="onCancel()">Annulla</button>
-      <button type="submit" class="primary" [disabled]="!canSubmit()">
-        {{ isSaving() ? 'Salvataggio…' : 'Crea prenotazione' }}
-      </button>
-    </div>
-  }
+    }
+  </div>
 </form>

@@ -28,6 +28,104 @@
       }
     </div>
 
+    @if (actions().length || actionsNote()) {
+      <section class="actions-panel" [attr.aria-labelledby]="'actions-title-' + b.id">
+        <h5 [id]="'actions-title-' + b.id">Azioni</h5>
+
+        <!--
+          Pulsanti e conferma sono entrambi nella pagina: quella attiva si apre,
+          l'altra si richiude (booking-detail.css). La conferma mostra
+          `shownAction`, che resta valorizzata durante la chiusura.
+        -->
+        <div class="action-view" [class.open]="!isConfirming()"
+             [attr.inert]="isConfirming() ? '' : null" [attr.aria-hidden]="isConfirming()">
+          <div class="action-view-content">
+            @if (actions().length) {
+              <div class="actions-row start">
+                @for (item of actions(); track item.action.target) {
+                  <button type="button" [class]="item.action.tone"
+                          [disabled]="!!item.blocked || isUpdating()"
+                          (click)="startAction(item.action)">
+                    {{ item.action.label }}
+                  </button>
+                }
+              </div>
+            }
+
+            @if (blockedActions().length) {
+              <ul class="action-hints">
+                @for (item of blockedActions(); track item.action.target) {
+                  <li class="text-small"><strong>{{ item.action.label }}</strong>: {{ item.blocked }}</li>
+                }
+              </ul>
+            }
+
+            @if (actionError() && !isConfirming()) {
+              <small class="error-message" role="alert">{{ actionError() }}</small>
+            }
+
+            @if (actionsNote(); as note) {
+              <p class="text-small">{{ note }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="action-view" [class.open]="isConfirming()"
+             [attr.inert]="isConfirming() ? null : ''" [attr.aria-hidden]="!isConfirming()"
+             (keydown.escape)="cancelAction()">
+          <div class="action-view-content">
+            @if (shownAction(); as action) {
+              <div class="action-confirm" role="group" [attr.aria-label]="'Conferma: ' + action.label">
+                <p class="action-question">
+                  <strong>{{ action.label }}?</strong> {{ consequence() }}
+                </p>
+
+                @if (warnings().length) {
+                  <ul class="action-warnings">
+                    @for (warning of warnings(); track warning) {
+                      <li>{{ warning }}</li>
+                    }
+                  </ul>
+                }
+
+                <div class="form-group">
+                  <label [for]="'reason-' + b.id">
+                    Motivazione {{ reasonRequired() ? '(obbligatoria)' : '(facoltativa)' }}
+                  </label>
+                  <textarea #reasonInput [id]="'reason-' + b.id" rows="2"
+                            [formControl]="reasonControl"
+                            [attr.maxlength]="reasonMaxLength"
+                            [class.invalid]="reasonMissing()"
+                            [placeholder]="reasonRequired() ? 'Scrivi il motivo' : 'Resta nella cronologia'"></textarea>
+                  <div class="reason-footer">
+                    @if (reasonMissing()) {
+                      <small class="error-message">Scrivi il motivo: è obbligatorio per questa operazione</small>
+                    }
+                    <small class="text-small counter">{{ reasonLength() }}/{{ reasonMaxLength }}</small>
+                  </div>
+                </div>
+
+                @if (actionError()) {
+                  <small class="error-message" role="alert">{{ actionError() }}</small>
+                }
+
+                <div class="actions-row">
+                  <button type="button" class="secondary" [disabled]="isUpdating()" (click)="cancelAction()">
+                    Indietro
+                  </button>
+                  <button type="button" [class]="action.tone"
+                          [disabled]="isUpdating() || reasonMissing()"
+                          (click)="confirmAction()">
+                    {{ isUpdating() ? 'Salvataggio…' : action.confirmLabel }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
     <div class="detail-grid">
       <section>
         <h5>Soggiorno</h5>

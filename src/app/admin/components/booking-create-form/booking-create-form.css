@@ -5,7 +5,12 @@
 
 .booking-create {
   cursor: default;
-  /* Più respiro fra le sezioni rispetto ai form brevi delle altre schermate. */
+}
+
+/* Più respiro fra le sezioni rispetto ai form brevi delle altre schermate. */
+.booking-create > .form-body {
+  display: flex;
+  flex-direction: column;
   gap: 24pt;
 }
 

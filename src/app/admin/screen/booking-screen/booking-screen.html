@@ -120,8 +120,11 @@
             [booking]="detailOf(item)"
             [isLoading]="isDetailLoadingFor(item)"
             [error]="detailErrorFor(item)"
+            [isUpdating]="isStatusUpdatingFor(item)"
+            [actionError]="statusErrorFor(item)"
             (close)="closeDetail()"
-            (retry)="retryDetail()">
+            (retry)="retryDetail()"
+            (statusChange)="onStatusChange($event)">
           </app-booking-detail>
         }
       </app-list-item>

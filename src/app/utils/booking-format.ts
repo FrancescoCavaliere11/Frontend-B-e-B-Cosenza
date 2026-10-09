@@ -97,3 +97,59 @@ export function formatAmount(value: string | null | undefined, currency = 'EUR')
   if (Number.isNaN(amount)) return value;
   return new Intl.NumberFormat('it-IT', {style: 'currency', currency}).format(amount);
 }
+
+/** Data (`YYYY-MM-DD`) di un istante nel fuso della struttura. */
+function isoDateInAppTimezone(instant: Date): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: APP_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(instant);
+}
+
+/** Scadenza raccontata a parole, per i testi che l'admin legge in fretta. */
+export interface DeadlineDescription {
+  /** «le 11:15 di oggi» · «le 09:00 di domani» · «le 18:30 del 12/10/2026». */
+  when: string;
+  /** «tra 12 minuti» · «tra 1 ora e 5 minuti»; vuoto se già passata. */
+  remaining: string;
+  isPast: boolean;
+}
+
+/**
+ * Descrive un istante ISO futuro o passato rispetto a `now`, nel fuso della
+ * struttura: «le 11:15 di oggi (tra 12 minuti)». Serve a non parlare di
+ * «blocco» o «scadenza» in astratto, ma di un orario.
+ */
+export function describeDeadline(value: string, now: Date = new Date()): DeadlineDescription {
+  const deadline = new Date(value);
+  const time = new Intl.DateTimeFormat('it-IT', {
+    timeZone: APP_TIMEZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(deadline);
+
+  const day = isoDateInAppTimezone(deadline);
+  const today = isoDateInAppTimezone(now);
+  const dayLabel = day === today
+    ? 'di oggi'
+    : day === addDaysIso(today, 1) ? 'di domani' : `del ${formatStayDate(day)}`;
+
+  const minutesLeft = Math.ceil((deadline.getTime() - now.getTime()) / 60_000);
+  return {
+    when: `le ${time} ${dayLabel}`,
+    remaining: minutesLeft > 0 ? `tra ${formatDuration(minutesLeft)}` : '',
+    isPast: minutesLeft <= 0,
+  };
+}
+
+/** `5` → «5 minuti», `65` → «1 ora e 5 minuti», `120` → «2 ore». */
+function formatDuration(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  const minutePart = rest === 1 ? '1 minuto' : `${rest} minuti`;
+  if (!hours) return minutePart;
+  const hourPart = hours === 1 ? '1 ora' : `${hours} ore`;
+  return rest ? `${hourPart} e ${minutePart}` : hourPart;
+}

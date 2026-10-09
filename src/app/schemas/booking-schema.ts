@@ -49,6 +49,19 @@ export class BookingListItemSchema {
     this.total_price = String(data.total_price);
     this.payment_status = data.payment_status;
   }
+
+  /**
+   * Riga ricavata dal dettaglio, per aggiornare l'elenco dopo un'azione
+   * senza ricaricare la pagina: stessi campi che il backend calcola per la
+   * lista (`rooms_count`, `room_names`).
+   */
+  static fromDetail(detail: BookingDetailSchema): BookingListItemSchema {
+    return new BookingListItemSchema({
+      ...detail,
+      rooms_count: detail.rooms.length,
+      room_names: detail.rooms.map(room => room.room_name),
+    });
+  }
 }
 
 /** Pagina di risultati — `PaginatedBookingsSchema`. */
