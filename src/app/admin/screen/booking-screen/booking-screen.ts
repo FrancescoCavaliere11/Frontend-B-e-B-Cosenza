@@ -8,6 +8,7 @@ import {
   EMPTY,
   finalize,
   map,
+  Observable,
   Subject,
   switchMap,
   takeUntil,
@@ -37,6 +38,7 @@ import {
 import {formatAmount, formatStayRange, nightsBetween} from '../../../utils/booking-format';
 import {dateRangeValidator, EMAIL_PATTERN} from '../../../validators/validators';
 import {StatusChangeRequest} from '../../../schemas/booking-transitions';
+import {PaymentChangeRequest} from '../../../schemas/booking-payments';
 import {errorMessageOf} from '../../../security/interceptor';
 
 @Component({
@@ -99,9 +101,9 @@ export class BookingScreen implements OnInit, OnDestroy {
   isDetailLoading = false;
   detailError: string | null = null;
 
-  /** Cambio di stato in corso sulla riga aperta. */
+  /** Azione (stato o pagamento) in corso sulla riga aperta. */
   isStatusUpdating = false;
-  /** Errore dell'ultimo cambio di stato, mostrato nella scheda accanto ai pulsanti. */
+  /** Errore dell'ultima azione, mostrato nella scheda accanto ai pulsanti. */
   statusError: string | null = null;
 
   /** Ogni emissione rilancia la ricerca; `switchMap` annulla quella in volo. */
@@ -388,16 +390,28 @@ export class BookingScreen implements OnInit, OnDestroy {
   // Cambio di stato                                                     //
   // ------------------------------------------------------------------ //
 
+  /** Cambio di stato confermato nella scheda. */
+  onStatusChange(change: StatusChangeRequest): void {
+    this.runBookingUpdate(id => this.bookingService.changeStatus(id, change.status, change.reason));
+  }
+
+  /** Incasso, rimborso o correzione confermati nella scheda. */
+  onPaymentChange(change: PaymentChangeRequest): void {
+    this.runBookingUpdate(id =>
+      this.bookingService.registerPayment(id, change.status, change.method, change.reason)
+    );
+  }
+
   /**
-   * Esegue l'azione confermata nella scheda. La risposta è la prenotazione
+   * Esegue un'azione sulla prenotazione aperta. La risposta è la prenotazione
    * aggiornata, cronologia compresa: scheda e riga dell'elenco si aggiornano
    * senza ricaricare la pagina.
    *
-   * Su `409` (stato cambiato nel frattempo, da un altro operatore o dallo
-   * sweeper) la scheda viene riletta, così mostra lo stato vero insieme al
-   * messaggio del backend.
+   * Una sola azione alla volta. Su `409` (stato cambiato nel frattempo, da un
+   * altro operatore, dalla scadenza automatica o da Stripe) la scheda viene
+   * riletta, così mostra lo stato vero insieme al messaggio del backend.
    */
-  onStatusChange(change: StatusChangeRequest): void {
+  private runBookingUpdate(request: (id: string) => Observable<BookingDetailSchema>): void {
     const id = this.openBookingId;
     if (!id || this.isStatusUpdating) return;
 
@@ -405,7 +419,7 @@ export class BookingScreen implements OnInit, OnDestroy {
     this.statusError = null;
     this.cdr.detectChanges();
 
-    this.bookingService.changeStatus(id, change.status, change.reason).pipe(
+    request(id).pipe(
       finalize(() => {
         this.isStatusUpdating = false;
         this.cdr.detectChanges();
@@ -415,7 +429,7 @@ export class BookingScreen implements OnInit, OnDestroy {
       next: booking => this.applyUpdatedBooking(booking),
       error: (err: HttpErrorResponse) => {
         // Solo lo stato HTTP: il corpo può contenere dati dell'ospite.
-        console.error('Errore nel cambio di stato della prenotazione:', err?.status);
+        console.error('Errore nell\'aggiornamento della prenotazione:', err?.status);
         this.statusError = errorMessageOf(err);
         if (err.status === HttpStatusCode.Conflict) this.refreshDetail(id);
       },

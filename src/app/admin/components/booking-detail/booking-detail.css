@@ -64,6 +64,42 @@ hugeicons-icon.close:hover {
   margin-bottom: 8pt;
 }
 
+/* Gruppo «Pagamento», sotto le azioni di stato. */
+.action-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6pt;
+  padding-top: 8pt;
+  border-top: 1px solid var(--stroke-weak);
+}
+
+.action-group-title {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-weak);
+}
+
+/* Scelta del metodo nella conferma. */
+.method-choice {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.method-choice > legend {
+  padding-left: 4pt;
+  margin-bottom: 4pt;
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  color: var(--text-strong);
+}
+
+.method-choice.invalid > legend {
+  color: var(--error-strong);
+}
+
 /*
  * Pulsanti e conferma si scambiano il posto: quella aperta prende la sua
  * altezza (`1fr`), l'altra scende a zero (`0fr`) e svanisce. Stessa curva
@@ -228,6 +264,17 @@ dl.rooms {
   height: 8px;
   border-radius: 50%;
   background: var(--brand-weak);
+}
+
+/* Le voci del pagamento hanno il punto vuoto: si distinguono dai cambi di stato. */
+.timeline > li.payment::before {
+  background: var(--background);
+  border: 2px solid var(--brand-weak);
+  box-sizing: border-box;
+}
+
+.timeline-kind {
+  color: var(--text-weak);
 }
 
 .timeline p {

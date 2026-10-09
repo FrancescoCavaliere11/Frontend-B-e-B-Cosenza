@@ -28,7 +28,7 @@
       }
     </div>
 
-    @if (actions().length || actionsNote()) {
+    @if (hasActionsSection()) {
       <section class="actions-panel" [attr.aria-labelledby]="'actions-title-' + b.id">
         <h5 [id]="'actions-title-' + b.id">Azioni</h5>
 
@@ -67,6 +67,26 @@
             @if (actionsNote(); as note) {
               <p class="text-small">{{ note }}</p>
             }
+
+            @if (hasPaymentGroup()) {
+              <div class="action-group" role="group" [attr.aria-labelledby]="'payment-title-' + b.id">
+                <p class="action-group-title" [id]="'payment-title-' + b.id">Pagamento</p>
+                @if (paymentActions().length) {
+                  <div class="actions-row start">
+                    @for (action of paymentActions(); track action.target) {
+                      <button type="button" [class]="action.tone"
+                              [disabled]="isUpdating()"
+                              (click)="startPaymentAction(action)">
+                        {{ action.label }}
+                      </button>
+                    }
+                  </div>
+                }
+                @if (paymentNoteText(); as note) {
+                  <p class="text-small">{{ note }}</p>
+                }
+              </div>
+            }
           </div>
         </div>
 
@@ -74,10 +94,10 @@
              [attr.inert]="isConfirming() ? null : ''" [attr.aria-hidden]="!isConfirming()"
              (keydown.escape)="cancelAction()">
           <div class="action-view-content">
-            @if (shownAction(); as action) {
-              <div class="action-confirm" role="group" [attr.aria-label]="'Conferma: ' + action.label">
+            @if (shown(); as target) {
+              <div class="action-confirm" role="group" [attr.aria-label]="'Conferma: ' + target.action.label">
                 <p class="action-question">
-                  <strong>{{ action.label }}?</strong> {{ consequence() }}
+                  <strong>{{ target.action.label }}?</strong> {{ consequence() }}
                 </p>
 
                 @if (warnings().length) {
@@ -86,6 +106,24 @@
                       <li>{{ warning }}</li>
                     }
                   </ul>
+                }
+
+                @if (asksMethod()) {
+                  <fieldset class="form-group method-choice" [class.invalid]="methodMissing()">
+                    <legend>Metodo</legend>
+                    <div class="options">
+                      @for (method of manualPaymentMethods; track method) {
+                        <label class="option">
+                          <input type="radio" [name]="'method-' + b.id" [value]="method"
+                                 [formControl]="methodControl">
+                          {{ paymentMethodLabels[method] }}
+                        </label>
+                      }
+                    </div>
+                    @if (methodMissing()) {
+                      <small class="error-message">Scegli il metodo con cui l'ospite ha pagato</small>
+                    }
+                  </fieldset>
                 }
 
                 <div class="form-group">
@@ -113,10 +151,10 @@
                   <button type="button" class="secondary" [disabled]="isUpdating()" (click)="cancelAction()">
                     Indietro
                   </button>
-                  <button type="button" [class]="action.tone"
-                          [disabled]="isUpdating() || reasonMissing()"
+                  <button type="button" [class]="target.action.tone"
+                          [disabled]="isUpdating() || reasonMissing() || methodMissing()"
                           (click)="confirmAction()">
-                    {{ isUpdating() ? 'Salvataggio…' : action.confirmLabel }}
+                    {{ isUpdating() ? 'Salvataggio…' : target.action.confirmLabel }}
                   </button>
                 </div>
               </div>
@@ -221,13 +259,22 @@
       <section class="wide">
         <h5>Cronologia</h5>
         <ol class="timeline">
-          @for (entry of b.status_history; track $index) {
-            <li>
+          @for (entry of timeline(); track $index) {
+            <li [class.payment]="entry.kind === 'payment'">
               <p class="text-small">
-                {{ formatInstant(entry.created_at) }} · {{ actorLabels[entry.actor_type] }}
+                {{ formatInstant(entry.createdAt) }} · {{ entry.actor }}
               </p>
               <p>
-                {{ historyFrom(entry) }} → <strong>{{ statusLabels[entry.to_status] }}</strong>
+                @if (entry.kind === 'payment') {
+                  <span class="timeline-kind">Pagamento:</span>
+                }
+                @if (entry.from) {
+                  {{ entry.from }} →
+                }
+                <strong>{{ entry.to }}</strong>
+                @if (entry.method) {
+                  · {{ entry.method }}
+                }
               </p>
               @if (entry.reason) {
                 <p class="text-small reason">{{ entry.reason }}</p>

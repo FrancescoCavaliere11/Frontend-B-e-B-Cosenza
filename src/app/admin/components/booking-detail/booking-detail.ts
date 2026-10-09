@@ -15,7 +15,7 @@ import {
 import {toSignal} from '@angular/core/rxjs-interop';
 import {FormControl, Validators} from '@angular/forms';
 import {Cancel01Icon} from '@hugeicons/core-free-icons';
-import {BookingDetailSchema, BookingStatusHistorySchema} from '../../../schemas/booking-schema';
+import {BookingDetailSchema} from '../../../schemas/booking-schema';
 import {
   AUDIT_ACTOR_LABELS,
   BOOKING_CHANNEL_LABELS,
@@ -26,6 +26,7 @@ import {
   PAYMENT_OPTION_LABELS,
   PAYMENT_STATUS_LABELS,
   PAYMENT_STATUS_TONES,
+  PaymentMethod,
   visiblePaymentStatus,
 } from '../../../schemas/booking-enums';
 import {
@@ -39,6 +40,17 @@ import {
   StatusAction,
   StatusChangeRequest,
 } from '../../../schemas/booking-transitions';
+import {
+  availablePaymentActions,
+  defaultPaymentMethod,
+  MANUAL_PAYMENT_METHODS,
+  PAYMENT_REASON_MAX_LENGTH,
+  PaymentAction,
+  PaymentChangeRequest,
+  paymentConsequence,
+  paymentNote,
+  paymentWarnings,
+} from '../../../schemas/booking-payments';
 import {formatAmount, formatInstant, formatStayDate, todayIso} from '../../../utils/booking-format';
 
 /** Stati in cui la prenotazione occupa ancora le camere in modo provvisorio. */
@@ -62,6 +74,27 @@ interface ActionButton {
   blocked: string | null;
 }
 
+/**
+ * Azione in attesa di conferma: un cambio di stato della prenotazione o
+ * un'operazione sul pagamento. Stessa conferma, stessa animazione, stesso
+ * campo motivazione; cambiano le regole e l'evento emesso.
+ */
+type ConfirmTarget =
+  | { kind: 'status'; action: StatusAction }
+  | { kind: 'payment'; action: PaymentAction };
+
+/** Voce della cronologia unica: stati della prenotazione e pagamenti, in ordine di tempo. */
+interface TimelineEntry {
+  kind: 'status' | 'payment';
+  createdAt: string;
+  actor: string;
+  /** Stato di partenza già tradotto; vuoto quando non c'è. */
+  from: string;
+  to: string;
+  method: string | null;
+  reason: string | null;
+}
+
 /** Riga «etichetta → valore» della sezione date. */
 interface KeyDate {
   label: string;
@@ -76,10 +109,12 @@ interface KeyDate {
  * tentativo li governa la schermata che la ospita.
  *
  * La sezione «Azioni» mostra i cambi di stato ammessi (`booking-transitions.ts`)
- * e chiede sempre una conferma, con le conseguenze e gli avvisi dell'azione,
- * prima di emettere `statusChange`: è la schermata a chiamare il backend e a
- * restituire la prenotazione aggiornata o l'errore. Pulsanti e conferma si
- * scambiano il posto con un'animazione (booking-detail.css).
+ * e, nel gruppo «Pagamento», le operazioni sul pagamento (`booking-payments.ts`).
+ * Ogni azione chiede una conferma, con conseguenze, avvisi, motivazione e —
+ * per incasso e rimborso — il metodo, prima di emettere `statusChange` o
+ * `paymentChange`: è la schermata a chiamare il backend e a restituire la
+ * prenotazione aggiornata o l'errore. Pulsanti e conferma si scambiano il
+ * posto con un'animazione (booking-detail.css).
  */
 @Component({
   selector: 'app-booking-detail',
@@ -102,14 +137,15 @@ export class BookingDetail {
   isLoading = input<boolean>(false);
   error = input<string | null>(null);
 
-  /** Un cambio di stato è in corso. */
+  /** Un'azione (stato o pagamento) è in corso di salvataggio. */
   isUpdating = input<boolean>(false);
-  /** Errore dell'ultimo cambio di stato, mostrato accanto ai pulsanti. */
+  /** Errore dell'ultima azione, mostrato accanto ai pulsanti. */
   actionError = input<string | null>(null);
 
   close = output<void>();
   retry = output<void>();
   statusChange = output<StatusChangeRequest>();
+  paymentChange = output<PaymentChangeRequest>();
 
   protected readonly Cancel01Icon = Cancel01Icon;
   protected readonly statusLabels = BOOKING_STATUS_LABELS;
@@ -118,32 +154,39 @@ export class BookingDetail {
   protected readonly paymentTones = PAYMENT_STATUS_TONES;
   protected readonly paymentOptionLabels = PAYMENT_OPTION_LABELS;
   protected readonly paymentMethodLabels = PAYMENT_METHOD_LABELS;
+  protected readonly manualPaymentMethods = MANUAL_PAYMENT_METHODS;
   protected readonly channelLabels = BOOKING_CHANNEL_LABELS;
   protected readonly actorLabels = AUDIT_ACTOR_LABELS;
   protected readonly formatAmount = formatAmount;
   protected readonly formatInstant = formatInstant;
   protected readonly formatStayDate = formatStayDate;
-  protected readonly reasonMaxLength = STATUS_REASON_MAX_LENGTH;
+  /** Stesso limite per le due motivazioni (stato e pagamento). */
+  protected readonly reasonMaxLength = Math.min(STATUS_REASON_MAX_LENGTH, PAYMENT_REASON_MAX_LENGTH);
 
   private readonly injector = inject(Injector);
   private readonly reasonInput = viewChild<ElementRef<HTMLTextAreaElement>>('reasonInput');
 
   /** Azione in attesa di conferma, o `null`: decide quale vista è aperta. */
-  protected readonly pendingAction = signal<StatusAction | null>(null);
+  protected readonly pending = signal<ConfirmTarget | null>(null);
   /**
-   * Ultima azione mostrata nella conferma. A differenza di `pendingAction`
-   * non torna `null` alla chiusura: la conferma resta leggibile mentre si
+   * Ultima azione mostrata nella conferma. A differenza di `pending` non
+   * torna `null` alla chiusura: la conferma resta leggibile mentre si
    * richiude con l'animazione, invece di svuotarsi di colpo.
    */
-  protected readonly shownAction = signal<StatusAction | null>(null);
-  protected readonly isConfirming = computed(() => this.pendingAction() !== null);
+  protected readonly shown = signal<ConfirmTarget | null>(null);
+  protected readonly isConfirming = computed(() => this.pending() !== null);
+
   protected readonly reasonControl = new FormControl('', {
     nonNullable: true,
-    validators: [Validators.maxLength(STATUS_REASON_MAX_LENGTH)],
+    validators: [Validators.maxLength(this.reasonMaxLength)],
   });
   private readonly reasonValue = toSignal(this.reasonControl.valueChanges, {initialValue: ''});
   protected readonly reasonLength = computed(() => this.reasonValue().length);
   private readonly trimmedReason = computed(() => this.reasonValue().trim());
+
+  /** Metodo di incasso o rimborso scelto nella conferma; `''` = nessuno. */
+  protected readonly methodControl = new FormControl<PaymentMethod | ''>('', {nonNullable: true});
+  private readonly methodValue = toSignal(this.methodControl.valueChanges, {initialValue: '' as PaymentMethod | ''});
 
   /** Adesso, aggiornato periodicamente finché la prenotazione è in attesa (tempo rimasto). */
   private readonly now = signal(new Date());
@@ -172,28 +215,103 @@ export class BookingDetail {
     return booking ? noActionsNote(booking, this.now()) : null;
   });
 
+  protected readonly paymentActions = computed<PaymentAction[]>(() => {
+    const booking = this.booking();
+    return booking ? availablePaymentActions(booking) : [];
+  });
+
+  protected readonly paymentNoteText = computed(() => {
+    const booking = this.booking();
+    return booking ? paymentNote(booking) : null;
+  });
+
+  protected readonly hasPaymentGroup = computed(() =>
+    this.paymentActions().length > 0 || !!this.paymentNoteText()
+  );
+
+  protected readonly hasActionsSection = computed(() =>
+    this.actions().length > 0 || !!this.actionsNote() || this.hasPaymentGroup()
+  );
+
+  /** Il metodo scelto, o `null`. */
+  private readonly selectedMethod = computed<PaymentMethod | null>(() => this.methodValue() || null);
+
   protected readonly consequence = computed(() => {
     const booking = this.booking();
-    const action = this.shownAction();
-    return booking && action ? actionConsequence(booking, action.target, this.today()) : '';
+    const target = this.shown();
+    if (!booking || !target) return '';
+    return target.kind === 'status'
+      ? actionConsequence(booking, target.action.target, this.today())
+      : paymentConsequence(target.action, this.selectedMethod());
   });
 
   protected readonly warnings = computed(() => {
     const booking = this.booking();
-    const action = this.shownAction();
-    return booking && action ? actionWarnings(booking, action.target, this.today()) : [];
+    const target = this.shown();
+    if (!booking || !target) return [];
+    return target.kind === 'status'
+      ? actionWarnings(booking, target.action.target, this.today())
+      : paymentWarnings(booking, target.action);
   });
 
   protected readonly reasonRequired = computed(() => {
     const booking = this.booking();
-    const action = this.shownAction();
-    return !!booking && !!action && isReasonRequired(booking, action.target, this.today());
+    const target = this.shown();
+    if (!booking || !target) return false;
+    return target.kind === 'status'
+      ? isReasonRequired(booking, target.action.target, this.today())
+      : target.action.reasonRequired;
+  });
+
+  /** La conferma chiede il metodo (incasso e rimborso). */
+  protected readonly asksMethod = computed(() => {
+    const target = this.shown();
+    return target?.kind === 'payment' && target.action.asksMethod;
+  });
+
+  private readonly methodRequired = computed(() => {
+    const target = this.shown();
+    return target?.kind === 'payment' && target.action.methodRequired;
   });
 
   protected readonly canConfirm = computed(() => {
-    if (!this.pendingAction() || this.isUpdating()) return false;
-    if (this.reasonLength() > STATUS_REASON_MAX_LENGTH) return false;
+    if (!this.pending() || this.isUpdating()) return false;
+    if (this.reasonLength() > this.reasonMaxLength) return false;
+    if (this.methodRequired() && !this.selectedMethod()) return false;
     return !this.reasonRequired() || this.trimmedReason().length > 0;
+  });
+
+  /**
+   * Cronologia unica: cambi di stato della prenotazione e del pagamento,
+   * dal più vecchio. A parità di istante (stessa transazione, es. un
+   * pagamento online che conferma la prenotazione) lo stato viene prima.
+   */
+  protected readonly timeline = computed<TimelineEntry[]>(() => {
+    const booking = this.booking();
+    if (!booking) return [];
+
+    const entries: TimelineEntry[] = [
+      ...booking.status_history.map(entry => ({
+        kind: 'status' as const,
+        createdAt: entry.created_at,
+        actor: this.actorLabels[entry.actor_type],
+        from: entry.from_status ? this.statusLabels[entry.from_status] : 'Creata',
+        to: this.statusLabels[entry.to_status],
+        method: null,
+        reason: entry.reason,
+      })),
+      ...booking.payment_history.map(entry => ({
+        kind: 'payment' as const,
+        createdAt: entry.created_at,
+        actor: this.actorLabels[entry.actor_type],
+        from: entry.from_status ? this.paymentLabels[entry.from_status] : '',
+        to: this.paymentLabels[entry.to_status],
+        method: entry.payment_method ? this.paymentMethodLabels[entry.payment_method] : null,
+        reason: entry.reason,
+      })),
+    ];
+    // `sort` è stabile: a parità di istante resta l'ordine di partenza (stati prima).
+    return entries.sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
   });
 
   constructor() {
@@ -254,9 +372,20 @@ export class BookingDetail {
   });
 
   protected startAction(action: StatusAction): void {
+    this.open({kind: 'status', action});
+  }
+
+  protected startPaymentAction(action: PaymentAction): void {
+    this.open({kind: 'payment', action});
+  }
+
+  private open(target: ConfirmTarget): void {
+    const booking = this.booking();
     this.reasonControl.reset('');
-    this.shownAction.set(action);
-    this.pendingAction.set(action);
+    const method = booking && target.kind === 'payment' ? defaultPaymentMethod(booking, target.action) : null;
+    this.methodControl.reset(method ?? '');
+    this.shown.set(target);
+    this.pending.set(target);
     afterNextRender(() => this.reasonInput()?.nativeElement.focus(), {injector: this.injector});
   }
 
@@ -265,21 +394,34 @@ export class BookingDetail {
     if (!this.isUpdating()) this.resetConfirmation();
   }
 
-  /** Chiude la conferma; il testo resta (`shownAction`) per l'animazione di chiusura. */
+  /** Chiude la conferma; il testo resta (`shown`) per l'animazione di chiusura. */
   private resetConfirmation(): void {
-    this.pendingAction.set(null);
+    this.pending.set(null);
     this.reasonControl.markAsUntouched();
+    this.methodControl.markAsUntouched();
   }
 
   protected confirmAction(): void {
-    const action = this.pendingAction();
-    if (!action) return;
+    const target = this.pending();
+    if (!target) return;
     if (!this.canConfirm()) {
       this.reasonControl.markAsTouched();
+      this.methodControl.markAsTouched();
       return;
     }
+
     const reason = this.trimmedReason();
-    this.statusChange.emit({status: action.target, ...(reason ? {reason} : {})});
+    if (target.kind === 'status') {
+      this.statusChange.emit({status: target.action.target, ...(reason ? {reason} : {})});
+      return;
+    }
+
+    const method = target.action.asksMethod ? this.selectedMethod() : null;
+    this.paymentChange.emit({
+      status: target.action.target,
+      ...(method ? {method} : {}),
+      ...(reason ? {reason} : {}),
+    });
   }
 
   /** Motivazione obbligatoria mancante, mostrata dopo il primo tentativo. */
@@ -289,6 +431,11 @@ export class BookingDetail {
       && this.trimmedReason().length === 0;
   }
 
+  /** Metodo obbligatorio non scelto, mostrato dopo il primo tentativo. */
+  protected methodMissing(): boolean {
+    return this.methodRequired() && this.methodControl.touched && !this.selectedMethod();
+  }
+
   protected guestName(booking: BookingDetailSchema): string {
     return [booking.guest_firstname, booking.guest_lastname].filter(Boolean).join(' ');
   }
@@ -296,10 +443,5 @@ export class BookingDetail {
   /** `tel:` senza spazi, che alcuni dispositivi non accettano. */
   protected phoneHref(phone: string): string {
     return `tel:${phone.replace(/\s+/g, '')}`;
-  }
-
-  /** «Creata» per la prima voce, altrimenti lo stato di partenza. */
-  protected historyFrom(entry: BookingStatusHistorySchema): string {
-    return entry.from_status ? this.statusLabels[entry.from_status] : 'Creata';
   }
 }

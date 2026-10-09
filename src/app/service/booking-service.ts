@@ -8,7 +8,7 @@ import {
   BookingSearchFilters,
   PaginatedBookingsSchema,
 } from '../schemas/booking-schema';
-import {BookingStatus} from '../schemas/booking-enums';
+import {BookingStatus, PaymentMethod, PaymentStatus} from '../schemas/booking-enums';
 import {SHOWS_OWN_ERRORS} from '../security/interceptor';
 
 /**
@@ -75,6 +75,33 @@ export class BookingService {
   changeStatus(id: string, newStatus: BookingStatus, reason?: string): Observable<BookingDetailSchema> {
     const body = reason ? {new_status: newStatus, reason} : {new_status: newStatus};
     return this.http.post<any>(`${this.apiUrl}${encodeURIComponent(id)}/status`, body, {
+      context: new HttpContext().set(SHOWS_OWN_ERRORS, true),
+    }).pipe(
+      map(response => new BookingDetailSchema(response))
+    );
+  }
+
+  /**
+   * `POST /admin/bookings/{id}/payment` — incasso, rimborso o correzione
+   * registrati dal back-office.
+   *
+   * Come `changeStatus`: la risposta è la prenotazione aggiornata, storico dei
+   * pagamenti compreso, e l'errore lo mostra la scheda (`SHOWS_OWN_ERRORS`).
+   * Metodo e motivazione si inviano solo se ci sono: il backend rifiuta i
+   * campi non previsti, e un campo vuoto non è un valore.
+   */
+  registerPayment(
+    id: string,
+    paymentStatus: PaymentStatus,
+    method?: PaymentMethod,
+    reason?: string
+  ): Observable<BookingDetailSchema> {
+    const body = {
+      payment_status: paymentStatus,
+      ...(method ? {payment_method: method} : {}),
+      ...(reason ? {reason} : {}),
+    };
+    return this.http.post<any>(`${this.apiUrl}${encodeURIComponent(id)}/payment`, body, {
       context: new HttpContext().set(SHOWS_OWN_ERRORS, true),
     }).pipe(
       map(response => new BookingDetailSchema(response))

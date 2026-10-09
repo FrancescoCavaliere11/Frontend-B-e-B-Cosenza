@@ -205,25 +205,6 @@ h5 .text-small {
 }
 
 /* --- Pagamento --- */
-.options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12pt;
-}
-
-.option {
-  display: flex;
-  align-items: center;
-  gap: 4pt;
-  padding-left: 0;
-  font-weight: 400;
-  cursor: pointer;
-}
-
-.option > input {
-  accent-color: var(--brand-weak);
-}
-
 .services.toggles > .checkbox:has(input:disabled) {
   cursor: not-allowed;
   opacity: 0.8;

@@ -153,6 +153,30 @@ export class BookingStatusHistorySchema {
 }
 
 /**
+ * Voce dello storico dei pagamenti — `BookingPaymentHistorySchema`.
+ * `from_status` è nullo quando la prenotazione nasce già pagata;
+ * `payment_method` è il metodo **dopo** il cambiamento (nullo dopo una
+ * correzione). Nessun importo e nessun operatore: non arrivano dal backend.
+ */
+export class BookingPaymentHistorySchema {
+  from_status: PaymentStatus | null;
+  to_status: PaymentStatus;
+  payment_method: PaymentMethod | null;
+  actor_type: AuditActorType;
+  reason: string | null;
+  created_at: string;
+
+  constructor(data: any) {
+    this.from_status = data.from_status ?? null;
+    this.to_status = data.to_status;
+    this.payment_method = data.payment_method ?? null;
+    this.actor_type = data.actor_type;
+    this.reason = data.reason ?? null;
+    this.created_at = data.created_at;
+  }
+}
+
+/**
  * Vista completa per il back-office — `BookingSchema`.
  *
  * Gli istanti (`created_at`, `hold_expires_at`, …) restano stringhe ISO:
@@ -198,6 +222,7 @@ export class BookingDetailSchema {
   updated_at: string;
 
   status_history: BookingStatusHistorySchema[];
+  payment_history: BookingPaymentHistorySchema[];
 
   constructor(data: any) {
     this.id = data.id;
@@ -238,6 +263,8 @@ export class BookingDetailSchema {
 
     this.status_history = (data.status_history ?? [])
       .map((entry: any) => new BookingStatusHistorySchema(entry));
+    this.payment_history = (data.payment_history ?? [])
+      .map((entry: any) => new BookingPaymentHistorySchema(entry));
   }
 }
 

@@ -124,7 +124,8 @@
             [actionError]="statusErrorFor(item)"
             (close)="closeDetail()"
             (retry)="retryDetail()"
-            (statusChange)="onStatusChange($event)">
+            (statusChange)="onStatusChange($event)"
+            (paymentChange)="onPaymentChange($event)">
           </app-booking-detail>
         }
       </app-list-item>

@@ -305,3 +305,23 @@ button.danger:hover,
   background-color: var(--brand-fill);
   border-color: var(--brand-stroke-weak);
 }
+
+/* Scelta singola fra poche opzioni (radio in riga): pagamento, metodo. */
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12pt;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 4pt;
+  padding-left: 0;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.option > input {
+  accent-color: var(--brand-weak);
+}
