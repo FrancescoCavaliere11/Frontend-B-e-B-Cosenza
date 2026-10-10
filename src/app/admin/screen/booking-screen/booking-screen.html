@@ -90,7 +90,7 @@
       <app-list-item
         [title]="guestName(item)"
         [action]="'Dettagli'"
-        [isOpen]="openBookingId === item.id"
+        [isOpen]="detail.isOpen(item.id)"
         (click)="openDetail(item)">
         <div class="booking-meta">
           <p class="text-small">
@@ -112,18 +112,18 @@
           </div>
         </div>
 
-        @if (hasDetail(item)) {
+        @if (detail.hasDetail(item.id)) {
           <app-booking-detail
             form
             [headline]="guestName(item)"
             [code]="item.code"
-            [booking]="detailOf(item)"
-            [isLoading]="isDetailLoadingFor(item)"
-            [error]="detailErrorFor(item)"
-            [isUpdating]="isStatusUpdatingFor(item)"
-            [actionError]="statusErrorFor(item)"
+            [booking]="detail.detailOf(item.id)"
+            [isLoading]="detail.isLoadingFor(item.id)"
+            [error]="detail.errorFor(item.id)"
+            [isUpdating]="detail.isUpdatingFor(item.id)"
+            [actionError]="detail.actionErrorFor(item.id)"
             (close)="closeDetail()"
-            (retry)="retryDetail()"
+            (retry)="detail.retry()"
             (statusChange)="onStatusChange($event)"
             (paymentChange)="onPaymentChange($event)">
           </app-booking-detail>

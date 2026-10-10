@@ -21,6 +21,8 @@ import { BookingScreen } from './admin/screen/booking-screen/booking-screen';
 import { BookingDetail } from './admin/components/booking-detail/booking-detail';
 import { BookingCreateForm } from './admin/components/booking-create-form/booking-create-form';
 import { StayCalendar } from './shared/components/stay-calendar/stay-calendar';
+import { CalendarScreen } from './admin/screen/calendar-screen/calendar-screen';
+import { PlanningGrid } from './admin/components/planning-grid/planning-grid';
 
 @NgModule({
   declarations: [
@@ -39,6 +41,8 @@ import { StayCalendar } from './shared/components/stay-calendar/stay-calendar';
     BookingDetail,
     BookingCreateForm,
     StayCalendar,
+    CalendarScreen,
+    PlanningGrid,
   ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule, HugeiconsIconComponent],
   providers: [

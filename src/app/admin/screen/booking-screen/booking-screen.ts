@@ -1,14 +1,11 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {HttpErrorResponse, HttpStatusCode} from '@angular/common/http';
 import {
   catchError,
   debounceTime,
   distinctUntilChanged,
   EMPTY,
-  finalize,
   map,
-  Observable,
   Subject,
   switchMap,
   takeUntil,
@@ -39,7 +36,7 @@ import {formatAmount, formatStayRange, nightsBetween} from '../../../utils/booki
 import {dateRangeValidator, EMAIL_PATTERN} from '../../../validators/validators';
 import {StatusChangeRequest} from '../../../schemas/booking-transitions';
 import {PaymentChangeRequest} from '../../../schemas/booking-payments';
-import {errorMessageOf} from '../../../security/interceptor';
+import {BookingDetailFacade} from '../../service/booking-detail-facade';
 
 @Component({
   selector: 'app-booking-screen',
@@ -52,7 +49,9 @@ import {errorMessageOf} from '../../../security/interceptor';
     '../../../../../public/css/form.css',
     '../../../../../public/css/layout.css',
     '../../../../../public/css/badge.css',
-  ]
+  ],
+  // Scheda aperta propria della schermata: lo stato muore con lei.
+  providers: [BookingDetailFacade],
 })
 export class BookingScreen implements OnInit, OnDestroy {
   protected readonly statusOrder = BOOKING_STATUS_ORDER;
@@ -82,41 +81,29 @@ export class BookingScreen implements OnInit, OnDestroy {
 
   isLoading = false;
 
-  /** Riga aperta: al massimo una alla volta, come nelle altre schermate admin. */
-  openBookingId: string | null = null;
-  /** Riga «+» di creazione aperta. Esclusiva con `openBookingId`. */
+  /** Riga «+» di creazione aperta. Esclusiva con la scheda aperta. */
   isCreateOpen = false;
   /** Codice dell'ultima prenotazione creata, per il messaggio di conferma. */
   createdCode: string | null = null;
   /** Prenotazione appena creata da aprire quando la lista ricaricata la contiene. */
   private pendingOpenId: string | null = null;
   private createdMessageTimer: ReturnType<typeof setTimeout> | null = null;
-  /**
-   * Dettagli già caricati nella pagina corrente. Non è una cache di lettura —
-   * a ogni apertura si rilegge dal backend — ma tiene la scheda dentro la
-   * riga anche da chiusa, così la riga si richiude con l'animazione invece
-   * di perdere altezza di colpo. Si svuota a ogni ricarica della lista.
-   */
-  private details = new Map<string, BookingDetailSchema>();
-  isDetailLoading = false;
-  detailError: string | null = null;
-
-  /** Azione (stato o pagamento) in corso sulla riga aperta. */
-  isStatusUpdating = false;
-  /** Errore dell'ultima azione, mostrato nella scheda accanto ai pulsanti. */
-  statusError: string | null = null;
 
   /** Ogni emissione rilancia la ricerca; `switchMap` annulla quella in volo. */
   private query$ = new Subject<void>();
-  /** Id da caricare, o `null` per chiudere: `switchMap` annulla la richiesta precedente. */
-  private detail$ = new Subject<string | null>();
   private destroy$ = new Subject<void>();
 
   constructor(
     private bookingService: BookingService,
     private roomService: RoomService,
     private formBuilder: FormBuilder,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    /**
+     * Scheda della riga aperta (caricamento, azioni, errori). I dettagli già
+     * caricati restano nella riga anche da chiusa, così si richiude con
+     * l'animazione; si dimenticano a ogni ricarica della lista.
+     */
+    protected detail: BookingDetailFacade,
   ) {
     this.searchControl = this.formBuilder.control('');
     this.filtersForm = this.formBuilder.group(
@@ -132,7 +119,7 @@ export class BookingScreen implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.setupQueryStream();
-    this.setupDetailStream();
+    this.setupDetailUpdates();
     this.setupFilterTriggers();
     this.loadRooms();
     this.query$.next();
@@ -153,7 +140,7 @@ export class BookingScreen implements OnInit, OnDestroy {
       switchMap(() => {
         // La riga aperta potrebbe non esserci più nella nuova pagina.
         this.closeDetail();
-        this.details.clear();
+        this.detail.clear();
         this.isLoading = true;
         this.cdr.detectChanges();
 
@@ -177,30 +164,15 @@ export class BookingScreen implements OnInit, OnDestroy {
     });
   }
 
-  private setupDetailStream(): void {
-    this.detail$.pipe(
-      switchMap(id => {
-        if (!id) return EMPTY;
-
-        this.detailError = null;
-        this.isDetailLoading = true;
-        this.cdr.detectChanges();
-
-        return this.bookingService.getBooking(id).pipe(
-          catchError(err => {
-            // Solo lo stato HTTP: il messaggio lo mostra l'interceptor globale.
-            console.error('Errore nel caricamento della prenotazione:', err?.status);
-            this.detailError = 'Impossibile caricare la prenotazione';
-            this.isDetailLoading = false;
-            this.cdr.detectChanges();
-            return EMPTY;
-          })
-        );
-      }),
-      takeUntil(this.destroy$)
-    ).subscribe(booking => {
-      this.details.set(booking.id, booking);
-      this.isDetailLoading = false;
+  /**
+   * Dopo un'azione nella scheda, la riga dell'elenco prende la versione
+   * ricevuta dal backend: niente da ricaricare.
+   */
+  private setupDetailUpdates(): void {
+    this.detail.updated$.pipe(takeUntil(this.destroy$)).subscribe(booking => {
+      this.bookings = this.bookings.map(item =>
+        item.id === booking.id ? BookingListItemSchema.fromDetail(booking) : item
+      );
       this.cdr.detectChanges();
     });
   }
@@ -339,123 +311,27 @@ export class BookingScreen implements OnInit, OnDestroy {
 
   /** Apre la riga e ne carica il dettaglio; un secondo clic sulla stessa riga non fa nulla. */
   openDetail(item: BookingListItemSchema): void {
-    if (this.openBookingId === item.id) return;
+    if (this.detail.isOpen(item.id)) return;
     this.isCreateOpen = false;
-    this.openBookingId = item.id;
-    this.statusError = null;
-    this.detail$.next(item.id);
+    this.detail.open(item.id);
   }
 
   closeDetail(): void {
-    if (this.openBookingId === null) return;
-    this.openBookingId = null;
-    this.detailError = null;
-    this.statusError = null;
-    this.isDetailLoading = false;
-    this.detail$.next(null);
-    this.cdr.detectChanges();
-  }
-
-  /** La scheda resta nella riga aperta e in quelle già caricate (vedi `details`). */
-  hasDetail(item: BookingListItemSchema): boolean {
-    return this.openBookingId === item.id || this.details.has(item.id);
-  }
-
-  detailOf(item: BookingListItemSchema): BookingDetailSchema | null {
-    return this.details.get(item.id) ?? null;
-  }
-
-  /** Caricamento ed errore riguardano solo la riga aperta. */
-  isDetailLoadingFor(item: BookingListItemSchema): boolean {
-    return this.openBookingId === item.id && this.isDetailLoading;
-  }
-
-  detailErrorFor(item: BookingListItemSchema): string | null {
-    return this.openBookingId === item.id ? this.detailError : null;
-  }
-
-  retryDetail(): void {
-    if (this.openBookingId) this.detail$.next(this.openBookingId);
-  }
-
-  isStatusUpdatingFor(item: BookingListItemSchema): boolean {
-    return this.openBookingId === item.id && this.isStatusUpdating;
-  }
-
-  statusErrorFor(item: BookingListItemSchema): string | null {
-    return this.openBookingId === item.id ? this.statusError : null;
+    this.detail.close();
   }
 
   // ------------------------------------------------------------------ //
-  // Cambio di stato                                                     //
+  // Azioni della scheda                                                 //
   // ------------------------------------------------------------------ //
 
   /** Cambio di stato confermato nella scheda. */
   onStatusChange(change: StatusChangeRequest): void {
-    this.runBookingUpdate(id => this.bookingService.changeStatus(id, change.status, change.reason));
+    this.detail.changeStatus(change);
   }
 
   /** Incasso, rimborso o correzione confermati nella scheda. */
   onPaymentChange(change: PaymentChangeRequest): void {
-    this.runBookingUpdate(id =>
-      this.bookingService.registerPayment(id, change.status, change.method, change.reason)
-    );
-  }
-
-  /**
-   * Esegue un'azione sulla prenotazione aperta. La risposta è la prenotazione
-   * aggiornata, cronologia compresa: scheda e riga dell'elenco si aggiornano
-   * senza ricaricare la pagina.
-   *
-   * Una sola azione alla volta. Su `409` (stato cambiato nel frattempo, da un
-   * altro operatore, dalla scadenza automatica o da Stripe) la scheda viene
-   * riletta, così mostra lo stato vero insieme al messaggio del backend.
-   */
-  private runBookingUpdate(request: (id: string) => Observable<BookingDetailSchema>): void {
-    const id = this.openBookingId;
-    if (!id || this.isStatusUpdating) return;
-
-    this.isStatusUpdating = true;
-    this.statusError = null;
-    this.cdr.detectChanges();
-
-    request(id).pipe(
-      finalize(() => {
-        this.isStatusUpdating = false;
-        this.cdr.detectChanges();
-      }),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: booking => this.applyUpdatedBooking(booking),
-      error: (err: HttpErrorResponse) => {
-        // Solo lo stato HTTP: il corpo può contenere dati dell'ospite.
-        console.error('Errore nell\'aggiornamento della prenotazione:', err?.status);
-        this.statusError = errorMessageOf(err);
-        if (err.status === HttpStatusCode.Conflict) this.refreshDetail(id);
-      },
-    });
-  }
-
-  /** Aggiorna scheda e riga dell'elenco con la versione ricevuta dal backend. */
-  private applyUpdatedBooking(booking: BookingDetailSchema): void {
-    this.details.set(booking.id, booking);
-    this.bookings = this.bookings.map(item =>
-      item.id === booking.id ? BookingListItemSchema.fromDetail(booking) : item
-    );
-  }
-
-  /**
-   * Rilegge la prenotazione senza mostrare il caricamento: la scheda resta
-   * visibile e cambia solo se lo stato è davvero cambiato.
-   */
-  private refreshDetail(id: string): void {
-    this.bookingService.getBooking(id).pipe(takeUntil(this.destroy$)).subscribe({
-      next: booking => {
-        this.applyUpdatedBooking(booking);
-        this.cdr.detectChanges();
-      },
-      error: err => console.error('Errore nel ricaricare la prenotazione:', err?.status),
-    });
+    this.detail.registerPayment(change);
   }
 
   // ------------------------------------------------------------------ //

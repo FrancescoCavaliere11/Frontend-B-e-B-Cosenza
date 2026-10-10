@@ -1,0 +1,160 @@
+<section class="calendar-section">
+  <div class="header">
+    <div class="title">
+      <h2>Calendario</h2>
+      <p class="text-small range" aria-live="polite">{{ rangeLabel() }}</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="nav" role="group" aria-label="Periodo">
+        <button type="button" class="secondary icon-button" aria-label="Periodo precedente"
+                [disabled]="isLoading()" (click)="previous()">
+          <hugeicons-icon [icon]="ArrowLeft01Icon" color="currentColor"></hugeicons-icon>
+        </button>
+        <button type="button" class="secondary" [disabled]="isLoading() || isTodayShown()" (click)="goToToday()">
+          Oggi
+        </button>
+        <button type="button" class="secondary icon-button" aria-label="Periodo successivo"
+                [disabled]="isLoading()" (click)="next()">
+          <hugeicons-icon [icon]="ArrowRight01Icon" color="currentColor"></hugeicons-icon>
+        </button>
+      </div>
+
+      <input type="date" class="jump" aria-label="Vai alla data" (change)="onJumpDate($event)">
+
+      <div class="spans" role="group" aria-label="Ampiezza">
+        @for (option of spanOptions; track option.value) {
+          <button type="button" class="span-option"
+                  [class.active]="span() === option.value"
+                  [attr.aria-pressed]="span() === option.value"
+                  (click)="setSpan(option.value)">
+            {{ option.label }}
+          </button>
+        }
+      </div>
+
+      <button #createButton type="button" class="primary" (click)="openCreate(null, null, createButton)">
+        <hugeicons-icon [icon]="Add01Icon" color="currentColor"></hugeicons-icon>
+        Nuova prenotazione
+      </button>
+    </div>
+  </div>
+
+  <!-- Riquadro di oggi: i numeri solo se il periodo mostrato comprende ieri e oggi. -->
+  <section class="today-card" aria-labelledby="today-title">
+    <div class="today-head">
+      <p class="today-kicker">Oggi</p>
+      <h3 id="today-title" class="today-date">{{ todayLabel() }}</h3>
+    </div>
+    @if (summary(); as today) {
+      <dl class="today-stats">
+        <div class="stat">
+          <dt>Arrivi</dt>
+          <dd>{{ today.arrivals }}</dd>
+        </div>
+        <div class="stat">
+          <dt>Partenze</dt>
+          <dd>{{ today.departures }}</dd>
+        </div>
+        <div class="stat">
+          <dt>Camere occupate</dt>
+          <dd>{{ today.occupiedRooms }} <span class="of">su {{ today.totalRooms }}</span></dd>
+        </div>
+      </dl>
+    } @else if (planning()) {
+      <div class="today-away">
+        <p class="text-small">Il periodo mostrato non comprende oggi.</p>
+        <button type="button" class="secondary" (click)="goToToday()">Torna a oggi</button>
+      </div>
+    }
+  </section>
+
+  @if (loadError()) {
+    <div class="load-error" role="alert">
+      <small class="error-message">{{ loadError() }}</small>
+      <button type="button" class="secondary" (click)="reload()">Riprova</button>
+    </div>
+  }
+
+  <div class="board" [class.refreshing]="isLoading() && planning()" [attr.aria-busy]="isLoading()">
+    @if (planning(); as data) {
+      <app-planning-grid
+        [rooms]="data.rooms"
+        [stays]="data.stays"
+        [dateFrom]="data.date_from"
+        [dateTo]="data.date_to"
+        [today]="today()"
+        [selectedBookingId]="selectedBookingId()"
+        (stayClick)="onStayClick($event)"
+        (cellClick)="onCellClick($event)">
+      </app-planning-grid>
+    } @else if (isLoading()) {
+      <p class="loading">Caricamento in corso...</p>
+    }
+  </div>
+
+  <!-- Legenda e avviso sulle prenotazioni che il tabellone non mostra. -->
+  <section class="legend-card" aria-labelledby="legend-title">
+    <div class="legend">
+      <h5 id="legend-title">Legenda</h5>
+      <ul class="legend-items">
+        @for (item of stayLegend; track item.label) {
+          <li>
+            <span class="swatch stay" [class]="item.tone" [class.pending]="item.pending" aria-hidden="true"></span>
+            {{ item.label }}
+          </li>
+        }
+        <li><span class="swatch edge" aria-hidden="true">‹ ›</span> Continua fuori dal periodo</li>
+        <li><span class="swatch today" aria-hidden="true"></span> Oggi</li>
+        <li><span class="swatch weekend" aria-hidden="true"></span> Fine settimana</li>
+        <li><span class="swatch free" aria-hidden="true">+</span> Notte libera: clic per creare</li>
+      </ul>
+    </div>
+
+    <div class="hidden-note">
+      <p class="text-small">
+        <strong>Annullate, scadute e non presentate</strong> non compaiono nel calendario:
+        le loro notti sono libere. Si trovano nell'Elenco.
+      </p>
+      <a class="button secondary" routerLink="/admin/bookings">
+        <hugeicons-icon [icon]="LeftToRightListBulletIcon" color="currentColor"></hugeicons-icon>
+        Apri l'Elenco
+        <hugeicons-icon [icon]="ArrowRight01Icon" color="currentColor"></hugeicons-icon>
+      </a>
+    </div>
+  </section>
+</section>
+
+@if (drawer(); as panel) {
+  <div class="drawer-backdrop" (click)="closeDrawer()"></div>
+  <aside #drawerPanel
+         class="drawer"
+         role="dialog"
+         aria-modal="true"
+         tabindex="-1"
+         [attr.aria-label]="panel.kind === 'detail' ? 'Prenotazione ' + panel.stay.code : 'Nuova prenotazione'"
+         (keydown.escape)="onDrawerEscape($event)">
+    @if (panel.kind === 'detail') {
+      <app-booking-detail
+        [headline]="panel.stay.guest_name"
+        [code]="panel.stay.code"
+        [booking]="detail.current()"
+        [isLoading]="detail.isLoading()"
+        [error]="detail.error()"
+        [isUpdating]="detail.isUpdating()"
+        [actionError]="detail.actionError()"
+        (close)="closeDrawer()"
+        (retry)="detail.retry()"
+        (statusChange)="onStatusChange($event)"
+        (paymentChange)="onPaymentChange($event)">
+      </app-booking-detail>
+    } @else {
+      <app-booking-create-form
+        [presetRoomId]="panel.roomId"
+        [presetCheckIn]="panel.checkIn"
+        (created)="onBookingCreated($event)"
+        (cancel)="closeDrawer()">
+      </app-booking-create-form>
+    }
+  </aside>
+}

@@ -1,5 +1,12 @@
 import { Component } from '@angular/core';
-import {Appointment02Icon, BedDoubleIcon, HotelBellIcon, Login02Icon, Wifi02Icon} from '@hugeicons/core-free-icons';
+import {
+  Appointment02Icon,
+  BedDoubleIcon,
+  HotelBellIcon,
+  LeftToRightListBulletIcon,
+  Login02Icon,
+  Wifi02Icon,
+} from '@hugeicons/core-free-icons';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,4 +24,5 @@ export class Dashboard {
   protected readonly HotelBellIcon = HotelBellIcon;
   protected readonly Wifi02Icon = Wifi02Icon;
   protected readonly Login02Icon = Login02Icon;
+  protected readonly LeftToRightListBulletIcon = LeftToRightListBulletIcon;
 }

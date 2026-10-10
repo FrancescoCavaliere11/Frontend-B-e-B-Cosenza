@@ -1,4 +1,4 @@
-import {Component, DestroyRef, OnInit, inject, output, signal} from '@angular/core';
+import {Component, DestroyRef, OnInit, inject, input, output, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {catchError, debounceTime, EMPTY, finalize, map, merge, Subject, switchMap} from 'rxjs';
@@ -75,6 +75,13 @@ export type SearchMode = 'dates' | 'rooms';
   ],
 })
 export class BookingCreateForm implements OnInit {
+  /**
+   * Camera e arrivo già scelti (clic su una notte libera del Calendario).
+   * Letti una volta, all'apertura: il form nasce già compilato.
+   */
+  presetRoomId = input<string | null>(null);
+  presetCheckIn = input<string | null>(null);
+
   created = output<BookingDetailSchema>();
   cancel = output<void>();
 
@@ -187,6 +194,37 @@ export class BookingCreateForm implements OnInit {
       this.occupancy$.next();
       if (this.currentStay()) this.lookup$.next();
     });
+
+    // Dopo le sottoscrizioni: il preset deve far partire le verifiche come una scelta a mano.
+    this.applyPreset();
+  }
+
+  /**
+   * Camera e arrivo arrivati dal Calendario.
+   *
+   * - Arrivo da oggi in poi: modalità «Per camera», con la camera scelta e
+   *   l'arrivo segnato sul calendario; manca solo la partenza, che il
+   *   calendario propone fra le notti libere.
+   * - Arrivo nel passato: il calendario «Per camera» parte da oggi, quindi
+   *   modalità «Per date» con una notte già impostata, da allungare a mano.
+   *   Al salvataggio resta la conferma esplicita delle date passate.
+   */
+  private applyPreset(): void {
+    const roomId = this.presetRoomId();
+    const checkIn = this.presetCheckIn();
+    if (!roomId || !checkIn) return;
+
+    if (checkIn >= this.today) {
+      this.searchMode.set('rooms');
+      this.roomIdsControl.setValue([roomId]);
+      this.stayGroup.patchValue({check_in: checkIn});
+    } else {
+      this.roomIdsControl.setValue([roomId]);
+      this.stayGroup.patchValue({
+        check_in: checkIn,
+        check_out: addDaysIso(checkIn, BOOKING_RULES.MIN_NIGHTS),
+      });
+    }
   }
 
   // ------------------------------------------------------------------ //
@@ -317,6 +355,10 @@ export class BookingCreateForm implements OnInit {
 
   /** Toglie dalla selezione le camere che non sono più fra quelle proposte, e lo dice. */
   private pruneSelection(): void {
+    // Camere attive non ancora arrivate (form aperto già compilato dal
+    // Calendario): togliere la selezione ora la perderebbe per niente.
+    if (this.isPastStay() && this.enabledRooms().length === 0) return;
+
     const offered = new Set(this.roomOptions().map(room => room.id));
     const selected = this.roomIdsControl.value;
     const kept = selected.filter(id => offered.has(id));

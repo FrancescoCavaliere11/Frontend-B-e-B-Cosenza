@@ -45,6 +45,14 @@
   --success-text: #166534;
 
   --shadow-soft: rgba(0, 0, 0, 0.1);
+  --shadow-strong: rgba(0, 0, 0, 0.18);
+  /* Velo dietro un pannello laterale aperto. */
+  --backdrop: #2020204D;
+  /* Fine settimana nel tabellone del Calendario. */
+  --planning-weekend: #20202005;
+
+  /* Barra di navigazione dell'area admin su telefono (in basso). */
+  --admin-mobile-nav-height: 60px;
 
   /* Tipografia: famiglie e dimensioni del testo riusate fra i componenti. */
   --font-family-base: "Inter", sans-serif;
@@ -54,6 +62,8 @@
   --font-size-xs: 0.75rem;     /* testo piccolo, etichette */
   --font-size-sm: 0.8125rem;   /* valori nelle schede di dettaglio */
   --font-size-md: 0.875rem;    /* importi in evidenza */
+  --font-size-lg: 1.0625rem;   /* data nel riquadro di oggi */
+  --font-size-stat: 1.5rem;    /* numeri dei riepiloghi */
 }
 
 * {

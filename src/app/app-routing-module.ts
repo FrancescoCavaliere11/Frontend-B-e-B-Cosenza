@@ -6,6 +6,7 @@ import {RoomServiceScreen} from './admin/screen/room-service-screen/room-service
 import {ExtraServiceScreen} from './admin/screen/extra-service-screen/extra-service-screen';
 import {RoomScreen} from './admin/screen/room-screen/room-screen';
 import {BookingScreen} from './admin/screen/booking-screen/booking-screen';
+import {CalendarScreen} from './admin/screen/calendar-screen/calendar-screen';
 import {adminGuard} from './security/admin-guard';
 
 const routes: Routes = [
@@ -24,7 +25,9 @@ const routes: Routes = [
     title: 'Admin Home',
     canActivate: [adminGuard],
     children: [
-      { path:'', redirectTo: 'bookings', pathMatch: 'full' },
+      // Il Calendario è la pagina iniziale dell'area admin (incremento 7, P1).
+      { path:'', redirectTo: 'calendar', pathMatch: 'full' },
+      { path:'calendar', component:CalendarScreen, title: 'Calendar Page' },
       { path:'bookings', component:BookingScreen, title: 'Bookings Page' },
       { path:'rooms', component:RoomScreen, title: 'Rooms Page' },
       { path:'rooms-services', component:RoomServiceScreen, title: 'Rooms Services Page' },
@@ -32,7 +35,7 @@ const routes: Routes = [
       // Deve restare l'ultima: le rotte si provano nell'ordine in cui sono
       // scritte. Un indirizzo sconosciuto sotto /admin passa comunque dalla
       // guard del genitore, quindi chi non è admin finisce su /login.
-      { path:'**', redirectTo: 'bookings' },
+      { path:'**', redirectTo: 'calendar' },
     ]
   }
 

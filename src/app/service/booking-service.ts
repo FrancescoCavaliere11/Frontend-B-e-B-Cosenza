@@ -9,6 +9,7 @@ import {
   PaginatedBookingsSchema,
 } from '../schemas/booking-schema';
 import {BookingStatus, PaymentMethod, PaymentStatus} from '../schemas/booking-enums';
+import {PlanningSchema} from '../schemas/booking-planning';
 import {SHOWS_OWN_ERRORS} from '../security/interceptor';
 
 /**
@@ -46,6 +47,23 @@ export class BookingService {
   getBooking(id: string): Observable<BookingDetailSchema> {
     return this.http.get<any>(`${this.apiUrl}${encodeURIComponent(id)}`).pipe(
       map(response => new BookingDetailSchema(response))
+    );
+  }
+
+  /**
+   * `GET /admin/bookings/planning` — camere e soggiorni della finestra
+   * `[dateFrom, dateTo)` per il tabellone.
+   *
+   * Nessuna cache: il tabellone si ricarica dopo ogni azione. L'errore lo
+   * mostra la schermata con «Riprova» (`SHOWS_OWN_ERRORS`).
+   */
+  getPlanning(dateFrom: string, dateTo: string): Observable<PlanningSchema> {
+    const params = new HttpParams().set('date_from', dateFrom).set('date_to', dateTo);
+    return this.http.get<any>(`${this.apiUrl}planning`, {
+      params,
+      context: new HttpContext().set(SHOWS_OWN_ERRORS, true),
+    }).pipe(
+      map(response => new PlanningSchema(response))
     );
   }
 

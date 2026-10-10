@@ -1,0 +1,413 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+
+  --drawer-width: 520px;
+  --drawer-padding: 12pt;
+}
+
+/*
+ * A differenza delle schermate a elenco (colonna di 800px) il tabellone
+ * prende tutta la larghezza disponibile: più giorni si vedono, meglio è.
+ */
+.calendar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8pt;
+  width: 100%;
+  min-width: 0;
+  padding: 0 8pt 16pt;
+  /* Spazio che testata e riquadro di oggi sottraggono all'altezza del tabellone. */
+  --planning-offset: 300px;
+}
+
+/* --- Testata --- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8pt;
+  padding: 8pt 0;
+  background: var(--background);
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: 8pt;
+}
+
+.range {
+  color: var(--text-weak);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8pt;
+}
+
+.nav,
+.spans {
+  display: flex;
+  align-items: center;
+  gap: 4pt;
+}
+
+.icon-button {
+  padding: 6pt;
+}
+
+.icon-button hugeicons-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Le icone disegnano solo il tratto: prende il colore del testo del pulsante. */
+.toolbar hugeicons-icon {
+  stroke: currentColor;
+}
+
+/* Più specifico di `input[type="date"]` in form.css, che la allargherebbe a tutta riga. */
+.toolbar > input.jump {
+  width: auto;
+  min-height: 0;
+  height: 30px;
+}
+
+/* Scelta dell'ampiezza: due pulsanti uniti, quello attivo pieno. */
+.spans {
+  gap: 0;
+  padding: 2pt;
+  border-radius: 8pt;
+  background: var(--fill-dark);
+  border: 1px solid var(--stroke-weak);
+}
+
+.span-option {
+  background: transparent;
+  color: var(--text-weak);
+  padding: 6pt 10pt;
+}
+
+.span-option.active {
+  background: var(--background);
+  color: var(--text-strong);
+  box-shadow: 0 1px 2px var(--shadow-soft);
+}
+
+.toolbar > .primary hugeicons-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* --- Oggi --- */
+.today-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8pt 24pt;
+  padding: 10pt 14pt;
+  border: 1px solid var(--brand-stroke-weak);
+  border-radius: 10pt;
+  background: var(--brand-fill);
+}
+
+.today-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2pt;
+}
+
+.today-kicker {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brand-weak);
+}
+
+.today-date {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--brand-strong);
+}
+
+/* Solo l'iniziale: in italiano i mesi restano minuscoli («Sabato 10 ottobre»). */
+.today-date::first-letter {
+  text-transform: uppercase;
+}
+
+.today-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8pt;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2pt;
+  min-width: 96px;
+  padding: 6pt 12pt;
+  border-radius: 8pt;
+  background: var(--background);
+  border: 1px solid var(--brand-stroke-weak);
+}
+
+.stat dt {
+  font-size: var(--font-size-2xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-weak);
+}
+
+.stat dd {
+  font-size: var(--font-size-stat);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-strong);
+}
+
+.stat .of {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-weak);
+}
+
+.today-away {
+  display: flex;
+  align-items: center;
+  gap: 8pt;
+  color: var(--text-weak);
+}
+
+/* --- Legenda e avviso --- */
+.legend-card {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 12pt 24pt;
+  padding: 10pt 14pt;
+  border: 1px solid var(--stroke-weak);
+  border-radius: 10pt;
+  background: var(--background);
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6pt;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6pt 16pt;
+  list-style: none;
+}
+
+.legend-items > li {
+  display: flex;
+  align-items: center;
+  gap: 6pt;
+  font-size: var(--font-size-xs);
+  color: var(--text-weak);
+}
+
+/* Campioni: stessa materia delle barre (stay-tones.css), in piccolo. */
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 14px;
+  border-radius: 4pt;
+  font-size: var(--font-size-2xs);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.swatch.edge {
+  width: auto;
+  height: auto;
+  color: var(--text-strong);
+}
+
+.swatch.today {
+  background: var(--brand-fill);
+  box-shadow: inset 0 -2px 0 var(--brand-weak);
+}
+
+.swatch.weekend {
+  background: var(--planning-weekend);
+  border: 1px solid var(--stroke-weak);
+}
+
+.swatch.free {
+  border: 1px dashed var(--stroke-strong);
+  background: var(--brand-range);
+  color: var(--brand-strong);
+}
+
+/* Avviso sulle prenotazioni che il tabellone non mostra, con il collegamento all'Elenco. */
+.hidden-note {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8pt;
+  padding: 8pt 10pt;
+  border-left: 3px solid var(--warning-strong);
+  border-radius: 6pt;
+  background: var(--warning-fill);
+}
+
+.hidden-note p {
+  color: var(--warning-text);
+}
+
+.hidden-note a.button {
+  background: var(--background);
+  border: 1px solid var(--warning-stroke);
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+
+.hidden-note a.button:hover {
+  border-color: var(--brand-stroke-strong);
+  box-shadow: 0 1px 3px var(--shadow-soft);
+}
+
+.hidden-note a.button hugeicons-icon {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+}
+
+.load-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8pt;
+  padding: 6pt 8pt;
+  border: 1px solid var(--error-stroke-weak);
+  border-radius: 8pt;
+  background: var(--error-fill);
+}
+
+/* --- Tabellone --- */
+.board {
+  width: 100%;
+  min-width: 0;
+  transition: opacity .2s ease-in-out;
+}
+
+.board.refreshing {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.loading {
+  padding: 16pt;
+  color: var(--text-weak);
+  font-size: var(--font-size-sm);
+}
+
+/* --- Pannello laterale --- */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--backdrop);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  width: min(var(--drawer-width), 100vw);
+  padding: var(--drawer-padding);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--background);
+  border-left: 1px solid var(--stroke-weak);
+  box-shadow: -8px 0 24px var(--shadow-strong);
+  /* Il form di creazione scorre da sé dentro questa altezza (form.css). */
+  --list-item-panel-max-height: calc(100dvh - 2 * var(--drawer-padding) + 8pt);
+  animation: drawer-in .25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer:focus {
+  outline: none;
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer {
+    animation: none;
+  }
+}
+
+/* --- Schermi piccoli --- */
+@media (max-width: 768px) {
+  .calendar-section {
+    --planning-offset: 380px;
+  }
+
+  .legend-card {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    width: 100%;
+  }
+
+  .toolbar > .primary {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  /*
+   * Su telefono la navigazione sta in basso e resta sopra il pannello (la
+   * pagina è un contesto di sovrapposizione a sé): il pannello si ferma
+   * sopra di lei invece di finirci sotto.
+   */
+  .drawer-backdrop {
+    bottom: var(--admin-mobile-nav-height);
+  }
+
+  .drawer {
+    bottom: var(--admin-mobile-nav-height);
+    width: 100vw;
+    border-left: none;
+    --list-item-panel-max-height: calc(100dvh - var(--admin-mobile-nav-height) - 2 * var(--drawer-padding) + 8pt);
+  }
+
+  .stat {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}

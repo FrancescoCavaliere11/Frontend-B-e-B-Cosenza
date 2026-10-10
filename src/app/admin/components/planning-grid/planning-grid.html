@@ -1,0 +1,72 @@
+<div class="planning-scroll" role="region" aria-label="Tabellone delle prenotazioni" tabindex="0">
+  <div class="planning-grid"
+       [class.wide]="isWide()"
+       [style.grid-template-columns]="gridColumns()"
+       [style.min-width]="minWidth()">
+
+    <!-- Intestazione: angolo e giorni. Le date sono già nelle descrizioni delle barre. -->
+    <div class="corner" aria-hidden="true">Camera</div>
+    @for (day of days(); track day.date; let index = $index) {
+      <div class="day-head"
+           aria-hidden="true"
+           [style.grid-column]="dayColumn(index)"
+           [class.weekend]="day.isWeekend"
+           [class.today]="day.isToday"
+           [title]="dayAriaLabel(day.date)">
+        <span class="month">{{ day.showsMonth ? monthLabel(day.date) : '' }}</span>
+        <span class="weekday">{{ weekdayLabel(day.date) }}</span>
+        <span class="day-number">{{ day.day }}</span>
+      </div>
+    }
+
+    @for (room of rooms(); track room.id; let row = $index) {
+      <div class="room" [style.grid-row]="row + 2" [class.disabled]="!room.enabled">
+        <span class="room-number">{{ room.number }}</span>
+        <span class="room-name">{{ room.name }}</span>
+        @if (!room.enabled) {
+          <span class="room-off">non in vendita</span>
+        }
+      </div>
+
+      <!-- Notti: sfondo della riga e, se libere, clic per creare. -->
+      @for (day of days(); track day.date; let index = $index) {
+        <div class="cell"
+             aria-hidden="true"
+             [style.grid-row]="row + 2"
+             [style.grid-column]="dayColumn(index)"
+             [class.weekend]="day.isWeekend"
+             [class.today]="day.isToday"
+             [class.free]="isFree(room, day.date)"
+             [attr.title]="isFree(room, day.date) ? cellTitle(room, day.date) : null"
+             (click)="onCellClick(room, day.date)">
+        </div>
+      }
+
+      @for (bar of barsOf(room); track bar.stay.booking_id) {
+        <button type="button"
+                class="bar stay"
+                [class]="statusTones[bar.stay.status]"
+                [class.pending]="bar.isPending"
+                [class.clipped-start]="bar.clippedStart"
+                [class.clipped-end]="bar.clippedEnd"
+                [class.selected]="selectedBookingId() === bar.stay.booking_id"
+                [style.grid-row]="row + 2"
+                [style.grid-column]="bar.columnStart + ' / ' + bar.columnEnd"
+                [attr.aria-label]="barLabel(bar, room)"
+                [title]="barTitle(bar, room)"
+                (click)="onBarClick(bar, $event)">
+          @if (bar.clippedStart) {
+            <span class="edge" aria-hidden="true">‹</span>
+          }
+          <span class="guest">{{ bar.stay.guest_name }}</span>
+          <span class="guests" aria-hidden="true">{{ bar.stay.guest_count }}</span>
+          @if (bar.clippedEnd) {
+            <span class="edge end" aria-hidden="true">›</span>
+          }
+        </button>
+      }
+    } @empty {
+      <p class="empty" [style.grid-column]="'1 / -1'">Nessuna camera da mostrare</p>
+    }
+  </div>
+</div>

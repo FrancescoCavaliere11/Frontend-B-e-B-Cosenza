@@ -1,0 +1,271 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+
+  /* Misure del tabellone: valgono solo qui. */
+  --planning-room-width: 132px;
+  --planning-day-width: 56px;
+  --planning-header-height: 52px;
+  --planning-row-height: 44px;
+  --planning-bar-inset: 6px;
+}
+
+/*
+ * Scorre in entrambe le direzioni dentro un'area di altezza limitata: così
+ * intestazione dei giorni e colonna delle camere restano agganciate
+ * (`sticky` si riferisce al contenitore che scorre più vicino).
+ */
+.planning-scroll {
+  width: 100%;
+  max-height: calc(100dvh - var(--planning-offset, 220px));
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--stroke-weak);
+  border-radius: 8pt;
+  background: var(--background);
+}
+
+.planning-scroll:focus-visible {
+  outline: 2px solid var(--brand-weak);
+  outline-offset: 2px;
+}
+
+.planning-grid {
+  /*
+   * Calcolata qui e non su :host: una variabile si risolve dove è dichiarata,
+   * e `.wide` deve poterla cambiare cambiando solo la larghezza del giorno.
+   */
+  --planning-half-day-width: calc(var(--planning-day-width) / 2);
+  display: grid;
+  grid-template-rows: var(--planning-header-height);
+  grid-auto-rows: var(--planning-row-height);
+  /*
+   * Larga quanto il contenitore, ma mai meno della somma delle colonne
+   * (`min-width` dal componente). Non `max-content`: il testo delle barre
+   * allargherebbe i giorni che attraversano.
+   */
+  width: 100%;
+}
+
+/* Il mese intero: colonne più strette. */
+.planning-grid.wide {
+  --planning-day-width: 36px;
+}
+
+/* --- Intestazione --- */
+.corner,
+.day-head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  grid-row: 1;
+  background: var(--background);
+  border-bottom: 1px solid var(--stroke-strong);
+}
+
+.corner {
+  left: 0;
+  z-index: 4;
+  grid-column: 1;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 8pt 6pt;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-weak);
+  border-right: 1px solid var(--stroke-strong);
+}
+
+.day-head {
+  position: sticky;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 4pt;
+  line-height: 1.1;
+  border-left: 1px solid var(--stroke-weak);
+  color: var(--text-weak);
+}
+
+.day-head .weekday {
+  font-size: var(--font-size-2xs);
+  text-transform: capitalize;
+}
+
+.day-head .day-number {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+/* Riga del mese: sempre presente, vuota se il giorno non apre un mese, così i giorni restano allineati. */
+.day-head .month {
+  min-height: 1.1em;
+  font-size: var(--font-size-2xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--brand-weak);
+}
+
+.day-head.weekend {
+  background: var(--planning-weekend);
+}
+
+.day-head.today {
+  background: var(--brand-fill);
+  box-shadow: inset 0 -2px 0 var(--brand-weak);
+}
+
+.day-head.today .day-number {
+  color: var(--brand-strong);
+}
+
+/* --- Camere --- */
+.room {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 0 8pt;
+  background: var(--background);
+  border-right: 1px solid var(--stroke-strong);
+  border-bottom: 1px solid var(--stroke-weak);
+}
+
+.room-number {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.room-name,
+.room-off {
+  font-size: var(--font-size-2xs);
+  color: var(--text-weak);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.room.disabled .room-number {
+  color: var(--text-weak);
+}
+
+/* --- Notti --- */
+.cell {
+  border-left: 1px solid var(--stroke-weak);
+  border-bottom: 1px solid var(--stroke-weak);
+}
+
+.cell.weekend {
+  background: var(--planning-weekend);
+}
+
+.cell.today {
+  background: var(--brand-fill);
+}
+
+.cell.free {
+  cursor: pointer;
+  transition: background-color .15s ease-in-out;
+}
+
+.cell.free:hover {
+  background: var(--brand-range);
+}
+
+/* --- Barre --- */
+.bar {
+  z-index: 1;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 4pt;
+  min-width: 0;
+  height: calc(var(--planning-row-height) - 2 * var(--planning-bar-inset));
+  margin: 0 1px;
+  padding: 0 6pt;
+  border-radius: 6pt;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition: box-shadow .15s ease-in-out, transform .15s ease-in-out;
+}
+
+.bar:hover {
+  box-shadow: 0 2px 6px var(--shadow-soft);
+}
+
+.bar:focus-visible {
+  outline: 2px solid var(--brand-strong);
+  outline-offset: 1px;
+}
+
+.bar.selected {
+  box-shadow: 0 0 0 2px var(--brand-strong);
+}
+
+/* Colori e tratteggio: `public/css/stay-tones.css`, condiviso con la legenda. */
+
+/* Il soggiorno continua oltre il bordo: niente angolo arrotondato da quel lato. */
+.bar.clipped-start {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left-width: 0;
+  margin-left: 0;
+}
+
+.bar.clipped-end {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right-width: 0;
+  margin-right: 0;
+}
+
+.bar .guest {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar .guests {
+  flex-shrink: 0;
+  font-size: var(--font-size-2xs);
+  opacity: 0.75;
+}
+
+.bar .edge {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.empty {
+  padding: 16pt;
+  color: var(--text-weak);
+  font-size: var(--font-size-sm);
+}
+
+@media (max-width: 576px) {
+  :host {
+    --planning-room-width: 76px;
+  }
+
+  .room-name,
+  .room-off {
+    display: none;
+  }
+
+  .bar .guests {
+    display: none;
+  }
+}
