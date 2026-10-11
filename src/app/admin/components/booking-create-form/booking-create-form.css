@@ -306,3 +306,20 @@ h5 .text-small {
   }
 
 }
+
+/* Telefono: tutta la riga, perché prefisso e numero stiano affiancati. */
+.phone-group {
+  grid-column: 1 / -1;
+}
+
+/* Telefono: prefisso internazionale e numero sulla stessa riga. */
+.phone-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr);
+  gap: 6pt;
+}
+
+/* Con «Altro prefisso» compare il campo del prefisso, stretto. */
+.phone-fields.custom {
+  grid-template-columns: minmax(0, 8.5rem) 4.5rem minmax(0, 1fr);
+}

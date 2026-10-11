@@ -23,7 +23,21 @@ import {
 } from '../../../schemas/booking-enums';
 import {addDaysIso, formatAmount, formatStayDate, formatStayRange, nightsBetween, todayIso} from '../../../utils/booking-format';
 import {StayRange, VisibleRange} from '../../../shared/components/stay-calendar/stay-calendar';
-import {EMAIL_PATTERN, stayRulesValidator} from '../../../validators/validators';
+import {
+  EMAIL_PATTERN,
+  italianMobileValidator,
+  phoneDigitsOf,
+  phoneDigitsValidator,
+  stayRulesValidator,
+} from '../../../validators/validators';
+import {
+  CUSTOM_PREFIX_PATTERN,
+  DEFAULT_PHONE_PREFIX,
+  ITALIAN_MOBILE_FIRST_DIGIT,
+  normalizePrefix,
+  OTHER_PHONE_PREFIX,
+  PHONE_PREFIXES,
+} from '../../../schemas/phone-prefixes';
 
 /** Camera proposta nel form: dalla disponibilità (date future) o dall'elenco camere (passate). */
 interface RoomOption {
@@ -96,6 +110,8 @@ export class BookingCreateForm implements OnInit {
   protected readonly formatStayDate = formatStayDate;
   protected readonly formatStayRange = formatStayRange;
   protected readonly today = todayIso();
+  protected readonly phonePrefixes = PHONE_PREFIXES;
+  protected readonly otherPhonePrefix = OTHER_PHONE_PREFIX;
 
   form: FormGroup;
 
@@ -166,7 +182,15 @@ export class BookingCreateForm implements OnInit {
         firstname: ['', this.nameValidators()],
         lastname: ['', this.nameValidators()],
         email: ['', [Validators.required, Validators.pattern(EMAIL_PATTERN)]],
-        phone_number: ['', [Validators.required, Validators.pattern(new RegExp(`^\\d{${BOOKING_RULES.PHONE_LENGTH}}$`))]],
+        // Prefisso dal menu (Italia predefinita) o scritto a mano con «Altro».
+        phone_prefix: [DEFAULT_PHONE_PREFIX],
+        phone_custom_prefix: [''],
+        phone_number: ['', [Validators.required, phoneDigitsValidator(BOOKING_RULES.PHONE_DIGITS)]],
+      }, {
+        // Con il prefisso italiano solo cellulari: il numero inizia con 3.
+        validators: italianMobileValidator(
+          'phone_prefix', 'phone_number', DEFAULT_PHONE_PREFIX, ITALIAN_MOBILE_FIRST_DIGIT
+        ),
       }),
       admin_notes: ['', Validators.maxLength(BOOKING_RULES.NOTES_MAX_LENGTH)],
     });
@@ -177,6 +201,7 @@ export class BookingCreateForm implements OnInit {
     this.setupOccupancyStream();
     this.setupQuoteStream();
     this.setupPaymentRules();
+    this.setupPhonePrefixRules();
     this.loadEnabledRooms();
 
     this.stayGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
@@ -755,6 +780,50 @@ export class BookingCreateForm implements OnInit {
   // Ospite e note                                                       //
   // ------------------------------------------------------------------ //
 
+  /** Con «Altro prefisso» il campo del prefisso diventa obbligatorio. */
+  private setupPhonePrefixRules(): void {
+    const custom = this.guestGroup.get('phone_custom_prefix')!;
+    this.guestGroup.get('phone_prefix')!.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(prefix => {
+        if (prefix === OTHER_PHONE_PREFIX) {
+          custom.setValidators([Validators.required, Validators.pattern(CUSTOM_PREFIX_PATTERN)]);
+        } else {
+          custom.clearValidators();
+          custom.setValue('', {emitEvent: false});
+        }
+        custom.updateValueAndValidity({emitEvent: false});
+      });
+  }
+
+  isCustomPhonePrefix(): boolean {
+    return this.guestGroup.get('phone_prefix')?.value === OTHER_PHONE_PREFIX;
+  }
+
+  /** Prefisso e numero in un'unica stringa: `+44` + `20 7946 0958` → `+442079460958`. */
+  private fullPhoneNumber(): string {
+    const {phone_prefix, phone_custom_prefix, phone_number} = this.guestGroup.getRawValue();
+    const prefix = phone_prefix === OTHER_PHONE_PREFIX ? normalizePrefix(phone_custom_prefix) : phone_prefix;
+    return `${prefix}${phoneDigitsOf(phone_number)}`;
+  }
+
+  /**
+   * Errore del telefono: formato e lunghezza sono del campo, la regola del
+   * cellulare italiano è del gruppo (dipende anche dal prefisso).
+   */
+  phoneError(): string | null {
+    const control = this.guestGroup.get('phone_number');
+    if (!control?.touched) return null;
+    if (control.hasError('required')) return 'Il telefono è obbligatorio';
+    switch (control.getError('phoneDigits')) {
+      case 'format': return 'Solo cifre: spazi, trattini e punti sono ammessi';
+      case 'length': return `Il numero, senza prefisso, deve avere ${BOOKING_RULES.PHONE_DIGITS} cifre`;
+    }
+    return this.guestGroup.hasError('italianMobile')
+      ? 'Inserisci un cellulare italiano: inizia con 3 e ha 10 cifre'
+      : null;
+  }
+
   fieldError(path: string): string | null {
     const control = this.form.get(path);
     // Solo dopo che l'utente ha lasciato il campo: non mentre scrive.
@@ -766,8 +835,8 @@ export class BookingCreateForm implements OnInit {
         return `Da ${BOOKING_RULES.NAME_MIN_LENGTH} a ${BOOKING_RULES.NAME_MAX_LENGTH} caratteri`;
       case 'guest.email':
         return 'Inserisci un indirizzo email completo';
-      case 'guest.phone_number':
-        return `Il telefono deve avere ${BOOKING_RULES.PHONE_LENGTH} cifre, solo numeri`;
+      case 'guest.phone_custom_prefix':
+        return 'Prefisso da 1 a 4 cifre, es. +351';
       case 'payment.payment_method':
         return 'Indica il metodo con cui l\'ospite ha pagato';
       case 'admin_notes':
@@ -844,7 +913,8 @@ export class BookingCreateForm implements OnInit {
         firstname: guest.firstname.trim(),
         lastname: guest.lastname.trim(),
         email: guest.email.trim(),
-        phone_number: guest.phone_number.trim(),
+        // Il backend lo salva normalizzato in E.164 (+393331234567).
+        phone_number: this.fullPhoneNumber(),
       },
       skip_email_confirmation: !!payment.skip_email_confirmation,
       mark_as_paid: !!payment.mark_as_paid,
@@ -868,7 +938,10 @@ export class BookingCreateForm implements OnInit {
         mark_as_paid: false,
         payment_method: '',
       },
-      guest: {firstname: '', lastname: '', email: '', phone_number: ''},
+      guest: {
+        firstname: '', lastname: '', email: '',
+        phone_prefix: DEFAULT_PHONE_PREFIX, phone_custom_prefix: '', phone_number: '',
+      },
       admin_notes: '',
     });
     this.applyPaymentRules();

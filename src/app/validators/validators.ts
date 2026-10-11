@@ -32,6 +32,47 @@ export function passwordStrengthValidator(): ValidatorFn {
   };
 }
 
+/** Separatori tollerati in un numero di telefono, come nel backend. */
+const PHONE_SEPARATORS = /[\s.-]/g;
+
+/** Cifre di un numero scritto a gruppi: `333 123-4567` → `3331234567`. */
+export function phoneDigitsOf(value: string | null | undefined): string {
+  return (value ?? '').replace(PHONE_SEPARATORS, '');
+}
+
+/**
+ * Numero di telefono senza prefisso: solo cifre, con spazi, trattini e punti
+ * tollerati (chi lo detta lo scrive a gruppi), esattamente `length` cifre.
+ *
+ * TODO(#40): la lunghezza dipende dal Paese; oggi è unica per tutti.
+ */
+export function phoneDigitsValidator(length: number): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value: string = (control.value ?? '').trim();
+    if (!value) return null;
+    if (!/^[\d\s.-]+$/.test(value)) return {phoneDigits: 'format'};
+    return phoneDigitsOf(value).length !== length ? {phoneDigits: 'length'} : null;
+  };
+}
+
+/**
+ * Regola di gruppo: con il prefisso italiano il numero deve essere un
+ * cellulare, cioè iniziare con `firstDigit` (3). L'errore va sul gruppo,
+ * perché dipende da due campi: prefisso e numero.
+ */
+export function italianMobileValidator(
+  prefixKey: string,
+  numberKey: string,
+  italianPrefix: string,
+  firstDigit: string,
+): ValidatorFn {
+  return (group: AbstractControl): ValidationErrors | null => {
+    if (group.get(prefixKey)?.value !== italianPrefix) return null;
+    const digits = phoneDigitsOf(group.get(numberKey)?.value);
+    return digits && !digits.startsWith(firstDigit) ? {italianMobile: true} : null;
+  };
+}
+
 /**
  * Validatore di gruppo per un intervallo di date `YYYY-MM-DD`.
  *

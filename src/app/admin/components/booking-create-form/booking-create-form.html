@@ -342,12 +342,29 @@
             <small class="error-message">{{ error }}</small>
           }
         </div>
-        <div class="form-group">
+        <div class="form-group phone-group">
           <label for="create-phone">Telefono</label>
-          <input id="create-phone" type="tel" inputmode="numeric" formControlName="phone_number"
-                 autocomplete="off" [attr.maxlength]="rules.PHONE_LENGTH"
-                 [class.invalid]="fieldError('guest.phone_number')">
-          @if (fieldError('guest.phone_number'); as error) {
+          <!-- Prefisso + numero: si invia «+44» + «20 7946 0958», il backend salva +442079460958. -->
+          <div class="phone-fields" [class.custom]="isCustomPhonePrefix()">
+            <select formControlName="phone_prefix" aria-label="Prefisso internazionale">
+              @for (prefix of phonePrefixes; track prefix.code) {
+                <option [value]="prefix.code">{{ prefix.code }} {{ prefix.country }}</option>
+              }
+              <option [value]="otherPhonePrefix">Altro prefisso…</option>
+            </select>
+            @if (isCustomPhonePrefix()) {
+              <input type="tel" inputmode="tel" formControlName="phone_custom_prefix"
+                     aria-label="Prefisso" placeholder="+351" maxlength="5" autocomplete="off"
+                     [class.invalid]="fieldError('guest.phone_custom_prefix')">
+            }
+            <input id="create-phone" type="tel" inputmode="numeric" formControlName="phone_number"
+                   autocomplete="off" placeholder="333 123 4567" maxlength="20"
+                   [class.invalid]="phoneError()">
+          </div>
+          @if (fieldError('guest.phone_custom_prefix'); as error) {
+            <small class="error-message">{{ error }}</small>
+          }
+          @if (phoneError(); as error) {
             <small class="error-message">{{ error }}</small>
           }
         </div>
