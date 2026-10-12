@@ -1,0 +1,194 @@
+/*
+ * Colori del tema registrati come <color>: così si possono animare, e
+ * TUTTO ciò che li usa (header, sfumature, bottoni, pallini) sfuma in
+ * sincrono con lo sfondo. `initial-value` deve essere un valore letterale
+ * (la specifica non ammette var()): sono gli stessi di linen ed espresso.
+ */
+@property --site-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #F4EFE7;
+}
+
+@property --site-fg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2E2621;
+}
+
+/*
+ * Token del sito. I colori di base arrivano dalla palette condivisa con
+ * l'admin (`src/styles.css`, `--color-*`): qui si combinano in temi.
+ */
+html.site {
+  /* --- Tema corrente: lo scrive ThemeService, sfuma in --dur-theme --- */
+  --site-bg: var(--color-linen);
+  --site-fg: var(--color-espresso);
+
+  /* --- Velature e tinte derivate --- */
+  --site-veil: color-mix(in oklab, var(--color-primary) 80%, transparent);
+  --site-veil-blur: 8px;
+  --site-backdrop: color-mix(in oklab, var(--color-black) 45%, transparent);
+  --site-divider-opacity: 0.2;
+  --site-muted-opacity: 0.6;
+  --site-dimmed-opacity: 0.5;
+  --site-media-fallback: color-mix(in oklab, var(--site-fg) 8%, var(--site-bg));
+  --site-focus-ring: color-mix(in oklab, currentColor 45%, transparent);
+  --site-shadow-logo: drop-shadow(0 4px 4px color-mix(in oklab, var(--color-black) 15%, transparent));
+  --site-error: var(--color-terracotta);
+  /* Filetti e bordi: sempre derivati dal colore del testo corrente. */
+  --site-rule: color-mix(in oklab, currentColor 18%, transparent);
+  --site-rule-strong: color-mix(in oklab, currentColor 30%, transparent);
+  --site-selected-fill: color-mix(in oklab, var(--color-primary) 8%, transparent);
+  --site-viewer-bg: color-mix(in oklab, var(--color-espresso) 96%, transparent);
+  --site-soft-opacity: 0.8;
+  --site-card-dim: 0.8;
+
+  /* --- Tipografia --- */
+  --font-body: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-label: "Jost", "Avenir Next", system-ui, sans-serif;
+
+  --text-12: 0.75rem;
+  --text-14: 0.875rem;
+  --text-16: 1rem;
+  --text-18: 1.125rem;
+  --text-20: 1.25rem;
+  --text-24: 1.5rem;
+  --text-32: 2rem;
+  --text-40: 2.5rem;
+  --text-56: 3.5rem;
+  --text-90: 5.625rem;
+  --text-cover: clamp(1.5rem, 1.15rem + 1.5vw, 2.5rem);
+  --text-page-cover: clamp(2.5rem, 1.4rem + 4.7vw, 5.625rem);
+  --text-wordmark: clamp(2.75rem, 1.2rem + 7vw, 7.5rem);
+
+  --tracking-plump: 0.02em;
+  --tracking-body: 0.015em;
+  --tracking-label: 0.2em;
+  --leading-tight: 1.1;
+  --leading-snug: 1.3;
+  --leading-normal: 1.55;
+  --measure-text: 32em;
+  --measure-heading: 18em;
+
+  /* --- Spaziatura: unità base 5px, come il blueprint --- */
+  --space: 5px;
+  --space-xs: calc(var(--space) * 2);   /* 10 */
+  --space-s: calc(var(--space) * 4);    /* 20 */
+  --space-m: calc(var(--space) * 8);    /* 40 */
+  --space-l: calc(var(--space) * 16);   /* 80 */
+  --space-xl: calc(var(--space) * 30);  /* 150 */
+  --block-gap: var(--space-xl);
+  --block-gap-media: var(--space-xl);
+  --block-gap-tight: var(--space-l);
+
+  /* --- Griglia e contenitore --- */
+  --site-max-width: 1920px;
+  --site-outer-gutter: var(--space-s);
+  --site-inner-gutter: var(--space-s);
+  --site-columns: 2;
+  --site-header-height: 76px;
+  --site-header-padding-y: var(--space-s);
+  --site-logo-width: 132px;
+  --site-wordmark-width: 70vw;
+  --site-line-short: 70px;
+  --site-line-dropdown: 77px;
+  --site-line-tall: 135px;
+  --site-icon: 22px;
+  --site-icon-s: 14px;
+  --site-control: 44px;
+  --site-control-s: 32px;
+  --site-dot: 6px;
+  --site-border: 1px;
+  --site-border-strong: 2px;
+  --site-overlay-max: 1280px;
+  --site-panel-max: 760px;
+  --site-card-blur: 20px;
+  --site-placeholder-blur: 12px;
+  --site-placeholder-scale: 1.1;
+  --site-dot-active-scale: 1.3;
+  --site-focus-offset: 3px;
+  --site-check: 18px;
+  --site-check-mark: 10px;
+  --site-link-shift: -8px;
+  --site-gallery-height: min(70vh, 135vw);
+  --site-inset-wide: 8vw;
+
+  /* --- Forme --- */
+  --radius-xs: 2px;
+  --radius-md: 6px;
+  --radius-round: 999px;
+
+  /* --- Movimento --- */
+  --ease-smooth: cubic-bezier(.4, 0, .2, 1);
+  --ease-out: cubic-bezier(0, 0, .2, 1);
+  --ease-in-expo: cubic-bezier(.95, .05, .795, .035);
+  --ease-out-expo: cubic-bezier(.19, 1, .22, 1);
+  --ease-in-out-expo: cubic-bezier(1, 0, 0, 1);
+  --ease-out-quart: cubic-bezier(.215, .61, .355, 1);
+  --ease-in-out-quart: cubic-bezier(.77, 0, .175, 1);
+
+  --dur-theme: 3s;
+  --dur-element: .2s;
+  --dur-fast: .35s;
+  --dur-fade: .5s;
+  --dur-slow: .8s;
+  --dur-panel: 1s;
+  --dur-image: 1s;
+  --dur-line: 1.5s;
+  --stagger-step: 70ms;
+  --stagger-reveal: 120ms;
+  --delay-card-text: .15s;
+
+  /* --- Livelli --- */
+  --z-sticky-logo: 1;
+  --z-content: 2;
+  --z-header-veil: 9;
+  --z-header: 10;
+  --z-overlay: 20;
+  --z-drawer: 30;
+  --z-booking: 40;
+  --z-gallery: 50;
+  --z-intro: 60;
+
+  /* --- Compatibilità con i componenti condivisi con l'admin --- */
+  --font-family-base: var(--font-body);
+}
+
+@media (width >= 640px) {
+  html.site { --site-columns: 4; }
+}
+
+@media (width >= 768px) {
+  html.site {
+    --site-columns: 12;
+    --site-outer-gutter: var(--space-m);
+    --site-header-height: 150px;
+    --site-header-padding-y: var(--space-m);
+    --site-logo-width: clamp(120px, 40px + 12vw, 200px);
+    --site-wordmark-width: 46vw;
+    --block-gap-media: 15.75vw;
+    --site-line-tall: 200px;
+  }
+}
+
+@media (width >= 1440px) {
+  html.site { --site-outer-gutter: calc(var(--space) * 12); }
+}
+
+@media (width >= 1920px) {
+  html.site { --block-gap-media: 300px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.site {
+    --dur-theme: .3s;
+    --dur-fade: .2s;
+    --dur-slow: .2s;
+    --dur-panel: .3s;
+    --dur-image: .2s;
+    --dur-line: .2s;
+    --stagger-step: 0ms;
+    --site-card-blur: 0px;
+  }
+}

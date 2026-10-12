@@ -1,0 +1,26 @@
+<div class="drawer__inner" [siteFocusTrap]="layout.isDrawerOpen()">
+  <nav class="drawer__nav" aria-label="Menu">
+    <ul class="drawer__list">
+      @for (item of nav; track item.label; let i = $index) {
+        <li class="drawer__item" [style.--i]="i">
+          @if (isGroup(item)) {
+            <site-accordion [title]="item.label" titleClass="drawer__group type-title">
+              <ul class="drawer__sublist">
+                @for (child of item.children; track child.path) {
+                  <li><a class="type-body-lg" [routerLink]="child.path" (click)="layout.closeMenus()">{{ child.label }}</a></li>
+                }
+              </ul>
+            </site-accordion>
+          } @else {
+            <a class="type-title" [routerLink]="item.path" (click)="layout.closeMenus()">{{ item.label }}</a>
+          }
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <div class="drawer__footer">
+    <a class="type-label-sm" [href]="site.phone.href">{{ site.phone.display }}</a>
+    <button type="button" class="button button--block" (click)="openBooking()">{{ ui.book }}</button>
+  </div>
+</div>

@@ -1,4 +1,22 @@
 
+/*
+ * Palette condivisa fra area admin e sito pubblico.
+ * `--color-primary` è il colore principale di ENTRAMBI: si cambia qui e basta.
+ * Il sito ne deriva i suoi temi (`src/app/site/styles/tokens.css`), l'admin
+ * le varianti `--brand-*` qui sotto.
+ */
+:root {
+  --color-primary: #2F3A2E;      /* salvia profondo — brand */
+  --color-sage: #5E6B55;         /* salvia */
+  --color-terracotta: #9C5A40;   /* terracotta tenue — accento */
+  --color-linen: #F4EFE7;        /* off-white caldo */
+  --color-sand: #E6DCCB;
+  --color-blush: #EBD9CE;
+  --color-espresso: #2E2621;     /* testo su fondo chiaro */
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+}
+
 :root {
   --background: #F5F7FA;
   --background-trasparent: #F5F7FA80;
@@ -6,7 +24,7 @@
   --fill: #FFFFFF1A;
   --fill-dark: #20202008;
 
-  --text-strong: #3e2d2d;
+  --text-strong: var(--color-espresso);
   --text-weak: #756a6a;
 
   --text-on-black-strong: #FFFFFF;
@@ -18,13 +36,14 @@
   --stroke-on-black-strong: #F2FAFB73;
   --stroke-on-black-weak: #F2FAFB26;
 
-  --brand-strong: #3e2d2d;
-  --brand-weak: #6e5959;
-  --brand-stroke-strong: #574444;
-  --brand-stroke-weak: #e8e2e2;
-  --brand-fill: #f5f0f0;
+  /* Varianti del colore principale, tutte derivate da --color-primary. */
+  --brand-strong: var(--color-primary);
+  --brand-weak: color-mix(in srgb, var(--color-primary) 72%, var(--color-white));
+  --brand-stroke-strong: color-mix(in srgb, var(--color-primary) 85%, var(--color-white));
+  --brand-stroke-weak: color-mix(in srgb, var(--color-primary) 14%, var(--color-white));
+  --brand-fill: color-mix(in srgb, var(--color-primary) 6%, var(--color-white));
   /* Fascia di un intervallo selezionato (calendario): visibile anche sopra --brand-fill. */
-  --brand-range: #6e595933;
+  --brand-range: color-mix(in srgb, var(--color-primary) 20%, transparent);
 
   --error-strong: #EF4444;
   --error-weak: #EF4444E6;

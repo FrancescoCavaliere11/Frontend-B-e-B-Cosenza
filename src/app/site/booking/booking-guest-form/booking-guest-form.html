@@ -1,0 +1,76 @@
+<form class="guest" [formGroup]="form" novalidate (ngSubmit)="submit()">
+  <h2 class="type-title guest__title">{{ ui.title }}</h2>
+
+  <div class="guest__grid">
+    <div class="field">
+      <label class="field__label" for="g-firstname">{{ ui.firstname }}</label>
+      <input id="g-firstname" class="field__input" formControlName="firstname" autocomplete="given-name"
+             [attr.aria-invalid]="!!errorOf('firstname')" [attr.aria-describedby]="errorOf('firstname') ? 'g-firstname-e' : null">
+      @if (errorOf('firstname'); as error) { <p id="g-firstname-e" class="field__error">{{ error }}</p> }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="g-lastname">{{ ui.lastname }}</label>
+      <input id="g-lastname" class="field__input" formControlName="lastname" autocomplete="family-name"
+             [attr.aria-invalid]="!!errorOf('lastname')" [attr.aria-describedby]="errorOf('lastname') ? 'g-lastname-e' : null">
+      @if (errorOf('lastname'); as error) { <p id="g-lastname-e" class="field__error">{{ error }}</p> }
+    </div>
+
+    <div class="field guest__wide">
+      <label class="field__label" for="g-email">{{ ui.email }}</label>
+      <input id="g-email" class="field__input" type="email" formControlName="email" autocomplete="email"
+             [attr.aria-invalid]="!!errorOf('email')" aria-describedby="g-email-h">
+      <p id="g-email-h" class="field__hint">{{ ui.emailHelp }}</p>
+      @if (errorOf('email'); as error) { <p class="field__error">{{ error }}</p> }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="g-prefix">{{ ui.prefix }}</label>
+      <select id="g-prefix" class="field__input" formControlName="phone_prefix">
+        @for (prefix of prefixes; track prefix.code) { <option [value]="prefix.code">{{ prefix.code }} · {{ prefix.country }}</option> }
+        <option [value]="otherPrefix">{{ ui.otherPrefix }}</option>
+      </select>
+      @if (isCustomPrefix()) {
+        <input class="field__input" formControlName="phone_custom_prefix" [attr.aria-label]="ui.customPrefix" [placeholder]="ui.customPrefix"
+               [attr.aria-invalid]="!!errorOf('phone_custom_prefix')">
+        @if (errorOf('phone_custom_prefix'); as error) { <p class="field__error">{{ error }}</p> }
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="g-phone">{{ ui.phone }}</label>
+      <input id="g-phone" class="field__input" type="tel" inputmode="tel" formControlName="phone_number" autocomplete="tel-national"
+             [attr.aria-invalid]="!!errorOf('phone_number')" aria-describedby="g-phone-h">
+      <p id="g-phone-h" class="field__hint">{{ ui.phoneHelp }}</p>
+      @if (errorOf('phone_number'); as error) { <p class="field__error">{{ error }}</p> }
+    </div>
+  </div>
+
+  <!-- Trappola per i bot: invisibile e non raggiungibile da tastiera. -->
+  <div class="honeypot" aria-hidden="true">
+    <label for="g-website">Sito web</label>
+    <input id="g-website" formControlName="website" tabindex="-1" autocomplete="off">
+  </div>
+
+  <label class="choice guest__terms">
+    <input type="checkbox" formControlName="accept_terms" [attr.aria-invalid]="!!errorOf('accept_terms')">
+    <span class="type-body">
+      {{ ui.terms }} <a class="link-underline" [routerLink]="routes.terms" target="_blank">{{ ui.termsLink }}</a>&nbsp;<a class="link-underline" [routerLink]="routes.privacy" target="_blank">{{ ui.privacy }}</a>
+    </span>
+  </label>
+  @if (errorOf('accept_terms'); as error) { <p class="field__error">{{ error }}</p> }
+
+  @if (captcha.isEnabled) {
+    <div class="guest__captcha" #captcha></div>
+    @if (captchaFailed()) { <p class="field__error">{{ ui.captchaError }}</p> }
+  }
+
+  <footer class="booking-actions">
+    <button type="button" class="text-action" (click)="store.back()">{{ common.back }}</button>
+    <div aria-live="polite">@if (store.error(); as error) { <p class="form-error">{{ error.message }}</p> }</div>
+    <button type="submit" class="button button--solid" [disabled]="store.isBusy()">
+      @if (store.isBusy()) { <span class="spinner"></span> }
+      {{ isPayNow ? ui.submitNow : ui.submitArrival }}
+    </button>
+  </footer>
+</form>

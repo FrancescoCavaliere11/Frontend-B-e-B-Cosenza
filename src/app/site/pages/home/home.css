@@ -1,0 +1,41 @@
+:host { display: block; }
+
+.home-hero {
+  position: relative;
+  margin-top: calc(var(--site-header-height) * -1);
+}
+
+/* Logo gigante: resta al centro mentre la foto gli scorre sotto. */
+.home-hero__wordmark {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-content);
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  margin-bottom: -100vh;
+  padding-inline: var(--site-outer-gutter);
+  filter: var(--site-shadow-logo);
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease-smooth);
+}
+
+.home-hero__wordmark.is-hidden { opacity: 0; }
+
+.home-hero__grid {
+  min-height: 100vh;
+  align-content: center;
+  padding-block: var(--site-header-height);
+}
+
+.home-hero__media { --col-start: 5; --col-end: 9; }
+
+.home-section { padding-top: var(--space-xl); }
+.home-section:first-of-type { padding-top: var(--space-l); }
+
+/* L'ultima fascia occupa lo schermo: il suo tema deve poter attraversare il centro. */
+.home-section:last-of-type { display: grid; align-content: center; min-height: 100vh; }
+
+@media (width >= 768px) {
+  .home-hero__grid { padding-bottom: var(--space-xl); }
+}

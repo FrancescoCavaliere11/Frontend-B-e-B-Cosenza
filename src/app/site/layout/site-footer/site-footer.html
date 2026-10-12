@@ -1,0 +1,36 @@
+<div class="wrapper">
+  <hr>
+
+  <div class="footer__info">
+    <site-accordion [title]="ui.footer.hours" staticFrom="sm">
+      <div class="prose prose--small prose--left footer__block">
+        <p>Check-in {{ site.checkIn }}<br>Check-out {{ site.checkOut }}</p>
+        <p>{{ site.pastry.name }}<br>{{ site.pastry.hours }}</p>
+      </div>
+    </site-accordion>
+    <site-accordion [title]="ui.footer.contact" staticFrom="sm">
+      <div class="prose prose--small prose--left footer__block">
+        <p>{{ site.address.street }}, {{ site.address.postalCode }} {{ site.address.city }}</p>
+        <p><a [href]="site.phone.href">{{ site.phone.display }}</a><br><a [href]="site.email.href">{{ site.email.display }}</a></p>
+      </div>
+    </site-accordion>
+    <site-accordion [title]="ui.footer.booking" staticFrom="sm">
+      <div class="prose prose--small prose--left footer__block">
+        <p>{{ ui.footer.bookingText }}</p>
+        <p><a [routerLink]="routes.bookingLookup">{{ ui.footer.manageBooking }}</a></p>
+      </div>
+    </site-accordion>
+  </div>
+
+  <div class="footer__bar type-micro">
+    <p>© {{ site.year }} {{ site.name }} · {{ ui.footer.rights }}</p>
+    <ul class="footer__links">
+      @for (link of legal; track link.path) {
+        <li><a [routerLink]="link.path">{{ link.label }}</a></li>
+      }
+      @for (social of site.social; track social.href) {
+        <li><a [href]="social.href" target="_blank" rel="noopener">{{ social.label }}</a></li>
+      }
+    </ul>
+  </div>
+</div>

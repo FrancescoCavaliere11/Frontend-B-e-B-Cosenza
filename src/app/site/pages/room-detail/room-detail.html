@@ -1,0 +1,40 @@
+@if (room(); as room) {
+  <site-overlay-panel [label]="room.name" [coverTitle]="room.name" (closed)="close()">
+    <article class="room">
+      <header class="room__intro wrapper prose">
+        <p class="type-label">{{ ui.rooms.details }}</p>
+        <h1 class="type-display">{{ room.name }}</h1>
+        <p class="type-body-lg type-italic">{{ room.headline }}</p>
+      </header>
+
+      <site-gallery class="room__gallery" [items]="room.gallery" [label]="room.name" />
+
+      <div class="wrapper room__body">
+        <div class="room__story prose prose--large prose--left">
+          @for (paragraph of room.story; track $index) { <p>{{ paragraph }}</p> }
+        </div>
+
+        <dl class="room__facts">
+          @if (room.capacity) {
+            <div><dt class="type-label-sm">{{ ui.rooms.capacity }}</dt><dd class="type-body-lg">{{ ui.common.upToGuests(room.capacity) }}</dd></div>
+          }
+          @if (price()) {
+            <div><dt class="type-label-sm">{{ ui.rooms.price }}</dt><dd class="type-body-lg">{{ ui.rooms.priceFrom(price()!) }}</dd></div>
+          }
+          <div>
+            <dt class="type-label-sm">{{ ui.rooms.amenities }}</dt>
+            <dd>
+              <ul class="room__features type-body">
+                @for (feature of features(); track feature) { <li>{{ feature }}</li> }
+              </ul>
+            </dd>
+          </div>
+        </dl>
+
+        <div class="room__cta">
+          <button type="button" class="button" (click)="bookRoom()">{{ ui.rooms.bookThis }}</button>
+        </div>
+      </div>
+    </article>
+  </site-overlay-panel>
+}

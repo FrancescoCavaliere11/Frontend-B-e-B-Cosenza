@@ -1,0 +1,3 @@
+:host { display: block; }
+.block-text__title { max-width: var(--measure-heading); }
+.block-text__action { padding-top: var(--space-s); }

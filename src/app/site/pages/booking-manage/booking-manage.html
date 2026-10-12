@@ -1,0 +1,36 @@
+<section class="page-start wrapper section booking-page">
+  <h1 class="type-title">{{ ui.manage.title }}</h1>
+  <div aria-live="polite" class="booking-page__body">
+    @if (isLoading()) {
+      <p class="type-body type-italic"><span class="spinner"></span> {{ ui.manage.loading }}</p>
+    }
+    @if (managed(); as managed) {
+      @if (cancelled()) { <p class="type-body-lg type-italic">{{ ui.manage.cancelled }}</p> }
+      <site-booking-card [booking]="managed.booking" [freeUntil]="managed.cancellation.freeUntil" />
+
+      @if (managed.cancellation.canCancel) {
+        @if (isConfirming()) {
+          <div class="booking-page__confirm">
+            <p class="type-body">{{ ui.manage.cancelConfirm }}</p>
+            <div class="field">
+              <label class="field__label" for="cancel-reason">{{ ui.manage.reason }}</label>
+              <textarea id="cancel-reason" class="field__input" [maxLength]="reasonMax" [value]="reason()" (input)="onReason($event)"></textarea>
+            </div>
+            <div class="booking-actions">
+              <button type="button" class="text-action" (click)="isConfirming.set(false)">{{ ui.manage.cancelNo }}</button>
+              <button type="button" class="button button--solid" [disabled]="isCancelling()" (click)="cancel()">
+                @if (isCancelling()) { <span class="spinner"></span> }
+                {{ ui.manage.cancelYes }}
+              </button>
+            </div>
+          </div>
+        } @else {
+          <p><button type="button" class="button" (click)="isConfirming.set(true)">{{ ui.manage.cancel }}</button></p>
+        }
+      } @else if (managed.cancellation.message && !cancelled()) {
+        <p class="field__hint">{{ managed.cancellation.message }}</p>
+      }
+    }
+    @if (error(); as error) { <p class="form-error">{{ error.message }}</p> }
+  </div>
+</section>

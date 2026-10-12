@@ -1,0 +1,12 @@
+<div class="wrapper layout-grid">
+  <a class="layout-cell editorial reveal" siteInView [routerLink]="block().path"
+     [style.--col-start]="block().placement.colStart" [style.--col-end]="block().placement.colEnd">
+    <figure>
+      <site-media-image class="editorial__media" [media]="block().media" [sizes]="sizes()" [decorative]="true" />
+      <figcaption class="editorial__caption">
+        <span class="type-body-lg type-italic">{{ block().caption }}</span>
+        @if (block().meta) { <span class="type-label-sm type-muted">{{ block().meta }}</span> }
+      </figcaption>
+    </figure>
+  </a>
+</div>

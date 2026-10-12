@@ -1,0 +1,14 @@
+<section class="page-start wrapper section booking-page">
+  <h1 class="type-title">{{ ui.confirm.title }}</h1>
+  <div aria-live="polite" class="booking-page__body">
+    @if (isWorking()) {
+      <p class="type-body type-italic"><span class="spinner"></span> {{ ui.confirm.working }}</p>
+    } @else if (booking(); as booking) {
+      <p class="type-body-lg type-italic">{{ ui.confirm.success }}</p>
+      <site-booking-card [booking]="booking" />
+    } @else if (error(); as error) {
+      <p class="form-error">{{ error.message }}</p>
+      <p><a class="text-action" [routerLink]="routes.bookingLookup">{{ ui.lookup.title }}</a></p>
+    }
+  </div>
+</section>

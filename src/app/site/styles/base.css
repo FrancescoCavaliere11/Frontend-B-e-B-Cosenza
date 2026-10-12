@@ -1,0 +1,90 @@
+html.site {
+  color: var(--site-fg);
+  background-color: var(--site-bg);
+  font-family: var(--font-body);
+  font-size: 100%;
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-body);
+  scrollbar-gutter: stable;
+  scroll-behavior: auto;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  /* Si animano le variabili del tema, non le singole proprietà. */
+  transition:
+    --site-bg var(--dur-theme) var(--ease-smooth),
+    --site-fg var(--dur-theme) var(--ease-smooth);
+}
+
+/*
+ * `src/styles.css` (admin) imposta il font su `*`, cioè su ogni elemento:
+ * così un figlio non eredita il font del genitore (es. un <span> dentro
+ * un'etichetta in Jost tornerebbe serif). Sul sito si ripristina l'eredità;
+ * `:where` azzera la specificità, quindi le classi tipografiche vincono.
+ */
+:where(html.site) * { font-family: inherit; }
+
+html.site body {
+  height: auto;
+  min-height: 100%;
+  color: inherit;
+  background-color: transparent;
+}
+
+html.site.is-scroll-locked { overflow: hidden; }
+
+:where(html.site) ::selection {
+  color: var(--site-bg);
+  background: var(--site-fg);
+}
+
+:where(html.site) :focus-visible {
+  outline: var(--site-border) solid var(--site-focus-ring);
+  outline-offset: var(--site-focus-offset);
+  border-radius: var(--radius-md);
+}
+
+:where(html.site) img,
+:where(html.site) video,
+:where(html.site) svg { display: block; max-width: 100%; }
+
+:where(html.site) a { color: inherit; text-decoration: none; }
+
+:where(html.site) button {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+:where(html.site) input,
+:where(html.site) select,
+:where(html.site) textarea { font: inherit; color: inherit; letter-spacing: inherit; }
+
+:where(html.site) hr {
+  border: 0;
+  border-top: var(--site-border) solid currentColor;
+  opacity: var(--site-divider-opacity);
+}
+
+:where(html.site) .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(html.site) *,
+  :where(html.site) *::before,
+  :where(html.site) *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

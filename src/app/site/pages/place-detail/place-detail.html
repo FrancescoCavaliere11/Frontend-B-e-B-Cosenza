@@ -1,0 +1,24 @@
+@if (place(); as place) {
+  <site-overlay-panel [label]="place.name" [coverTitle]="place.name" (closed)="close()">
+    <article class="place">
+      <header class="wrapper prose place__intro">
+        <p class="type-label">{{ place.distance }}</p>
+        <h1 class="type-display">{{ place.name }}</h1>
+        <p class="type-body-lg type-italic">{{ place.teaser }}</p>
+      </header>
+
+      <site-gallery [items]="place.gallery" [label]="place.name" />
+
+      <div class="wrapper place__body">
+        <div class="prose prose--large">
+          @for (paragraph of place.story; track $index) { <p>{{ paragraph }}</p> }
+          <p class="type-label">{{ ui.places.tips }}</p>
+          <ul>
+            @for (tip of place.tips; track tip) { <li>{{ tip }}</li> }
+          </ul>
+          <p><a class="button" [href]="directions()" target="_blank" rel="noopener">{{ ui.common.directions }}</a></p>
+        </div>
+      </div>
+    </article>
+  </site-overlay-panel>
+}

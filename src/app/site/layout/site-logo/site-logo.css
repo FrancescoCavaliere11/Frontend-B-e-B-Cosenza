@@ -1,0 +1,34 @@
+:host {
+  display: inline-grid;
+  justify-items: center;
+  gap: calc(var(--space) * 1.5);
+  width: var(--site-logo-width);
+  text-align: center;
+  line-height: 1;
+}
+
+.logo__name {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: var(--text-24);
+  letter-spacing: var(--tracking-plump);
+  white-space: nowrap;
+}
+
+.logo__kind {
+  font-family: var(--font-label);
+  font-weight: 500;
+  font-size: calc(var(--text-12) * .75);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+:host(.is-large) { width: auto; gap: var(--space-s); }
+:host(.is-large) .logo__name { font-size: var(--text-wordmark); letter-spacing: 0; }
+:host(.is-large) .logo__kind { font-size: var(--text-12); }
+
+@media (width >= 768px) {
+  .logo__name { font-size: var(--text-32); }
+  .logo__kind { font-size: var(--text-12); }
+}

@@ -1,0 +1,26 @@
+<div class="overlay__backdrop" aria-hidden="true" (click)="close()"></div>
+
+<section
+  #content
+  class="overlay__panel"
+  [class.overlay__panel--wide]="wide()"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="label()"
+  [siteFocusTrap]="isOpen()">
+  <div class="overlay__bar">
+    <button type="button" class="icon-button" [attr.aria-label]="ui.close" (click)="close()">
+      <span class="icon-close"></span>
+    </button>
+  </div>
+
+  @if (coverTitle()) {
+    <div class="overlay__cover" aria-hidden="true">
+      <p class="type-page-cover">{{ coverTitle() }}</p>
+    </div>
+  }
+
+  <div class="overlay__body">
+    <ng-content />
+  </div>
+</section>

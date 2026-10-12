@@ -1,0 +1,33 @@
+.burger {
+  position: relative;
+  /* L'header ha pointer-events: none: i suoi controlli li riattivano. */
+  pointer-events: auto;
+  width: var(--site-control-s);
+  height: var(--site-control-s);
+}
+
+.burger__line {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: var(--site-border);
+  background: currentColor;
+  transition:
+    translate var(--dur-fast) var(--ease-out-expo) var(--dur-fast),
+    rotate var(--dur-fast) var(--ease-in-expo);
+}
+
+.burger__line:first-child { translate: 0 calc(var(--space) * -1); }
+.burger__line:last-child { translate: 0 var(--space); }
+
+.burger.is-open .burger__line {
+  translate: 0 0;
+  transition:
+    translate var(--dur-fast) var(--ease-in-expo),
+    rotate var(--dur-fast) var(--ease-out-expo) var(--dur-fast);
+}
+
+.burger.is-open .burger__line:first-child { rotate: 45deg; }
+.burger.is-open .burger__line:last-child { rotate: -45deg; }
+

@@ -1,0 +1,3 @@
+.outcome { display: grid; gap: var(--space-m); justify-items: center; text-align: center; }
+.outcome > p { max-width: var(--measure-text); }
+.outcome site-booking-card { width: 100%; }

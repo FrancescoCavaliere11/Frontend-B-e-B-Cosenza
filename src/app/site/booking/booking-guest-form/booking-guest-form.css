@@ -1,0 +1,10 @@
+.guest { display: grid; gap: var(--space-m); max-width: var(--site-panel-max); margin-inline: auto; }
+.guest__title { text-align: center; }
+.guest__grid { display: grid; gap: var(--space-m) var(--space-l); }
+.guest__terms { margin-top: var(--space-xs); }
+.guest__captcha { min-height: calc(var(--space) * 13); }
+
+@media (width >= 640px) {
+  .guest__grid { grid-template-columns: 1fr 1fr; }
+  .guest__wide { grid-column: 1 / -1; }
+}

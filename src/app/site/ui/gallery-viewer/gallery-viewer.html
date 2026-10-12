@@ -1,0 +1,28 @@
+<div class="viewer__inner" [siteFocusTrap]="isOpen()">
+  <header class="viewer__bar">
+    <span class="type-label-sm" aria-live="polite">{{ ui.galleryCounter(index() + 1, items().length) }}</span>
+    <button type="button" class="icon-button" [attr.aria-label]="ui.close" (click)="close()">
+      <span class="icon-close"></span>
+    </button>
+  </header>
+
+  <div class="viewer__stage">
+    @for (item of items(); track item.src; let i = $index) {
+      @if (i === index()) {
+        <figure class="viewer__figure">
+          <site-media-image class="viewer__image" [media]="item" fit="contain" sizes="100vw" [eager]="true" />
+          <figcaption class="viewer__caption type-body type-italic">{{ item.caption ?? item.alt }}</figcaption>
+        </figure>
+      }
+    }
+  </div>
+
+  @if (items().length > 1) {
+    <button type="button" class="viewer__nav viewer__nav--prev" [attr.aria-label]="ui.previous" (click)="step(-1)">
+      <span class="icon-arrow icon-arrow--left"></span>
+    </button>
+    <button type="button" class="viewer__nav viewer__nav--next" [attr.aria-label]="ui.next" (click)="step(1)">
+      <span class="icon-arrow"></span>
+    </button>
+  }
+</div>

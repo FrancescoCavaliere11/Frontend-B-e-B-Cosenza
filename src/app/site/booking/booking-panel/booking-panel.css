@@ -1,0 +1,40 @@
+.booking {
+  /* Il calendario condiviso con l'admin legge queste variabili: qui prendono i colori del sito. */
+  --text-strong: var(--site-fg);
+  --text-weak: color-mix(in oklab, var(--site-fg) 60%, transparent);
+  --stroke-weak: color-mix(in oklab, var(--site-fg) 15%, transparent);
+  --stroke-strong: color-mix(in oklab, var(--site-fg) 30%, transparent);
+  --fill-dark: transparent;
+  --background: var(--site-bg);
+  max-width: var(--site-overlay-max);
+  margin-inline: auto;
+  padding-bottom: var(--space-xl);
+}
+
+.booking__head { display: grid; justify-items: center; gap: var(--space-s); padding-top: var(--space-s); text-align: center; }
+
+.booking__steps { display: flex; gap: var(--space-s); margin: 0; padding: 0; list-style: none; }
+
+.booking__step { display: flex; align-items: center; gap: var(--space-xs); opacity: var(--site-dimmed-opacity); transition: opacity var(--dur-fade) var(--ease-smooth); }
+.booking__step.is-current,
+.booking__step.is-done { opacity: 1; }
+
+.booking__step-number {
+  display: grid;
+  place-items: center;
+  width: calc(var(--space) * 5);
+  height: calc(var(--space) * 5);
+  border: var(--site-border) solid currentColor;
+  border-radius: var(--radius-round);
+}
+
+.booking__step.is-current .booking__step-number { color: var(--site-bg); background: var(--site-fg); }
+.booking__step-label { display: none; }
+.booking__step.is-current .booking__step-label { display: inline; }
+
+.booking__body { padding-top: var(--space-l); }
+
+@media (width >= 768px) {
+  .booking__steps { gap: var(--space-m); }
+  .booking__step-label { display: inline; }
+}

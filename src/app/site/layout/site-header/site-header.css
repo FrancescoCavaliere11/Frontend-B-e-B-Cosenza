@@ -1,0 +1,144 @@
+:host {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  display: block;
+  height: var(--site-header-height);
+  pointer-events: none;
+}
+
+:host a,
+:host button { pointer-events: auto; }
+
+.header__inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  height: 100%;
+  padding-block: var(--site-header-padding-y);
+}
+
+/* --- Gradiente allo scroll: dal colore del tema a trasparente --- */
+.header__gradient {
+  position: absolute;
+  inset: 0 0 -50% 0;
+  background: linear-gradient(to bottom, var(--site-bg) 35%, transparent);
+  opacity: 0;
+  transform: translateY(-100%);
+  transition:
+    opacity var(--dur-fast) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-smooth);
+}
+
+:host(.has-scrolled) .header__gradient { opacity: 1; transform: none; }
+
+/* --- Logo con auto-hide --- */
+.header__logo {
+  grid-column: 2;
+  transition:
+    opacity var(--dur-fade) var(--ease-smooth),
+    transform var(--dur-fade) var(--ease-smooth);
+}
+
+:host(.is-logo-hidden) .header__logo {
+  opacity: 0;
+  transform: translateY(-15%);
+  pointer-events: none;
+  transition-duration: var(--dur-element);
+}
+
+.header__end { display: flex; justify-content: flex-end; }
+.header__book { font-size: var(--text-12); padding: .8em 1em; }
+
+.nav { display: none; }
+
+/* --- Velo dietro i dropdown --- */
+.header__veil {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: var(--site-veil);
+  backdrop-filter: blur(var(--site-veil-blur));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fade) var(--ease-smooth);
+}
+
+:host(.is-dropdown-open) .header__veil { opacity: 1; pointer-events: auto; }
+:host(.is-dropdown-open) { color: var(--color-linen); }
+:host(.is-dropdown-open) .header__gradient { opacity: 0; }
+:host(.is-drawer-open) { color: var(--color-linen); }
+:host(.is-drawer-open) .header__gradient { opacity: 0; }
+:host(.is-drawer-open) .header__book { opacity: 0; pointer-events: none; }
+
+@media (width >= 768px) {
+  site-burger { display: none; }
+  .nav { display: block; }
+  .header__book { font-size: var(--text-14); padding: 1.05em 2.2em; }
+
+  .nav__list { display: flex; gap: var(--space-m); margin: 0; padding: 0; list-style: none; }
+  .nav__item { position: relative; transition: opacity var(--dur-element) var(--ease-smooth); }
+
+  :host(.is-dropdown-open) .nav__item:not(.is-active) { opacity: 0; pointer-events: none; }
+
+  .nav__trigger { display: inline-flex; align-items: center; gap: var(--space-xs); }
+
+  .nav__link.is-current { font-style: italic; }
+
+  .nav__chevron {
+    width: calc(var(--space) * 1.4);
+    height: calc(var(--space) * 1.4);
+    border-right: var(--site-border) solid currentColor;
+    border-bottom: var(--site-border) solid currentColor;
+    transform: translateY(-25%) rotate(45deg);
+    transition: transform var(--dur-fast) var(--ease-smooth);
+  }
+
+  .nav__item.is-active .nav__chevron { transform: translateY(25%) rotate(-135deg); }
+
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    /* Larghezza del proprio contenuto, non della voce «La casa». */
+    width: max-content;
+    padding-top: var(--space-s);
+    visibility: hidden;
+  }
+
+  .nav__item.is-active .dropdown { visibility: visible; }
+
+  .dropdown__line {
+    display: block;
+    width: var(--site-line-dropdown);
+    height: var(--site-border);
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-slow) var(--ease-out-expo);
+  }
+
+  .nav__item.is-active .dropdown__line { transform: scaleX(1); }
+
+  .dropdown__list { margin: var(--space-s) 0 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+  .dropdown__item { opacity: 0; white-space: nowrap; }
+
+  .nav__item.is-active .dropdown__item {
+    animation: site-link-show var(--dur-slow) var(--ease-out-expo) both;
+    animation-delay: calc(var(--dur-element) + var(--i) * var(--stagger-step));
+  }
+
+  .dropdown__item a { transition: opacity var(--dur-element) var(--ease-smooth); }
+}
+
+@media (width >= 768px) and (hover: hover) {
+  .nav__list:hover .nav__link:not(:hover),
+  .dropdown__list:hover a:not(:hover) { opacity: var(--site-dimmed-opacity); }
+  .nav__link:hover,
+  .dropdown__item a:hover,
+  .nav__trigger:hover { font-style: italic; }
+}
+
+.header__skip:focus { position: fixed; left: var(--space-s); top: var(--space-s); z-index: 3; width: auto; height: auto; clip: auto; margin: 0; }

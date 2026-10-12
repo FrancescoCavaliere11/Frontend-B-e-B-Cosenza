@@ -1,0 +1,11 @@
+<div class="wrapper">
+  <div class="prose reveal" [class.prose--large]="block().size === 'large'" siteInView>
+    @if (block().eyebrow) { <p class="type-label">{{ block().eyebrow }}</p> }
+    @if (block().title) { <h2 class="type-title block-text__title">{{ block().title }}</h2> }
+    @for (paragraph of block().paragraphs; track $index) { <p>{{ paragraph }}</p> }
+    @if (block().link; as link) {
+      <div class="block-text__action"><site-block-link [link]="link" /></div>
+    }
+  </div>
+  @if (block().line) { <span class="connection-line" aria-hidden="true" siteInView></span> }
+</div>

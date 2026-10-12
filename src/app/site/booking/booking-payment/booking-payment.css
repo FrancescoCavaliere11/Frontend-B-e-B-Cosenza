@@ -1,0 +1,4 @@
+.payment { display: grid; gap: var(--space-m); max-width: var(--site-panel-max); margin-inline: auto; text-align: center; }
+.payment__status { display: flex; align-items: center; justify-content: center; gap: var(--space-xs); }
+.payment__element { text-align: left; }
+.payment__element.is-hidden { display: none; }

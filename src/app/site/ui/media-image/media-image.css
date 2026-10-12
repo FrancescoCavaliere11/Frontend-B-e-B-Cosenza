@@ -1,0 +1,35 @@
+:host {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--radius-xs);
+  background-color: var(--site-media-fallback);
+}
+
+img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+:host(.is-contain) img { position: relative; object-fit: contain; }
+:host(.is-contain) .media-image__placeholder { position: absolute; }
+
+.media-image__placeholder {
+  filter: blur(var(--site-placeholder-blur));
+  transform: scale(var(--site-placeholder-scale));
+  transition: opacity calc(var(--dur-image) * 2) var(--ease-out) calc(var(--dur-image) / 2);
+}
+
+.media-image__asset {
+  z-index: 1;
+  opacity: 0;
+  transition: opacity var(--dur-image) var(--ease-out);
+}
+
+:host(.is-loaded) .media-image__asset { opacity: 1; }
+:host(.is-loaded) .media-image__placeholder,
+:host(.is-failed) img { opacity: 0; }

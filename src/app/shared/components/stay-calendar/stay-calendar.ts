@@ -63,7 +63,8 @@ const SINGLE_MONTH_QUERY = '(max-width: 576px)';
  */
 @Component({
   selector: 'app-stay-calendar',
-  standalone: false,
+  // Standalone: lo usano sia l'area admin (AppModule) sia il sito (SiteModule).
+  standalone: true,
   templateUrl: './stay-calendar.html',
   styleUrls: [
     './stay-calendar.css',

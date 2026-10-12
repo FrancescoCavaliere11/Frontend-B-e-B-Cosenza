@@ -1,0 +1,26 @@
+<article class="booking-card">
+  <header class="booking-card__head">
+    <p class="type-label-sm type-muted">{{ ui.done.code }}</p>
+    <p class="type-title">{{ booking().code }}</p>
+    <p class="type-label booking-card__status">{{ status() }}</p>
+  </header>
+  <dl class="booking-card__rows">
+    <div><dt class="type-label-sm">{{ ui.card.stay }}</dt><dd class="type-body">{{ stay() }} · {{ ui.search.nightsLabel(booking().nights) }}</dd></div>
+    <div><dt class="type-label-sm">{{ ui.card.rooms }}</dt><dd class="type-body">{{ rooms() }}</dd></div>
+    <div><dt class="type-label-sm">{{ ui.card.guests }}</dt><dd class="type-body">{{ booking().guestCount }}</dd></div>
+    <div><dt class="type-label-sm">{{ ui.card.payment }}</dt><dd class="type-body">{{ payment() }}</dd></div>
+    <div><dt class="type-label-sm">{{ ui.card.total }}</dt><dd class="type-body-lg">{{ formatAmount(booking().totalPrice, booking().currency) }}</dd></div>
+    @if (freeUntilLabel()) {
+      <div><dt class="type-label-sm">{{ ui.card.freeCancellation }}</dt><dd class="type-body">{{ freeUntilLabel() }}</dd></div>
+    }
+  </dl>
+
+  @if (isCancelled()) {
+    <p class="booking-card__notice type-body type-italic">{{ ui.card.cancelledNotice }}</p>
+  } @else if (isExpired()) {
+    <div class="booking-card__notice">
+      <p class="type-body type-italic">{{ ui.card.expiredNotice }}</p>
+      <button type="button" class="button" (click)="bookingPanel.open()">{{ ui.card.bookAgain }}</button>
+    </div>
+  }
+</article>

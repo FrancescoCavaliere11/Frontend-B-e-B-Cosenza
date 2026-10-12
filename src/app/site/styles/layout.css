@@ -1,0 +1,51 @@
+:where(html.site) .wrapper {
+  width: 100%;
+  max-width: var(--site-max-width);
+  margin-inline: auto;
+  padding-inline: var(--site-outer-gutter);
+}
+
+:where(html.site) .section { padding-block: var(--space-m); }
+
+/*
+ * Griglia a 2 / 4 / 12 colonne. La posizione di un elemento è un dato del
+ * contenuto: `[style.--col-start]` e `[style.--col-end]` (colonne 1–13).
+ * Sotto i 768px tutto occupa la riga intera.
+ */
+:where(html.site) .layout-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--site-columns), minmax(0, 1fr));
+  column-gap: var(--site-inner-gutter);
+}
+
+:where(html.site) .layout-grid > .layout-cell { grid-column: 1 / -1; }
+
+@media (width >= 768px) {
+  :where(html.site) .section { padding-block: calc(var(--space) * 12); }
+  :where(html.site) .layout-grid > .layout-cell { grid-column: var(--col-start, 1) / var(--col-end, -1); }
+}
+
+/* Pila di blocchi editoriali con ritmo lento. Gli host dei componenti
+   sono elementi personalizzati, inline per natura: qui diventano blocchi. */
+:where(html.site) .blocks,
+:where(html.site) .blocks > * { display: block; }
+:where(html.site) .blocks { padding-bottom: calc(var(--space) * 24); }
+:where(html.site) .blocks > * + * { padding-top: var(--block-gap); }
+:where(html.site) .blocks > .is-media + .is-media { padding-top: var(--block-gap-media); }
+:where(html.site) .blocks > .is-tight,
+:where(html.site) .blocks > * + .is-tight { padding-top: var(--block-gap-tight); }
+
+/* Prima sezione sotto l'header sticky. */
+:where(html.site) .page-start { padding-top: var(--space-m); }
+
+@media (width >= 768px) {
+  :where(html.site) .blocks { padding-bottom: var(--space-xl); }
+}
+
+/* Intestazione di pagina: etichetta, titolo, linea. */
+:where(html.site) .page-intro {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-s);
+  text-align: center;
+}

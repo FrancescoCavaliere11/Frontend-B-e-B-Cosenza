@@ -1,0 +1,12 @@
+<div class="wrapper split" [class.split--reverse]="block().reverse">
+  <figure class="split__media reveal" siteInView>
+    <site-media-image [media]="block().media" sizes="(max-width: 767px) 100vw, 42vw" />
+  </figure>
+  <div class="split__text prose prose--left reveal" siteInView>
+    @if (block().eyebrow) { <p class="type-label">{{ block().eyebrow }}</p> }
+    <h2 class="type-title">{{ block().title }}</h2>
+    @for (paragraph of block().paragraphs; track $index) { <p class="type-body">{{ paragraph }}</p> }
+    @if (block().note) { <p class="type-label-sm type-muted">{{ block().note }}</p> }
+    @if (block().link; as link) { <p><site-block-link [link]="link" appearance="text-action" /></p> }
+  </div>
+</div>

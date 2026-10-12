@@ -1,0 +1,9 @@
+<button type="button" class="accordion__trigger" [class]="titleClass()" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="panelId" (click)="toggle()">
+  <span>{{ title() }}</span>
+  <span class="accordion__icon" aria-hidden="true"></span>
+</button>
+<div class="accordion__panel" [id]="panelId">
+  <div class="accordion__content">
+    <ng-content />
+  </div>
+</div>

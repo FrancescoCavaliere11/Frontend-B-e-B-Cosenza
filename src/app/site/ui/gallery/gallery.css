@@ -1,0 +1,73 @@
+:host { display: block; }
+
+.gallery__track {
+  display: flex;
+  gap: var(--site-inner-gutter);
+  margin: 0;
+  padding: 0 var(--site-outer-gutter);
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--site-outer-gutter);
+  scrollbar-width: none;
+  cursor: grab;
+}
+
+.gallery__track::-webkit-scrollbar { display: none; }
+.gallery.is-dragging .gallery__track { cursor: grabbing; scroll-snap-type: none; }
+.gallery.is-dragging .gallery__open { pointer-events: none; }
+
+.gallery__item {
+  flex: none;
+  /* Altezza fissa, larghezza dal rapporto d'aspetto della foto. */
+  height: var(--site-gallery-height);
+  aspect-ratio: var(--item-ratio);
+  scroll-snap-align: start;
+}
+
+.gallery__item:last-child { scroll-snap-align: end; }
+
+.gallery__open {
+  display: block;
+  width: 100%;
+  height: calc(100% - var(--space-m));
+  padding: 0;
+  cursor: zoom-in;
+}
+
+.gallery__open site-media-image { width: 100%; height: 100%; }
+
+.gallery__caption { margin-top: var(--space-xs); }
+
+.gallery__controls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-s);
+  margin-top: var(--space-s);
+}
+
+.gallery__hint { grid-column: 1 / -1; opacity: var(--site-muted-opacity); }
+
+.gallery__progress {
+  position: relative;
+  height: var(--site-border);
+  background: var(--site-rule);
+  overflow: hidden;
+}
+
+.gallery__progress-bar {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  transform-origin: left;
+  transition: transform var(--dur-element) linear;
+}
+
+.gallery__arrows { display: flex; gap: var(--space-xs); }
+
+@media (width >= 768px) {
+  .gallery__controls { grid-template-columns: auto 1fr auto; }
+  .gallery__hint { grid-column: auto; }
+}

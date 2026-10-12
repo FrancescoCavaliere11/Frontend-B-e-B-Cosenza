@@ -1,0 +1,8 @@
+:host { display: block; }
+figure { margin: 0; }
+.editorial__media { transition: opacity var(--dur-fade) var(--ease-out-quart); }
+.editorial__caption { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-xs); margin-top: var(--space-xs); }
+
+@media (hover: hover) {
+  .editorial:hover .editorial__media { opacity: var(--site-soft-opacity); }
+}

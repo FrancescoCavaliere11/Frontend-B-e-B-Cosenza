@@ -1,0 +1,42 @@
+<div class="page-start blocks">
+  <site-block-text [block]="intro" />
+
+  <div class="wrapper contact">
+    <figure class="contact__media reveal" siteInView>
+      <site-media-image [media]="page.media" sizes="(max-width: 767px) 100vw, 34vw" />
+    </figure>
+
+    <div class="contact__groups">
+      @for (group of groups; track group.title) {
+        <section class="contact__group reveal" siteInView>
+          <h2 class="type-label">{{ group.title }}</h2>
+          <dl>
+            @for (row of group.rows; track row.label) {
+              <div class="contact__row">
+                <dt class="type-label-sm type-muted">{{ row.label }}</dt>
+                <dd class="type-body">
+                  @if (row.href) { <a class="link-underline" [href]="row.href">{{ row.value }}</a> } @else { {{ row.value }} }
+                </dd>
+              </div>
+            }
+          </dl>
+        </section>
+      }
+      <p><a class="button" [href]="mailHref">{{ page.writeCta }}</a></p>
+    </div>
+  </div>
+
+  <section class="wrapper contact__map" aria-labelledby="map-title">
+    <h2 id="map-title" class="type-label">{{ page.mapTitle }}</h2>
+    <div class="contact__map-frame">
+      @if (isMapVisible()) {
+        <iframe [src]="mapUrl()" [title]="page.mapTitle" loading="lazy" referrerpolicy="no-referrer"></iframe>
+      } @else {
+        <div class="contact__map-placeholder">
+          <button type="button" class="button" (click)="isMapVisible.set(true)">{{ page.mapCta }}</button>
+          <p class="type-micro type-muted">{{ page.mapNotice }}</p>
+        </div>
+      }
+    </div>
+  </section>
+</div>

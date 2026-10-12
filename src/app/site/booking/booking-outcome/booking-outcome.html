@@ -1,0 +1,20 @@
+@if (booking(); as booking) {
+  <section class="outcome">
+    @if (store.isPaid()) {
+      <h2 class="type-title">{{ ui.paidTitle }}</h2>
+      <p class="type-body-lg type-italic">{{ ui.paidText }}</p>
+    } @else {
+      <h2 class="type-title">{{ ui.emailTitle }}</h2>
+      <p class="type-body-lg type-italic">{{ ui.emailText(store.guestEmail()) }}</p>
+      @if (holdLabel()) { <p class="type-label-sm">{{ ui.holdUntil }} {{ holdLabel() }}</p> }
+    }
+
+    <site-booking-card [booking]="booking" />
+
+    @if (devConfirmLink(); as dev) {
+      <p><a class="text-action" [routerLink]="dev.path" [queryParams]="{token: dev.token}" (click)="finished.emit()">{{ ui.devLink }}</a></p>
+    }
+
+    <p><button type="button" class="button" (click)="finished.emit()">{{ ui.close }}</button></p>
+  </section>
+}

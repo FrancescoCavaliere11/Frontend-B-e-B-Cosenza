@@ -1,0 +1,44 @@
+<div class="gallery" [class.is-dragging]="isDragging()">
+  <ul
+    #track
+    class="gallery__track"
+    [attr.aria-label]="label()"
+    tabindex="0"
+    (scroll)="onScroll()"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp()"
+    (pointerleave)="onPointerUp()">
+    @for (item of items(); track item.src; let i = $index) {
+      <li class="gallery__item" [style.--item-ratio]="item.ratio">
+        <button type="button" class="gallery__open" [attr.aria-label]="ui.common.openGallery(item.caption ?? item.alt)" (click)="open(i)">
+          <site-media-image [media]="item" sizes="(max-width: 767px) 85vw, 45vw" [eager]="i === 0" />
+        </button>
+        @if (item.caption) {
+          <p class="gallery__caption type-body type-italic">{{ item.caption }}</p>
+        }
+      </li>
+    }
+  </ul>
+
+  @if (canScroll()) {
+    <div class="gallery__controls wrapper">
+      <span class="gallery__hint type-label-sm">{{ ui.rooms.dragHint }}</span>
+      <span class="gallery__progress" aria-hidden="true">
+        <span class="gallery__progress-bar" [style.transform]="'scaleX(' + (0.15 + progress() * 0.85) + ')'"></span>
+      </span>
+      <span class="gallery__arrows">
+        <button type="button" class="icon-button" [attr.aria-label]="ui.common.previous" (click)="scrollByItem(-1)">
+          <span class="icon-arrow icon-arrow--left"></span>
+        </button>
+        <button type="button" class="icon-button" [attr.aria-label]="ui.common.next" (click)="scrollByItem(1)">
+          <span class="icon-arrow"></span>
+        </button>
+      </span>
+    </div>
+  }
+</div>
+
+@if (viewerIndex() !== null) {
+  <site-gallery-viewer [items]="items()" [startIndex]="viewerIndex()!" [label]="label()" (closed)="viewerIndex.set(null)" />
+}

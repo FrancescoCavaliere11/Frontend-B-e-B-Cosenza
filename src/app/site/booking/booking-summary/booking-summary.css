@@ -1,0 +1,15 @@
+.summary { display: grid; gap: var(--space-l); }
+.summary__stay { display: grid; gap: var(--space-s); }
+.summary__lines { display: grid; gap: var(--space-xs); margin: var(--space-s) 0 0; }
+.summary__line { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-s); padding-block: var(--space-xs); border-bottom: var(--site-border) solid var(--site-rule); }
+.summary__line dd { margin: 0; white-space: nowrap; }
+.summary__line--total { border-bottom: 0; padding-top: var(--space-s); }
+.summary__payment { display: grid; gap: var(--space-s); align-content: start; margin: 0; padding: 0; border: 0; }
+.summary__payment legend { margin-bottom: var(--space-s); }
+.summary__choice { padding: var(--space-s); border: var(--site-border) solid var(--site-rule-strong); border-radius: var(--radius-xs); }
+.summary__choice:has(input:checked) { border-color: currentColor; }
+.summary__choice.is-disabled { opacity: var(--site-dimmed-opacity); cursor: not-allowed; }
+
+@media (width >= 900px) {
+  .summary { grid-template-columns: 3fr 2fr; column-gap: var(--space-l); }
+}

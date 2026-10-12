@@ -1,0 +1,7 @@
+<div class="page-start">
+  <site-block-renderer [blocks]="blocks()" />
+  @if (catalog.isPreview()) {
+    <p class="wrapper form-error type-italic">{{ ui.rooms.previewNotice }}</p>
+  }
+</div>
+<router-outlet />

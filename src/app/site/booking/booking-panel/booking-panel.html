@@ -1,0 +1,26 @@
+<site-overlay-panel [label]="ui.panelLabel" [wide]="true" (closed)="closed.emit()">
+  <div class="booking">
+    <header class="booking__head wrapper">
+      <p class="type-label">{{ ui.panelLabel }}</p>
+      <ol class="booking__steps" [attr.aria-label]="ui.stepOf(stepIndex() + 1, ui.steps.length)">
+        @for (label of ui.steps; track label; let i = $index) {
+          <li class="booking__step type-label-sm" [class.is-current]="i === stepIndex()" [class.is-done]="i < stepIndex()"
+              [attr.aria-current]="i === stepIndex() ? 'step' : null">
+            <span class="booking__step-number">{{ i + 1 }}</span>
+            <span class="booking__step-label">{{ label }}</span>
+          </li>
+        }
+      </ol>
+    </header>
+
+    <div class="booking__body wrapper">
+      @switch (store.step()) {
+        @case ('search') { <site-booking-search /> }
+        @case ('summary') { <site-booking-summary /> }
+        @case ('guest') { <site-booking-guest-form /> }
+        @case ('payment') { <site-booking-payment /> }
+        @case ('done') { <site-booking-outcome (finished)="close()" /> }
+      }
+    </div>
+  </div>
+</site-overlay-panel>

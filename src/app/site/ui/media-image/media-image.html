@@ -1,0 +1,13 @@
+<img class="media-image__placeholder" [src]="media().lqip" alt="" aria-hidden="true" loading="lazy" decoding="async">
+<img
+  #asset
+  class="media-image__asset"
+  [src]="media().src"
+  [attr.srcset]="media().srcset"
+  [attr.sizes]="sizes()"
+  [alt]="alt()"
+  [attr.loading]="eager() ? 'eager' : 'lazy'"
+  [attr.fetchpriority]="eager() ? 'high' : null"
+  decoding="async"
+  (load)="onLoad()"
+  (error)="onError()">

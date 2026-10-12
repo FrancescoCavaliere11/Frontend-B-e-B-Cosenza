@@ -1,0 +1,23 @@
+<div class="page-start blocks">
+  <site-block-text [block]="intro" />
+  <site-block-split [block]="story" />
+
+  <section class="pastry" aria-label="I nostri dolci">
+    <div class="pastry__carousel wrapper">
+      <site-carousel [slides]="slides" [interactive]="true" label="I nostri dolci" sizes="100vw" />
+    </div>
+
+    <ul class="pastry__grid wrapper">
+      @for (item of items; track item.name; let i = $index) {
+        <li class="pastry__item reveal" siteInView [style.--reveal-delay]="'calc(' + (i % 3) + ' * var(--stagger-reveal))'">
+          <site-media-image [media]="item.media" sizes="(max-width: 1023px) 50vw, 30vw" />
+          <h3 class="type-label pastry__name">{{ item.name }}</h3>
+          <p class="type-body type-italic">{{ item.description }}</p>
+          @if (item.season) { <p class="type-label-sm type-muted">{{ item.season }}</p> }
+        </li>
+      }
+    </ul>
+  </section>
+
+  <site-block-text [block]="closing" />
+</div>

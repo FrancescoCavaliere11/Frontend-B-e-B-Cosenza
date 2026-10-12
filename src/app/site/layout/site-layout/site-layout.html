@@ -1,0 +1,16 @@
+<site-header />
+<site-drawer />
+
+<main id="contenuto" class="site-main" tabindex="-1">
+  <router-outlet />
+</main>
+
+<site-footer />
+
+@if (layout.isIntroVisible()) {
+  <site-intro (done)="onIntroDone()" />
+}
+
+@if (booking.isOpen()) {
+  <site-booking-panel (closed)="onBookingClosed()" />
+}

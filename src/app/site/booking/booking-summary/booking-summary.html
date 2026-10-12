@@ -1,0 +1,52 @@
+@if (store.quote(); as quote) {
+  <div class="summary">
+    <section class="summary__stay">
+      <h2 class="type-title">{{ ui.title }}</h2>
+      <p class="type-body-lg type-italic">{{ stay() }} · {{ search.nightsLabel(quote.nights) }} · {{ quote.guestCount }} {{ quote.guestCount === 1 ? 'ospite' : 'ospiti' }}</p>
+
+      <dl class="summary__lines">
+        @for (line of quote.lines; track line.roomId) {
+          <div class="summary__line">
+            <dt class="type-body">{{ line.roomName }} <span class="type-micro type-muted">{{ formatAmount(line.unitPrice) }} × {{ line.nights }}</span></dt>
+            <dd class="type-body">{{ formatAmount(line.lineTotal) }}</dd>
+          </div>
+        }
+        @if (hasDiscount()) {
+          <div class="summary__line">
+            <dt class="type-body">{{ ui.discount }}</dt>
+            <dd class="type-body">− {{ formatAmount(quote.discountAmount) }}</dd>
+          </div>
+        }
+        <div class="summary__line summary__line--total">
+          <dt class="type-label">{{ ui.total }}</dt>
+          <dd class="type-title">{{ formatAmount(quote.totalPrice, quote.currency) }}</dd>
+        </div>
+      </dl>
+      <p class="field__hint">{{ ui.taxNote }}</p>
+    </section>
+
+    <fieldset class="summary__payment" [disabled]="store.isBusy()">
+      <legend class="type-label">{{ ui.payment }}</legend>
+      <label class="choice summary__choice">
+        <input type="radio" name="payment" [checked]="store.paymentOption() === options.PAY_ON_ARRIVAL" (change)="store.setPaymentOption(options.PAY_ON_ARRIVAL)">
+        <span><span class="type-body-lg">{{ ui.payOnArrival }}</span><br><span class="type-micro type-muted">{{ ui.payOnArrivalHelp }}</span></span>
+      </label>
+      <label class="choice summary__choice" [class.is-disabled]="!canPayOnline">
+        <input type="radio" name="payment" [disabled]="!canPayOnline" [checked]="store.paymentOption() === options.PAY_NOW" (change)="store.setPaymentOption(options.PAY_NOW)">
+        <span>
+          <span class="type-body-lg">{{ ui.payNow }}</span><br>
+          <span class="type-micro type-muted">{{ canPayOnline ? ui.payNowHelp(discountPercent) : ui.payNowUnavailable }}</span>
+        </span>
+      </label>
+    </fieldset>
+  </div>
+
+  <footer class="booking-actions">
+    <button type="button" class="text-action" (click)="store.back()">{{ back }}</button>
+    <div aria-live="polite">@if (store.error(); as error) { <p class="form-error">{{ error.message }}</p> }</div>
+    <button type="button" class="button button--solid" [disabled]="store.isBusy()" (click)="store.continueToGuest()">
+      @if (store.isBusy()) { <span class="spinner"></span> }
+      {{ ui.continue }}
+    </button>
+  </footer>
+}

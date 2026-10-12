@@ -1,0 +1,125 @@
+/* Classi tipografiche: serif per il racconto, Jost maiuscolo per le etichette. */
+:where(html.site) .type-display,
+:where(html.site) .type-title,
+:where(html.site) .type-body,
+:where(html.site) .type-body-lg,
+:where(html.site) .type-cover,
+:where(html.site) .type-page-cover {
+  font-family: var(--font-body);
+  font-weight: 300;
+}
+
+:where(html.site) .type-display {
+  font-size: var(--text-40);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-plump);
+  text-wrap: balance;
+}
+
+:where(html.site) .type-title {
+  font-size: var(--text-24);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-plump);
+  text-wrap: balance;
+}
+
+:where(html.site) .type-label-lg,
+:where(html.site) .type-label,
+:where(html.site) .type-label-sm,
+:where(html.site) .type-micro {
+  font-family: var(--font-label);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  line-height: var(--leading-snug);
+}
+
+:where(html.site) .type-label-lg { font-size: var(--text-16); }
+:where(html.site) .type-label { font-size: var(--text-14); }
+:where(html.site) .type-label-sm { font-size: var(--text-12); }
+:where(html.site) .type-micro { font-size: var(--text-12); letter-spacing: var(--tracking-plump); text-transform: none; font-weight: 400; }
+
+:where(html.site) .type-body { font-size: var(--text-16); text-wrap: pretty; }
+:where(html.site) .type-body-lg { font-size: var(--text-18); line-height: var(--leading-snug); text-wrap: pretty; }
+:where(html.site) .type-italic { font-style: italic; }
+:where(html.site) .type-muted { opacity: var(--site-muted-opacity); }
+
+:where(html.site) .type-cover {
+  font-size: var(--text-cover);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-plump);
+}
+
+:where(html.site) .type-page-cover {
+  font-size: var(--text-page-cover);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-plump);
+  max-width: 15em;
+  text-wrap: balance;
+}
+
+@media (width >= 768px) {
+  :where(html.site) .type-display { font-size: var(--text-90); }
+  :where(html.site) .type-title { font-size: var(--text-40); }
+  :where(html.site) .type-label-lg { font-size: var(--text-18); }
+  :where(html.site) .type-body { font-size: var(--text-18); }
+  :where(html.site) .type-body-lg { font-size: var(--text-20); }
+}
+
+/* Testo lungo: ritmo verticale, misure di lettura, link sottolineati. */
+:where(html.site) .prose { text-align: center; }
+:where(html.site) .prose > * + * { margin-top: var(--space-s); }
+:where(html.site) .prose > * { margin-inline: auto; }
+:where(html.site) .prose p { max-width: var(--measure-text); text-wrap: pretty; }
+:where(html.site) .prose--large p { font-size: var(--text-18); }
+:where(html.site) .prose--small p { font-size: var(--text-14); }
+:where(html.site) .prose--left { text-align: left; }
+:where(html.site) .prose--left > * { margin-inline: 0; }
+:where(html.site) .prose a,
+:where(html.site) .link-underline {
+  text-decoration: underline;
+  text-underline-offset: .2em;
+  text-decoration-thickness: var(--site-border);
+  transition: opacity var(--dur-element) var(--ease-smooth);
+}
+:where(html.site) .prose ul { display: inline-block; text-align: left; padding-left: 1.1em; }
+:where(html.site) .prose li + li { margin-top: .6em; }
+
+@media (width >= 768px) {
+  :where(html.site) .prose--large p { font-size: var(--text-20); }
+}
+
+@media (hover: hover) {
+  :where(html.site) .prose a:hover,
+  :where(html.site) .link-underline:hover { opacity: var(--site-muted-opacity); }
+}
+
+/* Linea corta che separa titolo e sottotitolo (card su mobile, intestazioni). */
+:where(html.site) .rule-short {
+  display: block;
+  width: var(--site-line-short);
+  height: var(--site-border);
+  margin: var(--space-s) auto;
+  background: currentColor;
+}
+
+/*
+ * Corsivo senza salti di layout: il testo invisibile in `title`
+ * riserva la larghezza della versione in corsivo.
+ */
+:where(html.site) .italic-mask { display: inline-grid; white-space: nowrap; }
+:where(html.site) .italic-mask::after {
+  content: attr(title);
+  height: 0;
+  font-style: italic;
+  visibility: hidden;
+  overflow: hidden;
+}
+
+/* Titoli dentro un testo lungo: più aria sopra che sotto. */
+:where(html.site) .prose > h2:not(:first-child),
+:where(html.site) .prose > h3:not(:first-child) { margin-top: var(--space-m); }
+
+/* Un bottone o un'azione dentro un testo lungo non si sottolinea. */
+:where(html.site) .prose a.button,
+:where(html.site) .prose .text-action { text-decoration: none; }

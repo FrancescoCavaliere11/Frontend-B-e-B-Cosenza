@@ -15,6 +15,17 @@ export const SHOWS_OWN_ERRORS = new HttpContextToken<boolean>(() => false);
 /** Prefisso delle rotte SPA protette da `adminGuard`. */
 const ADMIN_AREA_PREFIX = '/admin';
 
+/** Pagina di accesso all'area admin. */
+const LOGIN_PAGE = '/login';
+
+/**
+ * L'alert globale è un comportamento del back-office. Il sito pubblico
+ * mostra ogni errore dentro la pagina, vicino a ciò che l'ha causato.
+ */
+function usesGlobalAlert(url: string): boolean {
+  return url.startsWith(ADMIN_AREA_PREFIX) || url.startsWith(LOGIN_PAGE);
+}
+
 export const withCredentialsInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
@@ -47,11 +58,17 @@ export const withCredentialsInterceptor: HttpInterceptorFn = (req, next) => {
 
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  const router = inject(Router);
+
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       // Il 401 è gestito da `withCredentialsInterceptor` (redirect al login)
       // e, sul login, dalla pagina stessa: un alert qui sarebbe un doppione.
-      if (error.status === HttpStatusCode.Unauthorized || req.context.get(SHOWS_OWN_ERRORS)) {
+      if (
+        error.status === HttpStatusCode.Unauthorized
+        || req.context.get(SHOWS_OWN_ERRORS)
+        || !usesGlobalAlert(router.url)
+      ) {
         return throwError(() => error);
       }
 

@@ -1,0 +1,8 @@
+<article class="page-start wrapper section prose prose--left legal">
+  <h1 class="type-title">{{ page.title }}</h1>
+  <p class="type-label-sm type-muted">{{ page.updated }}</p>
+  @for (section of page.sections; track section.title) {
+    <h2 class="type-label">{{ section.title }}</h2>
+    @for (paragraph of section.paragraphs; track $index) { <p class="type-body">{{ paragraph }}</p> }
+  }
+</article>

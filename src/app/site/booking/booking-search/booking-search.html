@@ -1,0 +1,116 @@
+<div class="search">
+  <div class="search__modes" role="tablist" aria-label="Modalità di ricerca">
+    @for (mode of modes; track mode) {
+      <button type="button" role="tab" class="search__mode type-label" [class.is-active]="store.mode() === mode"
+              [attr.aria-selected]="store.mode() === mode" (click)="store.setMode(mode)">{{ ui.modes[mode] }}</button>
+    }
+  </div>
+  <p class="search__help type-body type-italic">{{ ui.modeHelp[store.mode()] }}</p>
+
+  <div class="search__layout">
+    <div class="search__controls">
+      <div class="search__guests">
+        <span class="field__label" id="guests-label">{{ ui.guests }}</span>
+        <div class="stepper" role="group" aria-labelledby="guests-label">
+          <button type="button" class="icon-button" [attr.aria-label]="ui.fewer" [disabled]="store.guests() <= 1" (click)="store.setGuests(store.guests() - 1)">−</button>
+          <output class="type-title" aria-live="polite">{{ store.guests() }}</output>
+          <button type="button" class="icon-button" [attr.aria-label]="ui.more" [disabled]="store.guests() >= maxGuests" (click)="store.setGuests(store.guests() + 1)">+</button>
+        </div>
+      </div>
+
+      @if (store.mode() === 'room') {
+        <fieldset class="search__rooms">
+          <legend class="field__label">{{ ui.roomsForCalendar }}</legend>
+          @if (catalog.isPreview()) {
+            <p class="field__hint">{{ ui.previewOnly }}</p>
+          } @else {
+            @for (room of store.rooms(); track room.id) {
+              <label class="option">
+                <input type="checkbox" class="sr-only" [checked]="isRoomSelected(room.id)" (change)="store.toggleRoom(room.id)">
+                <span class="option__box" [class.is-selected]="isRoomSelected(room.id)">
+                  <span class="type-body-lg">{{ room.name }}</span>
+                  <span class="type-micro type-muted">{{ roomDetail(room) }}</span>
+                </span>
+              </label>
+            }
+          }
+        </fieldset>
+      }
+    </div>
+
+    <div class="search__calendar">
+      <app-stay-calendar
+        [unavailableNights]="calendarNights()"
+        [checkIn]="store.checkIn()"
+        [checkOut]="store.checkOut()"
+        [minDate]="today"
+        [maxDate]="maxDate"
+        [maxNights]="maxNights"
+        [isLoading]="store.isLoadingOccupancy()"
+        (rangeChange)="onRange($event)"
+        (visibleRangeChange)="onVisibleRange($event)" />
+      @if (store.hasDates()) {
+        <p class="type-label-sm search__nights">{{ ui.nightsLabel(store.nights()) }}</p>
+      }
+    </div>
+  </div>
+
+  @if (store.mode() === 'dates' && store.hasDates()) {
+    <section class="search__results" aria-live="polite">
+      @if (store.isSearching()) {
+        <p class="search__status"><span class="spinner"></span> {{ ui.searching }}</p>
+      } @else if (store.availability() && !hasResults()) {
+        <p class="search__status type-italic">{{ ui.noRooms }}</p>
+      } @else if (hasResults()) {
+        @if (singles().length) {
+          <h3 class="type-label">{{ ui.single }}</h3>
+          <div class="options">
+            @for (proposal of singles(); track proposal.key) {
+              <button type="button" class="option__box" [class.is-selected]="isSelected(proposal)" [attr.aria-pressed]="isSelected(proposal)" (click)="store.selectRooms(proposal.ids)">
+                <span class="type-body-lg">{{ proposal.title }}</span>
+                <span class="type-micro type-muted">{{ proposal.detail }}</span>
+              </button>
+            }
+          </div>
+        }
+        @if (combinations().length) {
+          <h3 class="type-label">{{ ui.combinations }}</h3>
+          <div class="options">
+            @for (proposal of combinations(); track proposal.key) {
+              <button type="button" class="option__box" [class.is-selected]="isSelected(proposal)" [attr.aria-pressed]="isSelected(proposal)" (click)="store.selectRooms(proposal.ids)">
+                <span class="type-body-lg">{{ proposal.title }}</span>
+                <span class="type-micro type-muted">{{ proposal.detail }}</span>
+              </button>
+            }
+          </div>
+        }
+        <h3 class="type-label">{{ ui.manual }}</h3>
+        <div class="options">
+          @for (room of store.rooms(); track room.id) {
+            <label class="option">
+              <input type="checkbox" class="sr-only" [checked]="isRoomSelected(room.id)" (change)="store.toggleRoom(room.id)">
+              <span class="option__box" [class.is-selected]="isRoomSelected(room.id)">
+                <span class="type-body-lg">{{ room.name }}</span>
+                <span class="type-micro type-muted">{{ roomDetail(room) }}</span>
+              </span>
+            </label>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <footer class="booking-actions">
+    <div aria-live="polite">
+      @if (store.error(); as error) {
+        <p class="form-error">{{ error.message }}</p>
+      } @else if (store.searchBlocker(); as blocker) {
+        <p class="field__hint">{{ blocker }}</p>
+      }
+    </div>
+    <button type="button" class="button button--solid" [disabled]="!!store.searchBlocker() || store.isBusy()" (click)="store.continueToSummary()">
+      @if (store.isBusy()) { <span class="spinner"></span> }
+      {{ ui.continue }}
+    </button>
+  </footer>
+</div>

@@ -1,0 +1,29 @@
+<section class="page-start wrapper section booking-page">
+  <h1 class="type-title">{{ ui.title }}</h1>
+  <p class="type-body type-italic">{{ ui.intro }}</p>
+
+  <form class="booking-page__form" [formGroup]="form" novalidate (ngSubmit)="submit()">
+    <div class="field">
+      <label class="field__label" for="lk-code">{{ ui.code }}</label>
+      <input id="lk-code" class="field__input" formControlName="code" autocomplete="off" autocapitalize="characters" [attr.aria-invalid]="hasError('code')">
+      @if (hasError('code')) { <p class="field__error">{{ validation.required }}</p> }
+    </div>
+    <div class="field">
+      <label class="field__label" for="lk-email">{{ ui.email }}</label>
+      <input id="lk-email" class="field__input" type="email" formControlName="email" autocomplete="email" [attr.aria-invalid]="hasError('email')">
+      @if (hasError('email')) { <p class="field__error">{{ validation.email }}</p> }
+    </div>
+    <button type="submit" class="button" [disabled]="isLoading()">
+      @if (isLoading()) { <span class="spinner"></span> }
+      {{ ui.submit }}
+    </button>
+  </form>
+
+  <div aria-live="polite" class="booking-page__body">
+    @if (error(); as error) { <p class="form-error">{{ error.message }}</p> }
+    @if (booking(); as booking) {
+      <site-booking-card [booking]="booking" />
+      <p class="field__hint">{{ ui.manageHint }}</p>
+    }
+  </div>
+</section>

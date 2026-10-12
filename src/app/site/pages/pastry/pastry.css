@@ -1,0 +1,19 @@
+.pastry__grid { display: none; }
+
+@media (width >= 768px) {
+  .pastry__carousel { display: none; }
+
+  /* Mosaico: colonne sfalsate in verticale, come un tavolo apparecchiato. */
+  .pastry__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-l) var(--site-inner-gutter);
+    margin: 0 auto;
+    padding-inline: calc(var(--site-outer-gutter) + var(--site-inset-wide));
+    list-style: none;
+  }
+
+  .pastry__item:nth-child(3n + 2) { margin-top: var(--space-xl); }
+  .pastry__item:nth-child(3n + 3) { margin-top: var(--space-l); }
+  .pastry__name { margin-top: var(--space-s); margin-bottom: var(--space-xs); }
+}

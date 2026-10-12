@@ -1,0 +1,194 @@
+/* --- Bottone: bordo del colore del testo, riempimento invertito in hover --- */
+:where(html.site) .button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 1.05em 2.2em;
+  font-family: var(--font-label);
+  font-size: var(--text-14);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: var(--tracking-label);
+  text-indent: var(--tracking-label);
+  text-transform: uppercase;
+  color: inherit;
+  border: var(--site-border-strong) solid currentColor;
+  border-radius: var(--radius-xs);
+  /* Niente transizione su `color`: il colore arriva dal tema, che sfuma già
+     da sé; una transizione propria lo farebbe restare indietro. */
+  transition:
+    background-color var(--dur-element) var(--ease-smooth),
+    opacity var(--dur-element) var(--ease-smooth);
+}
+
+:where(html.site) .button--compact { padding: .8em 1em; font-size: var(--text-12); }
+:where(html.site) .button--solid { color: var(--site-bg); background-color: var(--site-fg); border-color: var(--site-fg); }
+:where(html.site) .button--block { width: 100%; }
+:where(html.site) .button:disabled,
+:where(html.site) .button[aria-disabled="true"] { opacity: var(--site-dimmed-opacity); cursor: not-allowed; }
+
+@media (hover: hover) {
+  :where(html.site) .button:not(:disabled):hover { color: var(--site-bg); background-color: var(--site-fg); }
+  :where(html.site) .button--solid:not(:disabled):hover { color: var(--site-fg); background-color: transparent; }
+}
+
+/* Link-azione testuale in maiuscoletto. */
+:where(html.site) .text-action {
+  font-family: var(--font-label);
+  font-size: var(--text-12);
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  border-bottom: var(--site-border) solid currentColor;
+  padding-bottom: var(--site-border-strong);
+  transition: opacity var(--dur-element) var(--ease-smooth);
+}
+
+@media (hover: hover) {
+  :where(html.site) .text-action:hover { opacity: var(--site-muted-opacity); }
+}
+
+/* --- Campi: una sola linea inferiore, errori in corsivo --- */
+:where(html.site) .field { display: grid; gap: var(--space-xs); text-align: left; }
+:where(html.site) .field__label { font-family: var(--font-label); font-size: var(--text-12); font-weight: 500; letter-spacing: var(--tracking-label); text-transform: uppercase; }
+
+:where(html.site) .field__input {
+  width: 100%;
+  min-height: var(--site-control);
+  padding: var(--space-xs) 0;
+  font-size: var(--text-18);
+  background: transparent;
+  border: 0;
+  border-bottom: var(--site-border) solid var(--site-rule-strong);
+  border-radius: 0;
+  transition: border-color var(--dur-element) var(--ease-smooth);
+  appearance: none;
+}
+
+:where(html.site) textarea.field__input { min-height: calc(var(--site-control) * 2); resize: vertical; }
+:where(html.site) .field__input::placeholder { color: inherit; opacity: var(--site-dimmed-opacity); }
+:where(html.site) .field__input:focus { outline: none; border-bottom-color: currentColor; }
+:where(html.site) .field__input:focus::placeholder { opacity: 0; }
+:where(html.site) .field__input[aria-invalid="true"] { border-bottom-color: var(--site-error); }
+:where(html.site) .field__input:-webkit-autofill { -webkit-text-fill-color: currentColor; transition: background-color 5000s; }
+
+:where(html.site) select.field__input {
+  height: var(--site-control);
+  padding-right: var(--space-m);
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - var(--space) * 2) 55%, calc(100% - var(--space)) 55%;
+  background-size: var(--space) var(--space);
+  background-repeat: no-repeat;
+}
+
+:where(html.site) select.field__input option { color: var(--color-espresso); }
+
+:where(html.site) .field__error,
+:where(html.site) .form-error {
+  font-size: var(--text-14);
+  font-style: italic;
+  color: var(--site-error);
+}
+
+:where(html.site) .form-error { text-align: center; }
+:where(html.site) .field__hint { font-size: var(--text-14); font-style: italic; opacity: var(--site-muted-opacity); }
+
+/* Scelta con casella o pallino disegnati. */
+:where(html.site) .choice { display: flex; gap: var(--space-xs); align-items: flex-start; cursor: pointer; text-align: left; }
+:where(html.site) .choice input {
+  flex: none;
+  width: var(--site-check);
+  height: var(--site-check);
+  margin-top: .2em;
+  border: var(--site-border) solid currentColor;
+  border-radius: var(--radius-xs);
+  appearance: none;
+  display: grid;
+  place-content: center;
+}
+:where(html.site) .choice input[type="radio"] { border-radius: var(--radius-round); }
+:where(html.site) .choice input::after { content: ""; width: var(--site-check-mark); height: var(--site-check-mark); background: currentColor; transform: scale(0); transition: transform var(--dur-element) var(--ease-smooth); border-radius: inherit; }
+:where(html.site) .choice input:checked::after { transform: scale(1); }
+
+/* Trappola anti-bot: fuori dallo schermo, mai visibile né raggiungibile. */
+:where(html.site) .honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Indicatore di caricamento. */
+:where(html.site) .spinner {
+  display: inline-block;
+  width: var(--site-icon);
+  height: var(--site-icon);
+  border: var(--site-border) solid var(--site-rule-strong);
+  border-top-color: currentColor;
+  border-radius: var(--radius-round);
+  animation: site-spin var(--dur-panel) linear infinite;
+}
+
+/* Pulsante circolare (chiusura, frecce). */
+:where(html.site) .icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: var(--site-control);
+  height: var(--site-control);
+  border-radius: var(--radius-round);
+  transition: opacity var(--dur-element) var(--ease-smooth);
+}
+
+@media (hover: hover) {
+  :where(html.site) .icon-button:hover { opacity: var(--site-muted-opacity); }
+}
+
+/* X disegnata con due linee. */
+:where(html.site) .icon-close { position: relative; width: var(--site-icon); height: var(--site-icon); }
+:where(html.site) .icon-close::before,
+:where(html.site) .icon-close::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: var(--site-border);
+  background: currentColor;
+}
+:where(html.site) .icon-close::before { transform: rotate(45deg); }
+:where(html.site) .icon-close::after { transform: rotate(-45deg); }
+
+/* Freccia sottile (direzione da --arrow-rotate). */
+:where(html.site) .icon-arrow {
+  width: var(--site-icon-s);
+  height: var(--site-icon-s);
+  border-top: var(--site-border) solid currentColor;
+  border-right: var(--site-border) solid currentColor;
+  transform: rotate(var(--arrow-rotate, 45deg));
+}
+:where(html.site) .icon-arrow--left { --arrow-rotate: -135deg; }
+
+/* Barra delle azioni in fondo a un passo o a un modulo. */
+:where(html.site) .booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-s);
+  margin-top: var(--space-l);
+  padding-top: var(--space-m);
+  border-top: var(--site-border) solid var(--site-rule);
+}
+
+:where(html.site) .booking-actions > div { flex: 1 1 auto; text-align: center; }
+
+/* Pagine dei link email e della consultazione. */
+:where(html.site) .booking-page {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-m);
+  max-width: var(--site-panel-max);
+  text-align: center;
+}
+
+:where(html.site) .booking-page__body,
+:where(html.site) .booking-page__form,
+:where(html.site) .booking-page__confirm { display: grid; gap: var(--space-m); width: 100%; }
+:where(html.site) .booking-page__body site-booking-card { width: 100%; }

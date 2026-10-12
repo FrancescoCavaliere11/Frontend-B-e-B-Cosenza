@@ -1,0 +1,30 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-intro);
+  display: grid;
+  place-items: center;
+  padding-inline: var(--site-outer-gutter);
+  color: var(--color-linen);
+  background: var(--color-primary);
+  text-align: center;
+  cursor: pointer;
+  transition: opacity var(--dur-slow) var(--ease-smooth);
+}
+
+:host > * { grid-area: 1 / 1; }
+
+.intro__claim {
+  white-space: pre-line;
+  /* `backwards`, non `both`: finita la comparsa l'animazione non deve più
+     imporre l'opacità, altrimenti la fase «wordmark» non riesce a nasconderla. */
+  animation: site-fade-in var(--dur-panel) var(--ease-smooth) backwards;
+  transition: opacity var(--dur-fade) var(--ease-smooth);
+}
+
+.intro__wordmark { opacity: 0; transition: opacity var(--dur-slow) var(--ease-smooth); }
+
+:host([data-phase="wordmark"]) .intro__claim,
+:host([data-phase="leaving"]) .intro__claim { opacity: 0; }
+:host([data-phase="wordmark"]) .intro__wordmark { opacity: 1; }
+:host([data-phase="leaving"]) { opacity: 0; pointer-events: none; }

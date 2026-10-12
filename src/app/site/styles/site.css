@@ -1,0 +1,16 @@
+/*
+ * Design system del sito pubblico.
+ *
+ * Caricato globalmente (angular.json → styles) ma attivo solo sotto
+ * `html.site`, la classe che il layout pubblico mette sul documento:
+ * l'area admin non ne eredita nulla.
+ *
+ * Regola: nei CSS di componente niente colori, font, durate o misure
+ * letterali — solo le variabili definite in `tokens.css`.
+ */
+@import "./tokens.css";
+@import "./base.css";
+@import "./typography.css";
+@import "./layout.css";
+@import "./motion.css";
+@import "./controls.css";

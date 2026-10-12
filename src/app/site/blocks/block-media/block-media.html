@@ -1,0 +1,8 @@
+<div class="wrapper layout-grid">
+  <figure class="layout-cell reveal" siteInView [style.--col-start]="block().placement.colStart" [style.--col-end]="block().placement.colEnd">
+    <site-media-image [media]="block().media" [sizes]="sizes()" [eager]="eager() || !!block().eager" />
+    @if (block().media.caption) {
+      <figcaption class="type-body type-italic">{{ block().media.caption }}</figcaption>
+    }
+  </figure>
+</div>

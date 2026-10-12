@@ -1,0 +1,37 @@
+<div class="carousel__track">
+  @for (slide of slides(); track slide.src; let i = $index) {
+    <site-media-image
+      class="carousel__slide"
+      [class.is-active]="i === index()"
+      [media]="slide"
+      [sizes]="sizes()"
+      [eager]="eager() && i === 0"
+      [decorative]="decorative()"
+      [attr.aria-hidden]="i !== index()"
+      [attr.aria-roledescription]="interactive() ? 'diapositiva' : null"
+      [attr.aria-label]="interactive() ? ui.slide(i + 1, total()) : null" />
+  }
+</div>
+
+@if (total() > 1) {
+  <div class="carousel__dots" [attr.aria-hidden]="!interactive()">
+    @for (slide of slides(); track slide.src; let i = $index) {
+      @if (interactive()) {
+        <button type="button" class="carousel__dot" [class.is-active]="i === index()"
+                [attr.aria-label]="ui.slide(i + 1, total())" [attr.aria-current]="i === index()"
+                (click)="goTo(i)"></button>
+      } @else {
+        <span class="carousel__dot" [class.is-active]="i === index()"></span>
+      }
+    }
+  </div>
+}
+
+@if (interactive() && total() > 1) {
+  <button type="button" class="carousel__arrow carousel__arrow--prev" [attr.aria-label]="ui.previous" (click)="previous()">
+    <span class="icon-arrow icon-arrow--left"></span>
+  </button>
+  <button type="button" class="carousel__arrow carousel__arrow--next" [attr.aria-label]="ui.next" (click)="next()">
+    <span class="icon-arrow"></span>
+  </button>
+}

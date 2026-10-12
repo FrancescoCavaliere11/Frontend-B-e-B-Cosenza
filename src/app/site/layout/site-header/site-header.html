@@ -1,0 +1,50 @@
+<a class="header__skip sr-only" href="#contenuto">{{ ui.skip }}</a>
+
+<div class="header__gradient" aria-hidden="true"></div>
+<div class="header__veil" aria-hidden="true" (click)="layout.openDropdown.set(null)"></div>
+
+<div class="header__inner wrapper">
+  <div class="header__start">
+    <site-burger [isOpen]="layout.isDrawerOpen()" [label]="layout.isDrawerOpen() ? ui.closeMenu : ui.openMenu" (toggled)="toggleDrawer()" />
+
+    <nav class="nav" aria-label="Navigazione principale">
+      <ul class="nav__list">
+        @for (item of nav; track item.label) {
+          <li class="nav__item" [class.is-active]="layout.openDropdown() === item.label">
+            @if (isGroup(item)) {
+              <button type="button" class="nav__trigger type-body-lg"
+                      [attr.aria-expanded]="layout.openDropdown() === item.label"
+                      [attr.aria-controls]="'dropdown-' + $index" (click)="toggleDropdown(item)">
+                <span class="italic-mask" [attr.title]="item.label">{{ item.label }}</span>
+                <span class="nav__chevron" aria-hidden="true"></span>
+              </button>
+              <div class="dropdown" [id]="'dropdown-' + $index">
+                <span class="dropdown__line" aria-hidden="true"></span>
+                <ul class="dropdown__list">
+                  @for (child of item.children; track child.path; let i = $index) {
+                    <li class="dropdown__item" [style.--i]="i">
+                      <a class="type-body-lg italic-mask" [attr.title]="child.label" [routerLink]="child.path"
+                         [attr.tabindex]="layout.openDropdown() === item.label ? 0 : -1"
+                         (click)="layout.closeMenus()">{{ child.label }}</a>
+                    </li>
+                  }
+                </ul>
+              </div>
+            } @else {
+              <a class="nav__link type-body-lg italic-mask" [attr.title]="item.label" [routerLink]="item.path"
+                 routerLinkActive="is-current" (click)="layout.closeMenus()">{{ item.label }}</a>
+            }
+          </li>
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <a class="header__logo" [routerLink]="routes.home" [attr.aria-label]="ui.home" (click)="layout.closeMenus()">
+    <site-logo />
+  </a>
+
+  <div class="header__end">
+    <button type="button" class="button header__book" (click)="openBooking()">{{ ui.book }}</button>
+  </div>
+</div>

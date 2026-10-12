@@ -1,0 +1,16 @@
+.room { padding-bottom: var(--space-xl); }
+.room__intro { padding-top: var(--space-l); padding-bottom: var(--space-l); }
+.room__body { display: grid; gap: var(--space-l); padding-top: var(--space-l); }
+.room__facts { display: grid; gap: var(--space-m); margin: 0; }
+.room__facts dt { margin-bottom: var(--space-xs); opacity: var(--site-muted-opacity); }
+.room__facts dd { margin: 0; }
+.room__features { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.room__features li::before { content: "— "; opacity: var(--site-dimmed-opacity); }
+.room__cta { text-align: center; }
+
+@media (width >= 768px) {
+  .room__body { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--site-inner-gutter); }
+  .room__story { grid-column: 2 / 8; }
+  .room__facts { grid-column: 9 / 12; align-content: start; }
+  .room__cta { grid-column: 1 / -1; padding-top: var(--space-l); }
+}

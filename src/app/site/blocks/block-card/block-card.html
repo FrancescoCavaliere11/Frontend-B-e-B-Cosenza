@@ -1,0 +1,27 @@
+<div class="wrapper layout-grid">
+  <div class="layout-cell reveal" siteInView [style.--col-start]="block().placement.colStart" [style.--col-end]="block().placement.colEnd">
+    @if (routePath(); as path) {
+      <a class="card" [routerLink]="path" [attr.aria-label]="block().title + ' — ' + block().link.label">
+        <ng-container [ngTemplateOutlet]="cardBody" />
+      </a>
+    } @else {
+      <button type="button" class="card" [attr.aria-label]="block().link.label" (click)="booking.open()">
+        <ng-container [ngTemplateOutlet]="cardBody" />
+      </button>
+    }
+  </div>
+</div>
+
+<ng-template #cardBody>
+  <div class="card__media">
+    @if (block().media.length > 1) {
+      <site-carousel [slides]="block().media" [sizes]="sizes()" [autoplay]="autoplay" [eager]="eager()" [decorative]="true" />
+    } @else {
+      <site-media-image [media]="block().media[0]" [sizes]="sizes()" [eager]="eager()" [decorative]="true" />
+    }
+  </div>
+  <div class="card__content">
+    <h2 class="card__title type-label-lg">{{ block().title }}</h2>
+    <p class="card__headline type-body-lg">{{ block().headline }}</p>
+  </div>
+</ng-template>

@@ -1,0 +1,20 @@
+<section class="payment">
+  <h2 class="type-title">{{ ui.title }}</h2>
+  <p class="type-body type-italic">{{ ui.intro }}</p>
+
+  @switch (state()) {
+    @case ('loading') { <p class="payment__status"><span class="spinner"></span> {{ ui.loading }}</p> }
+    @case ('unavailable') { <p class="form-error">{{ ui.unavailable }}</p> }
+    @case ('error') { <p class="form-error">{{ message() }}</p> }
+  }
+
+  <div class="payment__element" #element [class.is-hidden]="state() !== 'ready' && state() !== 'paying'"></div>
+
+  @if (state() === 'ready' || state() === 'paying') {
+    <div aria-live="polite">@if (message()) { <p class="form-error">{{ message() }}</p> }</div>
+    <button type="button" class="button button--solid button--block" [disabled]="state() === 'paying'" (click)="pay()">
+      @if (state() === 'paying') { <span class="spinner"></span> }
+      {{ ui.pay(amount()) }}
+    </button>
+  }
+</section>

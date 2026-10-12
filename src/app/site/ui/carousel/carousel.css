@@ -1,0 +1,69 @@
+:host {
+  position: relative;
+  display: block;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+:host(.is-interactive) { cursor: grab; }
+:host(.is-interactive:active) { cursor: grabbing; }
+
+.carousel__track { display: grid; }
+
+.carousel__slide {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transition: opacity var(--dur-panel) var(--ease-smooth);
+}
+
+.carousel__slide.is-active { opacity: 1; z-index: 1; }
+
+.carousel__dots {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: var(--space-s);
+  display: flex;
+  gap: var(--space-xs);
+  transform: translateX(-50%);
+  color: var(--color-linen);
+}
+
+.carousel__dot {
+  width: var(--site-dot);
+  height: var(--site-dot);
+  padding: 0;
+  border-radius: var(--radius-round);
+  background: currentColor;
+  opacity: var(--site-dimmed-opacity);
+  transition: opacity var(--dur-element) var(--ease-smooth), transform var(--dur-element) var(--ease-smooth);
+}
+
+.carousel__dot.is-active { opacity: 1; transform: scale(var(--site-dot-active-scale)); }
+
+.carousel__arrow {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: var(--site-control);
+  height: var(--site-control);
+  color: var(--color-linen);
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity var(--dur-fade) var(--ease-smooth), transform var(--dur-fade) var(--ease-out-quart);
+}
+
+.carousel__arrow--prev { left: var(--space-xs); }
+.carousel__arrow--next { right: var(--space-xs); }
+
+:host(:focus-visible) .carousel__arrow,
+.carousel__arrow:focus-visible { opacity: 1; }
+
+@media (hover: hover) {
+  :host(:hover) .carousel__arrow { opacity: var(--site-muted-opacity); }
+  :host(:hover) .carousel__arrow:hover { opacity: 1; }
+  :host(:hover) .carousel__arrow--prev { transform: translate(calc(var(--space) * -1), -50%); }
+  :host(:hover) .carousel__arrow--next { transform: translate(var(--space), -50%); }
+}

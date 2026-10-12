@@ -1,0 +1,17 @@
+.booking-card {
+  display: grid;
+  gap: var(--space-m);
+  max-width: var(--site-panel-max);
+  margin-inline: auto;
+  padding: var(--space-m);
+  border: var(--site-border) solid var(--site-rule);
+  border-radius: var(--radius-xs);
+}
+
+.booking-card__head { display: grid; justify-items: center; gap: var(--space-xs); text-align: center; }
+.booking-card__status { padding: var(--space-xs) var(--space-s); border: var(--site-border) solid currentColor; border-radius: var(--radius-round); }
+.booking-card__rows { display: grid; gap: var(--space-s); margin: 0; }
+.booking-card__rows > div { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-s); }
+.booking-card__rows dt { opacity: var(--site-muted-opacity); }
+.booking-card__rows dd { margin: 0; text-align: right; }
+.booking-card__notice { display: grid; justify-items: center; gap: var(--space-s); padding-top: var(--space-m); border-top: var(--site-border) solid var(--site-rule); text-align: center; }

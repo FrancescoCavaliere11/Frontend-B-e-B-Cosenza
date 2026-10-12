@@ -1,0 +1,43 @@
+/* Comparsa all'ingresso nel viewport (direttiva siteInView). */
+:where(html.site) .reveal {
+  opacity: 0;
+  transform: translateY(var(--space-m));
+  transition:
+    opacity var(--dur-panel) var(--ease-out-quart),
+    transform var(--dur-panel) var(--ease-out-quart);
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+:where(html.site) .reveal.is-in-view { opacity: 1; transform: none; }
+
+/* Linea verticale che si disegna dall'alto. */
+:where(html.site) .connection-line {
+  display: block;
+  width: var(--site-border);
+  height: var(--site-line-tall);
+  margin: var(--space-m) auto 0;
+  background: currentColor;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform var(--dur-line) var(--ease-out-expo);
+}
+
+:where(html.site) .connection-line.is-in-view { transform: scaleY(1); }
+
+@keyframes site-link-show {
+  from { opacity: 0; transform: translateX(var(--site-link-shift)); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes site-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes site-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(html.site) .reveal { transform: none; }
+}

@@ -1,0 +1,18 @@
+<section class="home-hero" siteThemeTrigger="forest" [siteInViewOnce]="false" siteInViewMargin="-70% 0px 0px 0px" siteInView (siteInViewChange)="onHeroInView($event)">
+  <div class="home-hero__wordmark" [class.is-hidden]="!layout.isWordmarkVisible()">
+    <h1 class="sr-only">{{ site.name }} — {{ site.kind }} a {{ site.city }}</h1>
+    <site-logo size="large" aria-hidden="true" />
+  </div>
+
+  <div class="wrapper layout-grid home-hero__grid">
+    <div class="layout-cell home-hero__media">
+      <site-media-image [media]="hero" sizes="(max-width: 767px) 100vw, 34vw" [eager]="true" />
+    </div>
+  </div>
+</section>
+
+@for (section of sections; track section.id) {
+  <section class="home-section" [id]="section.id" [siteThemeTrigger]="section.theme">
+    <site-block-renderer [blocks]="section.blocks" />
+  </section>
+}

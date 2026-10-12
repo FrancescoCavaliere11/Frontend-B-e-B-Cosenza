@@ -1,0 +1,19 @@
+:host { display: block; }
+
+.split { display: grid; gap: var(--space-l); }
+.split__media { margin: 0; }
+.split__text { text-align: center; }
+.split__text > * { margin-inline: auto; }
+
+@media (width >= 768px) {
+  .split {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--site-inner-gutter);
+    align-items: center;
+  }
+  .split__media { grid-column: 2 / 7; }
+  .split__text { grid-column: 8 / 12; text-align: left; }
+  .split__text > * { margin-inline: 0; }
+  .split--reverse .split__media { grid-column: 7 / 12; grid-row: 1; }
+  .split--reverse .split__text { grid-column: 2 / 6; grid-row: 1; }
+}

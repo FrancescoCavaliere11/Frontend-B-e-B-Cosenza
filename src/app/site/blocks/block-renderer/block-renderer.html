@@ -1,0 +1,9 @@
+@for (block of blocks(); track $index; let first = $first) {
+  @switch (block.type) {
+    @case ('text') { <site-block-text [block]="block" [class.is-media]="false" /> }
+    @case ('media') { <site-block-media class="is-media" [block]="block" [eager]="eagerFirst() && first" /> }
+    @case ('card') { <site-block-card class="is-media" [block]="block" [eager]="eagerFirst() && first" /> }
+    @case ('split') { <site-block-split [block]="block" /> }
+    @case ('editorial') { <site-block-editorial class="is-media" [block]="block" /> }
+  }
+}

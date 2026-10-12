@@ -1,0 +1,49 @@
+.search { display: grid; gap: var(--space-m); }
+
+.search__modes { display: flex; justify-content: center; gap: var(--space-m); }
+.search__mode { padding-bottom: var(--space-xs); border-bottom: var(--site-border) solid transparent; opacity: var(--site-dimmed-opacity); transition: opacity var(--dur-element) var(--ease-smooth), border-color var(--dur-element) var(--ease-smooth); }
+.search__mode.is-active { opacity: 1; border-bottom-color: currentColor; }
+.search__help { text-align: center; }
+
+.search__layout { display: grid; gap: var(--space-m); }
+.search__controls { display: grid; gap: var(--space-m); align-content: start; }
+.search__guests { display: grid; gap: var(--space-xs); }
+.stepper { display: flex; align-items: center; gap: var(--space-s); }
+.stepper .icon-button { border: var(--site-border) solid currentColor; font-size: var(--text-20); }
+.stepper .icon-button:disabled { opacity: var(--site-dimmed-opacity); cursor: not-allowed; }
+.stepper output { min-width: var(--space-m); text-align: center; }
+
+.search__rooms { display: grid; gap: var(--space-xs); margin: 0; padding: 0; border: 0; }
+.search__nights { margin-top: var(--space-xs); text-align: center; }
+
+.search__results { display: grid; gap: var(--space-s); }
+.search__status { display: flex; align-items: center; justify-content: center; gap: var(--space-xs); text-align: center; }
+
+.options { display: grid; gap: var(--space-xs); }
+.option { display: block; cursor: pointer; }
+
+.option__box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  width: 100%;
+  padding: var(--space-s);
+  text-align: left;
+  border: var(--site-border) solid var(--site-rule-strong);
+  border-radius: var(--radius-xs);
+  transition: border-color var(--dur-element) var(--ease-smooth), background-color var(--dur-element) var(--ease-smooth);
+}
+
+.option__box.is-selected { border-color: currentColor; background: var(--site-selected-fill); }
+.option input:focus-visible + .option__box { outline: var(--site-border) solid var(--site-focus-ring); outline-offset: var(--site-focus-offset); }
+
+@media (hover: hover) {
+  .option__box:hover { border-color: currentColor; }
+}
+
+@media (width >= 900px) {
+  .search__layout { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); column-gap: var(--space-l); }
+  .options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

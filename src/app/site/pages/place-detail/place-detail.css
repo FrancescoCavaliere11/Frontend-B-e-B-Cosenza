@@ -1,0 +1,3 @@
+.place { padding-bottom: var(--space-xl); }
+.place__intro { padding-block: var(--space-l); }
+.place__body { padding-top: var(--space-l); }

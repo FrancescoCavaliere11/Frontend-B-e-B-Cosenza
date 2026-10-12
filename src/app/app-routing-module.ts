@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import {LoginPage} from './customers/screen/login-page/login-page';
+import {LoginPage} from './auth/login-page/login-page';
 import {AdminHome} from './admin/screen/admin-home/admin-home';
 import {RoomServiceScreen} from './admin/screen/room-service-screen/room-service-screen';
 import {ExtraServiceScreen} from './admin/screen/extra-service-screen/extra-service-screen';
@@ -10,11 +10,6 @@ import {CalendarScreen} from './admin/screen/calendar-screen/calendar-screen';
 import {adminGuard} from './security/admin-guard';
 
 const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'admin',
-    pathMatch: 'full'
-  },
   {
     path: 'login',
     component: LoginPage
@@ -37,12 +32,22 @@ const routes: Routes = [
       // guard del genitore, quindi chi non è admin finisce su /login.
       { path:'**', redirectTo: 'calendar' },
     ]
-  }
-
+  },
+  // Sito pubblico: modulo caricato a parte, così l'admin non lo scarica.
+  // Deve restare l'ultima rotta: il sito gestisce da sé anche il 404.
+  {
+    path: '',
+    loadChildren: () => import('./site/site-module').then(module => module.SiteModule),
+  },
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {
+    // Il sito usa overlay sopra le pagine indice: lo scroll lo governa
+    // `SiteScrollRestoration`, non il router.
+    scrollPositionRestoration: 'disabled',
+    anchorScrolling: 'enabled',
+  })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
