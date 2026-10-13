@@ -62,7 +62,10 @@
 
   @if (captcha.isEnabled) {
     <div class="guest__captcha" #captcha></div>
-    @if (captchaFailed()) { <p class="field__error">{{ ui.captchaError }}</p> }
+    <div aria-live="polite">
+      @if (captchaFailed()) { <p class="field__error">{{ ui.captchaError }}</p> }
+      @else if (captchaMissing()) { <p class="field__error">{{ ui.captchaPending }}</p> }
+    </div>
   }
 
   <footer class="booking-actions">

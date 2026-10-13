@@ -36,6 +36,9 @@
             ],
             "styles": [
               "src/styles.css",
+              "node_modules/@fontsource-variable/newsreader/opsz.css",
+              "node_modules/@fontsource-variable/newsreader/opsz-italic.css",
+              "node_modules/@fontsource-variable/jost/index.css",
               "src/app/site/styles/site.css"
             ]
           },

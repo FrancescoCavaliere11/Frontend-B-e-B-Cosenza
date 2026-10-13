@@ -63,6 +63,8 @@ export const BOOKING_UI = {
     submitNow: 'Vai al pagamento',
     quoteRefreshed: 'Il preventivo era scaduto ed è stato aggiornato: controllate l\'importo e inviate di nuovo.',
     captchaError: 'Il controllo anti-spam non si è caricato. Ricaricate la pagina o scriveteci.',
+    captchaPending: 'La verifica anti-spam non è ancora completa: attendete qualche secondo e inviate di nuovo.',
+    captchaRejected: 'La verifica anti-spam non è andata a buon fine. È stata ripetuta: inviate di nuovo.',
     errors: {
       phoneDigits: (digits: number) => `Il numero, senza prefisso, deve avere ${digits} cifre`,
       italianMobile: 'Inserite un cellulare italiano: inizia con 3 e ha 10 cifre',

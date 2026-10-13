@@ -45,8 +45,9 @@ html.site {
   --site-card-dim: 0.8;
 
   /* --- Tipografia --- */
-  --font-body: "Newsreader", "Iowan Old Style", Georgia, serif;
-  --font-label: "Jost", "Avenir Next", system-ui, sans-serif;
+  /* Font variabili serviti dal sito (@fontsource-variable, licenza OFL). */
+  --font-body: "Newsreader Variable", "Iowan Old Style", Georgia, serif;
+  --font-label: "Jost Variable", "Avenir Next", system-ui, sans-serif;
 
   --text-12: 0.75rem;
   --text-14: 0.875rem;

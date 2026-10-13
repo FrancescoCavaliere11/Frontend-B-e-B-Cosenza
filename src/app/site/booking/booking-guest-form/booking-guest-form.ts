@@ -2,7 +2,7 @@ import {AfterViewInit, Component, DestroyRef, ElementRef, inject, signal, viewCh
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {AbstractControl, FormBuilder, Validators} from '@angular/forms';
 import {BookingFlowStore} from '../booking-flow.store';
-import {CaptchaService} from '../captcha.service';
+import {CaptchaService, CaptchaWidget} from '../captcha.service';
 import {BOOKING_RULES} from '../../../schemas/booking-schema';
 import {PaymentOption} from '../../../schemas/booking-enums';
 import {
@@ -39,8 +39,11 @@ export class BookingGuestForm implements AfterViewInit {
   protected readonly submitted = signal(false);
   protected readonly captchaToken = signal<string | null>(null);
   protected readonly captchaFailed = signal(false);
+  /** «Invia» premuto prima che il captcha producesse un token. */
+  protected readonly captchaMissing = signal(false);
 
   private readonly destroyRef = inject(DestroyRef);
+  private captchaWidget: CaptchaWidget | null = null;
   private readonly captchaHost = viewChild<ElementRef<HTMLElement>>('captcha');
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
@@ -67,8 +70,11 @@ export class BookingGuestForm implements AfterViewInit {
   ngAfterViewInit(): void {
     const host = this.captchaHost()?.nativeElement;
     if (!host || !this.captcha.isEnabled) return;
-    this.captcha.render(host, token => this.captchaToken.set(token))
-      .then(dispose => this.destroyRef.onDestroy(dispose))
+    this.captcha.render(host, token => this.onCaptchaToken(token))
+      .then(widget => {
+        this.captchaWidget = widget;
+        this.destroyRef.onDestroy(() => widget.remove());
+      })
       .catch(() => this.captchaFailed.set(true));
   }
 
@@ -97,7 +103,11 @@ export class BookingGuestForm implements AfterViewInit {
   protected submit(): void {
     this.submitted.set(true);
     this.form.markAllAsTouched();
-    if (this.form.invalid || (this.captcha.isEnabled && !this.captchaToken())) return;
+    if (this.form.invalid) return;
+    if (this.captcha.isEnabled && !this.captchaToken()) {
+      this.captchaMissing.set(true);
+      return;
+    }
 
     const value = this.form.getRawValue();
     const prefix = value.phone_prefix === OTHER_PHONE_PREFIX ? normalizePrefix(value.phone_custom_prefix) : value.phone_prefix;
@@ -106,6 +116,11 @@ export class BookingGuestForm implements AfterViewInit {
       lastname: value.lastname.trim(),
       email: value.email.trim(),
       phone_number: `${prefix}${phoneDigitsOf(value.phone_number)}`,
-    }, this.captchaToken(), value.website || null);
+    }, this.captchaToken(), value.website || null, () => this.captchaWidget?.reset());
+  }
+
+  private onCaptchaToken(token: string | null): void {
+    this.captchaToken.set(token);
+    if (token) this.captchaMissing.set(false);
   }
 }

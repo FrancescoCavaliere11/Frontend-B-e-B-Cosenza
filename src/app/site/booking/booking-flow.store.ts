@@ -38,6 +38,8 @@ const SEARCH_DEBOUNCE_MS = 350;
 /** Margine prima della scadenza del preventivo oltre il quale lo si rinnova. */
 const QUOTE_SAFETY_MS = 30_000;
 const DEFAULT_GUESTS = 2;
+/** Campo con cui il backend segnala un captcha rifiutato (`details[].loc`). */
+const CAPTCHA_FIELD = 'captcha_token';
 
 /**
  * Stato del flusso di prenotazione dell'ospite (pattern Facade + State
@@ -212,13 +214,19 @@ export class BookingFlowStore {
 
   /* --- Passo 3: dati dell'ospite --- */
 
-  submitGuest(guest: GuestData, captchaToken: string | null, website: string | null): void {
+  /**
+   * Crea la prenotazione.
+   *
+   * @param onRejected chiamata se il backend rifiuta la richiesta: il token
+   *   del captcha è già stato speso e il form deve chiederne uno nuovo.
+   */
+  submitGuest(guest: GuestData, captchaToken: string | null, website: string | null, onRejected?: () => void): void {
     const quote = this.quote();
     if (!quote || this.isBusy()) return;
 
     // Preventivo in scadenza: lo si rinnova prima di spenderlo.
     if (Date.parse(quote.quoteExpiresAt) - Date.now() < QUOTE_SAFETY_MS) {
-      this.fetchQuote(() => this.submitGuest(guest, captchaToken, website));
+      this.fetchQuote(() => this.submitGuest(guest, captchaToken, website, onRejected));
       return;
     }
 
@@ -232,7 +240,10 @@ export class BookingFlowStore {
       this.created.set(created);
       this.guestEmail.set(guest.email);
       this.go(created.booking.paymentOption === PaymentOption.PAY_NOW ? 'payment' : 'done');
-    }, error => this.onCreateError(error));
+    }, error => {
+      onRejected?.();
+      this.onCreateError(error);
+    });
   }
 
   /* --- Passo 4: pagamento --- */
@@ -304,6 +315,11 @@ export class BookingFlowStore {
   }
 
   private onCreateError(error: SiteError): void {
+    // Captcha rifiutato: il form ne ha già chiesto uno nuovo, basta riprovare.
+    if (CAPTCHA_FIELD in error.fieldErrors) {
+      this.error.set({...error, message: BOOKING_UI.guest.captchaRejected, fieldErrors: {}});
+      return;
+    }
     // Preventivo scaduto o non più valido: lo si ricalcola e si avvisa.
     if (error.status === 422 && !Object.keys(error.fieldErrors).length) {
       this.fetchQuote(() => this.error.set({...error, message: BOOKING_UI.guest.quoteRefreshed}));

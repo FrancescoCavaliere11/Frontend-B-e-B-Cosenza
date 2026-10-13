@@ -49,7 +49,13 @@ export const SITE = {
  */
 export const PUBLIC_KEYS = {
   stripePublishableKey: '',
-  turnstileSiteKey: '',
+  /**
+   * CHIAVE DI PROVA di Cloudflare (passa sempre): va sostituita con quella
+   * vera prima della pubblicazione (debito tecnico, «Chiavi Turnstile»).
+   * Altre chiavi di prova: `2x00000000000000000000AB` (rifiuta sempre),
+   * `3x00000000000000000000FF` (chiede sempre la spunta).
+   */
+  turnstileSiteKey: '1x00000000000000000000AA',
 } as const;
 
 /** Script esterni caricati solo quando servono. */
