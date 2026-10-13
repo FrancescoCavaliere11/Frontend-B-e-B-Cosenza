@@ -50,7 +50,16 @@
 }
 
 .header__end { display: flex; justify-content: flex-end; }
-.header__book { font-size: var(--text-12); padding: .8em 1em; }
+.header__book { display: none; }
+
+.header__book-icon { border: var(--site-border) solid currentColor; }
+.header__book-icon svg {
+  width: var(--site-icon);
+  height: var(--site-icon);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--site-border);
+}
 
 .nav { display: none; }
 
@@ -71,12 +80,14 @@
 :host(.is-dropdown-open) .header__gradient { opacity: 0; }
 :host(.is-drawer-open) { color: var(--color-linen); }
 :host(.is-drawer-open) .header__gradient { opacity: 0; }
-:host(.is-drawer-open) .header__book { opacity: 0; pointer-events: none; }
+:host(.is-drawer-open) .header__book,
+:host(.is-drawer-open) .header__book-icon { opacity: 0; pointer-events: none; }
 
 @media (width >= 768px) {
   site-burger { display: none; }
   .nav { display: block; }
-  .header__book { font-size: var(--text-14); padding: 1.05em 2.2em; }
+  .header__book { display: inline-flex; font-size: var(--text-14); padding: 1.05em 2.2em; }
+  .header__book-icon { display: none; }
 
   .nav__list { display: flex; gap: var(--space-m); margin: 0; padding: 0; list-style: none; }
   .nav__item { position: relative; transition: opacity var(--dur-element) var(--ease-smooth); }
@@ -102,7 +113,7 @@
     position: absolute;
     top: 100%;
     left: 0;
-    /* Larghezza del proprio contenuto, non della voce «La casa». */
+    /* Larghezza del proprio contenuto, non della voce che la apre. */
     width: max-content;
     padding-top: var(--space-s);
     visibility: hidden;

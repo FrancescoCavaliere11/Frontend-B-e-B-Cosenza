@@ -112,6 +112,8 @@ html.site {
   --site-check-mark: 10px;
   --site-link-shift: -8px;
   --site-gallery-height: min(70vh, 135vw);
+  /* Su mobile: larghezza di una foto della galleria (si intravede la successiva). */
+  --site-gallery-item-mobile: 85vw;
   --site-inset-wide: 8vw;
 
   /* --- Forme --- */

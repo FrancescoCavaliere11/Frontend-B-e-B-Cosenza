@@ -1,18 +1,15 @@
 <div class="drawer__inner" [siteFocusTrap]="layout.isDrawerOpen()">
   <nav class="drawer__nav" aria-label="Menu">
     <ul class="drawer__list">
-      @for (item of nav; track item.label; let i = $index) {
-        <li class="drawer__item" [style.--i]="i">
-          @if (isGroup(item)) {
-            <site-accordion [title]="item.label" titleClass="drawer__group type-title">
-              <ul class="drawer__sublist">
-                @for (child of item.children; track child.path) {
-                  <li><a class="type-body-lg" [routerLink]="child.path" (click)="layout.closeMenus()">{{ child.label }}</a></li>
-                }
-              </ul>
-            </site-accordion>
+      @for (entry of entries; track entry.key) {
+        <li class="drawer__item" [style.--i]="entry.index"
+            [class.drawer__item--group]="entry.kind === 'group'"
+            [class.drawer__item--child]="entry.kind === 'link' && entry.inGroup"
+            [class.drawer__item--closes]="entry.closesGroup">
+          @if (entry.kind === 'group') {
+            <span class="type-label-sm drawer__group" aria-hidden="true">{{ entry.label }}</span>
           } @else {
-            <a class="type-title" [routerLink]="item.path" (click)="layout.closeMenus()">{{ item.label }}</a>
+            <a [class]="entry.inGroup ? 'type-body-lg' : 'type-title'" [routerLink]="entry.path" (click)="layout.closeMenus()">{{ entry.label }}</a>
           }
         </li>
       }

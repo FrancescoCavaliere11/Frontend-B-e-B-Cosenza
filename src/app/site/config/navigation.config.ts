@@ -27,7 +27,7 @@ export function placePath(slug: string): string {
 /** Navigazione principale (a sinistra del logo su desktop). */
 export const MAIN_NAV: ReadonlyArray<NavItem> = [
   {
-    label: 'La casa',
+    label: 'Il soggiorno',
     children: [
       {label: 'Le camere', path: SITE_ROUTES.rooms},
       {label: 'Servizi', path: SITE_ROUTES.services},

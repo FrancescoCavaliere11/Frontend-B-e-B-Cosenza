@@ -21,7 +21,13 @@ html.site {
  * un'etichetta in Jost tornerebbe serif). Sul sito si ripristina l'eredità;
  * `:where` azzera la specificità, quindi le classi tipografiche vincono.
  */
-:where(html.site) * { font-family: inherit; }
+/*
+ * Stessa origine per `overscroll-behavior: none`, che `src/styles.css` mette
+ * su ogni elemento: su iOS impediva al gesto verticale partito da una foto
+ * (contenitore con overflow) di far scorrere la pagina. Sul sito torna il
+ * comportamento normale; i pannelli in overlay lo bloccano da sé (`contain`).
+ */
+:where(html.site) * { font-family: inherit; overscroll-behavior: auto; }
 
 html.site body {
   height: auto;

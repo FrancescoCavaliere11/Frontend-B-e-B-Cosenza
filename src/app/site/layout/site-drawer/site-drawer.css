@@ -37,7 +37,24 @@
   transition-delay: calc(var(--dur-element) + var(--i) * var(--stagger-step));
 }
 
-.drawer__sublist { margin: 0; padding: 0 0 var(--space-s); list-style: none; display: grid; gap: var(--space-xs); }
+/*
+ * Gruppo («Il soggiorno»): etichetta, link più piccoli e ravvicinati, poi
+ * una linea corta che lo chiude. Le voci principali restano grandi.
+ */
+.drawer__item--group { padding-bottom: var(--space-xs); }
+.drawer__item--group:not(:first-child) { margin-top: var(--space-m); }
+.drawer__group { opacity: var(--site-muted-opacity); }
+.drawer__item--child { padding-block: calc(var(--space) * 1); }
+
+.drawer__item--closes::after {
+  content: "";
+  display: block;
+  width: var(--site-line-short);
+  height: var(--site-border);
+  margin: var(--space-m) auto var(--space-s);
+  background: currentColor;
+  opacity: var(--site-muted-opacity);
+}
 
 .drawer__footer {
   display: grid;

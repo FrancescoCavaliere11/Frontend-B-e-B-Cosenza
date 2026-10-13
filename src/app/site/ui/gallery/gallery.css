@@ -71,3 +71,26 @@
   .gallery__controls { grid-template-columns: auto 1fr auto; }
   .gallery__hint { grid-column: auto; }
 }
+
+/*
+ * Mobile: larghezza fissa e altezza dalle proporzioni, agganciata al centro.
+ * Con l'altezza fissa una foto verticale diventava più larga dello schermo
+ * e restava appoggiata al bordo sinistro.
+ */
+@media (width < 768px) {
+  .gallery__track {
+    padding-inline: calc((100vw - var(--site-gallery-item-mobile)) / 2);
+    scroll-padding-inline: 0;
+  }
+
+  .gallery__item,
+  .gallery__item:last-child {
+    width: var(--site-gallery-item-mobile);
+    height: auto;
+    aspect-ratio: auto;
+    scroll-snap-align: center;
+  }
+
+  .gallery__open,
+  .gallery__open site-media-image { height: auto; }
+}

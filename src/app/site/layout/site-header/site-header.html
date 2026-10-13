@@ -46,5 +46,12 @@
 
   <div class="header__end">
     <button type="button" class="button header__book" (click)="openBooking()">{{ ui.book }}</button>
+    <!-- Su mobile il bottone non ci sta accanto al logo: resta l'icona. -->
+    <button type="button" class="icon-button header__book-icon" [attr.aria-label]="ui.book" (click)="openBooking()">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3.5" y="5" width="17" height="15" rx="1.5" />
+        <path d="M3.5 10h17M8 3v4M16 3v4" />
+      </svg>
+    </button>
   </div>
 </div>
