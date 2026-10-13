@@ -21,7 +21,7 @@
       @if (store.mode() === 'room') {
         <fieldset class="search__rooms">
           <legend class="field__label">{{ ui.roomsForCalendar }}</legend>
-          @if (catalog.isPreview()) {
+          @if (catalog.isUnavailable()) {
             <p class="field__hint">{{ ui.previewOnly }}</p>
           } @else {
             @for (room of store.rooms(); track room.id) {

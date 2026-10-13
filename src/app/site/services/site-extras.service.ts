@@ -26,7 +26,7 @@ export class SiteExtrasService {
         if (services.length) this.items.set(services.map((service, index) => this.toItem(service, index)));
         this.state.set('ready');
       },
-      error: () => this.state.set('preview'),
+      error: () => this.state.set('unavailable'),
     });
   }
 

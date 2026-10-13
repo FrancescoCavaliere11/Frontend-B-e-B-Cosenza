@@ -46,7 +46,7 @@ export const UI = {
     price: 'Prezzo',
     priceFrom: (price: string) => `da ${price} a notte`,
     dragHint: 'Trascina per esplorare',
-    previewNotice: 'Anteprima: prezzi e disponibilità si caricano quando il sistema di prenotazione è raggiungibile.',
+    unavailableNotice: 'In questo momento non riusciamo a caricare le camere. Riprova fra poco, o scrivici.',
   },
   places: {
     howFar: 'Distanza',

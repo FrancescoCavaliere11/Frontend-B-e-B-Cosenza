@@ -86,6 +86,20 @@
             <small class="error-message">Il prezzo deve essere un numero positivo</small>
           }
 
+          <div class="form-group">
+            <label for="new-description">Descrizione (mostrata sul sito)</label>
+            <textarea
+              [class.invalid]="checkIsInvalidDescription()"
+              id="new-description"
+              formControlName="description"
+              rows="4"
+              [attr.maxlength]="descriptionMaxLength"
+              placeholder="Es. Un letto matrimoniale e due lettini, bagno privato con doccia"></textarea>
+            @if (checkIsInvalidDescription()) {
+              <small class="error-message">La descrizione può avere al massimo {{ descriptionMaxLength }} caratteri</small>
+            }
+          </div>
+
           <div class="enabled-toggle">
             <input
               id="new-enabled"
@@ -198,6 +212,20 @@
             @if (checkIsInvalidPrice()){
               <small class="error-message">Il prezzo deve essere un numero positivo</small>
             }
+
+            <div class="form-group">
+              <label for="description">Descrizione (mostrata sul sito)</label>
+              <textarea
+                [class.invalid]="checkIsInvalidDescription()"
+                id="description"
+                formControlName="description"
+                rows="4"
+                [attr.maxlength]="descriptionMaxLength"
+                placeholder="Es. Un letto matrimoniale e due lettini, bagno privato con doccia"></textarea>
+              @if (checkIsInvalidDescription()) {
+                <small class="error-message">La descrizione può avere al massimo {{ descriptionMaxLength }} caratteri</small>
+              }
+            </div>
 
             <div class="enabled-toggle">
               <input

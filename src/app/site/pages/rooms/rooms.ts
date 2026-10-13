@@ -3,7 +3,7 @@ import {SiteRoomsService} from '../../services/site-rooms.service';
 import {ROOMS_PAGE} from '../../content/rooms.content';
 import {CardBlock, EditorialBlock, RoomView, TextBlock} from '../../models/site.models';
 import {roomPath} from '../../config/navigation.config';
-import {formatAmount} from '../../../utils/booking-format';
+import {roomFacts} from '../../utils/room-facts';
 import {UI} from '../../i18n/it';
 
 /** Indice delle camere: card sfalsate con carosello; il dettaglio si apre sopra. */
@@ -35,14 +35,10 @@ export class RoomsPage implements OnInit {
   }
 
   private toCard(room: RoomView): CardBlock {
-    const facts = [
-      room.capacity ? UI.common.upToGuests(room.capacity) : null,
-      room.price ? UI.rooms.priceFrom(formatAmount(room.price)) : null,
-    ].filter(Boolean).join(' · ');
     return {
       type: 'card',
       title: room.name,
-      headline: facts || room.headline,
+      headline: roomFacts(room),
       media: room.gallery,
       placement: room.placement,
       link: {kind: 'route', label: UI.rooms.explore, path: roomPath(room.slug)},

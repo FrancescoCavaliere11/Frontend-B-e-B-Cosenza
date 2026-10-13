@@ -45,7 +45,8 @@ export class RoomService {
       number: payload.number,
       price: payload.price,
       room_services_ids: payload.room_services_ids,
-      enabled: payload.enabled
+      enabled: payload.enabled,
+      description: payload.description
     };
 
     formData.append('room_form', JSON.stringify(roomData));
@@ -73,7 +74,8 @@ export class RoomService {
       number: payload.number,
       price: payload.price,
       room_services_ids: payload.room_services_ids,
-      enabled: payload.enabled
+      enabled: payload.enabled,
+      description: payload.description
     };
 
     formData.append('room_form', JSON.stringify(roomData));

@@ -1,7 +1,7 @@
 <div class="page-start">
   <site-block-renderer [blocks]="blocks()" />
-  @if (catalog.isPreview()) {
-    <p class="wrapper form-error type-italic">{{ ui.rooms.previewNotice }}</p>
+  @if (catalog.isUnavailable()) {
+    <p class="wrapper form-error type-italic">{{ ui.rooms.unavailableNotice }}</p>
   }
 </div>
 <router-outlet />

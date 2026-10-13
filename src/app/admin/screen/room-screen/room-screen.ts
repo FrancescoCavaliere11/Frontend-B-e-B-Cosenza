@@ -4,7 +4,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { combineLatest, map, startWith, Subject, takeUntil } from 'rxjs';
 import { RoomService } from '../../../service/room-service';
 import { RoomServiceSchema } from '../../../schemas/room-service-schema';
-import { RoomSchema } from '../../../schemas/room-schema';
+import { ROOM_DESCRIPTION_MAX_LENGTH, RoomSchema } from '../../../schemas/room-schema';
 import { RoomServiceService } from '../../../service/room-service-service';
 
 @Component({
@@ -38,6 +38,7 @@ export class RoomScreen implements OnDestroy, OnInit {
   searchedRooms: RoomSchema[] = []
 
   roomServices: RoomServiceSchema[] = []
+  protected readonly descriptionMaxLength = ROOM_DESCRIPTION_MAX_LENGTH;
 
   private destroy$ = new Subject<void>();
 
@@ -55,7 +56,8 @@ export class RoomScreen implements OnDestroy, OnInit {
       number: [1, [Validators.required, Validators.min(1), Validators.max(1000)]],
       price: [0.01, [Validators.required, Validators.min(0.01)]],
       room_services_ids: [[], [Validators.maxLength(50)]],
-      enabled: [true, [Validators.required]]
+      enabled: [true, [Validators.required]],
+      description: ['', [Validators.maxLength(ROOM_DESCRIPTION_MAX_LENGTH)]]
     })
   }
 
@@ -146,7 +148,8 @@ export class RoomScreen implements OnDestroy, OnInit {
       number: 1,
       price: 0.01,
       room_services_ids: [],
-      enabled: true
+      enabled: true,
+      description: ''
     });
   }
 
@@ -166,7 +169,8 @@ export class RoomScreen implements OnDestroy, OnInit {
       number: room.number,
       price: room.price,
       room_services_ids: currentServiceIds,
-      enabled: room.enabled
+      enabled: room.enabled,
+      description: room.description ?? ''
     });
 
     this.cdr.detectChanges();
@@ -201,7 +205,8 @@ export class RoomScreen implements OnDestroy, OnInit {
       number: this.form.value.number,
       price: this.form.value.price,
       room_services_ids: this.form.value.room_services_ids,
-      enabled: this.form.value.enabled
+      enabled: this.form.value.enabled,
+      description: this.normalizedDescription()
     };
 
     this.roomService.createRoom(payload, this.selectedImageFile!).subscribe({
@@ -240,6 +245,7 @@ export class RoomScreen implements OnDestroy, OnInit {
       formValue.number === room.number &&
       Number(formValue.price) === Number(room.price) &&
       formValue.enabled === room.enabled &&
+      this.normalizedDescription() === room.description &&
       isServicesEqual &&
       !this.selectedImageFile
     ) {
@@ -256,7 +262,8 @@ export class RoomScreen implements OnDestroy, OnInit {
       number: formValue.number,
       price: formValue.price,
       room_services_ids: newServiceIds,
-      enabled: formValue.enabled
+      enabled: formValue.enabled,
+      description: this.normalizedDescription()
     };
 
     this.roomService.updateRoom(payload, this.selectedImageFile).subscribe({
@@ -316,6 +323,15 @@ export class RoomScreen implements OnDestroy, OnInit {
 
   checkIsInvalidNumber() {
     return this.form.get('number')?.touched && this.form.get('number')?.invalid
+  }
+
+  checkIsInvalidDescription() {
+    return this.form.get('description')?.touched && this.form.get('description')?.invalid
+  }
+
+  /** Descrizione come la salva il backend: senza spazi ai bordi, vuota → `null`. */
+  private normalizedDescription(): string | null {
+    return (this.form.value.description ?? '').trim() || null;
   }
 
   checkIsInvalidPrice() {

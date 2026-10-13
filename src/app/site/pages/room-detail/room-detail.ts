@@ -6,9 +6,13 @@ import {SiteRoomsService} from '../../services/site-rooms.service';
 import {BookingPanelService} from '../../services/booking-panel.service';
 import {SITE_ROUTES} from '../../config/navigation.config';
 import {formatAmount} from '../../../utils/booking-format';
+import {roomFacts} from '../../utils/room-facts';
 import {UI} from '../../i18n/it';
 
-/** Scheda camera in overlay: galleria percorribile, racconto, dotazioni, prenotazione. */
+/**
+ * Scheda camera in overlay: galleria percorribile, descrizione e servizi
+ * (solo quelli inseriti dall'admin), prenotazione.
+ */
 @Component({
   selector: 'site-room-detail',
   standalone: false,
@@ -25,27 +29,27 @@ export class RoomDetailPage {
   private readonly slug = toSignal(this.route.paramMap.pipe(map(params => params.get('slug') ?? '')), {initialValue: ''});
 
   protected readonly room = computed(() => this.catalog.bySlug(this.slug()));
-  protected readonly price = computed(() => {
-    const price = this.room()?.price;
-    return price ? formatAmount(price) : null;
-  });
-  protected readonly features = computed(() => {
+  protected readonly facts = computed(() => {
     const room = this.room();
-    return room ? [...room.details, ...room.amenities] : [];
+    return room ? roomFacts(room) : '';
+  });
+  protected readonly price = computed(() => {
+    const room = this.room();
+    return room ? formatAmount(room.price) : '';
   });
 
   constructor() {
     this.catalog.load();
-    // Slug inesistente (o camera disattivata): si torna all'indice.
+    // Camera inesistente, disattivata o backend irraggiungibile: si torna all'indice.
     effect(() => {
       const state = this.catalog.state();
-      if ((state === 'ready' || state === 'preview') && !this.room()) this.close();
+      if ((state === 'ready' || state === 'unavailable') && !this.room()) this.close();
     });
   }
 
   protected bookRoom(): void {
-    const id = this.room()?.id;
-    this.booking.open(id ? {roomId: id} : null);
+    const room = this.room();
+    if (room) this.booking.open({roomId: room.id});
   }
 
   protected close(): void {

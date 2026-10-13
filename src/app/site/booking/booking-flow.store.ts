@@ -87,12 +87,10 @@ export class BookingFlowStore {
         id: room.id, name: room.name, capacity: room.capacity, price: room.subtotal, fitsAll: room.fits_all_guests,
       }));
     }
-    return this.catalog.rooms()
-      .filter(room => room.id !== null)
-      .map(room => ({
-        id: room.id!, name: room.name, capacity: room.capacity ?? 0, price: room.price,
-        fitsAll: (room.capacity ?? 0) >= this.guests(),
-      }));
+    return this.catalog.rooms().map(room => ({
+      id: room.id, name: room.name, capacity: room.capacity, price: room.price,
+      fitsAll: room.capacity >= this.guests(),
+    }));
   });
 
   readonly selectedRooms = computed(() => {

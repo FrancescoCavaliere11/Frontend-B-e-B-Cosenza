@@ -1,6 +1,7 @@
 .room { padding-bottom: var(--space-xl); }
 .room__intro { padding-top: var(--space-l); padding-bottom: var(--space-l); }
 .room__body { display: grid; gap: var(--space-l); padding-top: var(--space-l); }
+.room__description { white-space: pre-line; }
 .room__facts { display: grid; gap: var(--space-m); margin: 0; }
 .room__facts dt { margin-bottom: var(--space-xs); opacity: var(--site-muted-opacity); }
 .room__facts dd { margin: 0; }
@@ -12,5 +13,7 @@
   .room__body { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--site-inner-gutter); }
   .room__story { grid-column: 2 / 8; }
   .room__facts { grid-column: 9 / 12; align-content: start; }
+  /* Senza descrizione i dati occupano il posto del testo. */
+  .room__facts:first-child { grid-column: 2 / 12; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .room__cta { grid-column: 1 / -1; padding-top: var(--space-l); }
 }

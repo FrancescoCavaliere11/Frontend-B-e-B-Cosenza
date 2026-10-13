@@ -114,25 +114,25 @@ export type EditorialBlock = TextBlock | MediaBlock | CardBlock | SplitBlock | E
 /* Contenuti di dominio                                                */
 /* ------------------------------------------------------------------ */
 
-/** Testi e foto di una camera, uniti ai dati vivi del backend per numero. */
-export interface RoomContent {
+/**
+ * Camera pronta per il template. Tutti i dati vengono dal backend; dal
+ * frontend arrivano solo le foto (finché manca il caricamento immagini,
+ * lacuna B2) e la posizione nella griglia.
+ */
+export interface RoomView {
+  id: string;
   number: number;
+  /** Ricavato dal nome: è l'indirizzo della scheda (`/camere/busento`). */
   slug: string;
   name: string;
-  headline: string;
-  story: ReadonlyArray<string>;
-  details: ReadonlyArray<string>;
-  gallery: ReadonlyArray<MediaAsset>;
-}
-
-/** Camera pronta per il template: contenuto editoriale + dati del backend. */
-export interface RoomView extends RoomContent {
-  /** UUID del backend; `null` se il backend non è raggiungibile (anteprima). */
-  id: string | null;
-  capacity: number | null;
+  /** Testo libero scritto dall'admin; `null` se assente. */
+  description: string | null;
+  capacity: number;
   /** Prezzo a notte come stringa decimale, mai convertito in numero. */
-  price: string | null;
+  price: string;
+  /** Servizi assegnati alla camera nel backend, e solo quelli. */
   amenities: ReadonlyArray<string>;
+  gallery: ReadonlyArray<MediaAsset>;
   placement: GridPlacement;
 }
 
