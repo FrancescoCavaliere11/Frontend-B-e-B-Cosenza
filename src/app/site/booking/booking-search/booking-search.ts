@@ -71,7 +71,7 @@ export class BookingSearch {
   }
 
   protected onVisibleRange(range: VisibleRange): void {
-    if (this.store.mode() === 'room') this.store.loadOccupancy(range.from, range.to);
+    this.store.setVisibleRange(range.from, range.to);
   }
 
   protected roomDetail(room: SelectableRoom): string {

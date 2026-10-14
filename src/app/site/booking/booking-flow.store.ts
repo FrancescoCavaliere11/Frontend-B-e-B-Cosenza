@@ -8,7 +8,8 @@ import {GuestBookingService} from '../http/guest-booking.service';
 import {SiteError, toSiteError} from '../http/site-error';
 import {SiteRoomsService} from '../services/site-rooms.service';
 import {CreatedBooking, GuestData, GuestQuote} from '../models/booking-public.models';
-import {nightsBetween} from '../../utils/booking-format';
+import {nightsBetween, todayIso} from '../../utils/booking-format';
+import {occupancyWindowOf} from '../../utils/occupancy-window';
 import {BOOKING_UI} from './booking.copy';
 
 export type BookingStep = 'search' | 'summary' | 'guest' | 'payment' | 'done';
@@ -111,7 +112,14 @@ export class BookingFlowStore {
   });
 
   private readonly searches = new Subject<void>();
-  private occupancyWindow: {from: string; to: string} | null = null;
+  /**
+   * Finestra mostrata dal calendario, ricordata in **entrambe** le modalità.
+   * Il calendario la comunica solo all'apertura e al cambio di mese: se la si
+   * ignorasse in «per date», passando a «per camera» senza cambiare mese il
+   * sito non saprebbe quale periodo chiedere e le notti occupate non
+   * comparirebbero (difetto del 14/10/2026).
+   */
+  private visibleRange: {from: string; to: string} | null = null;
 
   constructor() {
     this.searches.pipe(
@@ -139,6 +147,7 @@ export class BookingFlowStore {
   presetRoom(roomId: string): void {
     this.setMode('room');
     this.selectedIds.set([roomId]);
+    this.loadOccupancy();
   }
 
   setRange(checkIn: string | null, checkOut: string | null): void {
@@ -166,23 +175,29 @@ export class BookingFlowStore {
     } else if (ids.length < BOOKING_RULES.MAX_ROOMS) {
       this.selectedIds.set([...ids, id]);
     }
-    if (this.mode() === 'room') this.checkSelectionAgainstOccupancy();
+    if (this.mode() === 'room') this.loadOccupancy();
   }
 
   selectRooms(ids: ReadonlyArray<string>): void {
     this.selectedIds.set(ids.slice(0, BOOKING_RULES.MAX_ROOMS));
   }
 
-  /** Calendario «per camera»: notti occupate delle camere scelte nella finestra visibile. */
-  loadOccupancy(from: string, to: string): void {
-    this.occupancyWindow = {from, to};
+  /** Il calendario mostra un nuovo periodo: in «per camera» se ne leggono le notti occupate. */
+  setVisibleRange(from: string, to: string): void {
+    this.visibleRange = {from, to};
+    if (this.mode() === 'room') this.loadOccupancy();
+  }
+
+  /** Notti occupate delle camere scelte nella finestra visibile. */
+  private loadOccupancy(): void {
+    const range = this.visibleRange ? occupancyWindowOf(this.visibleRange, todayIso()) : null;
     const ids = this.selectedIds();
-    if (!ids.length) {
+    if (!range || !ids.length) {
       this.unavailableNights.set(new Set());
       return;
     }
     this.isLoadingOccupancy.set(true);
-    this.availabilityApi.getOccupancy([...ids], from, to).pipe(
+    this.availabilityApi.getOccupancy([...ids], range.from, range.to).pipe(
       finalize(() => this.isLoadingOccupancy.set(false)),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
@@ -332,11 +347,6 @@ export class BookingFlowStore {
       this.requestSearch();
     }
     this.error.set(error);
-  }
-
-  /** Camere cambiate nella modalità «per camera»: si rilegge l'occupazione. */
-  private checkSelectionAgainstOccupancy(): void {
-    if (this.occupancyWindow) this.loadOccupancy(this.occupancyWindow.from, this.occupancyWindow.to);
   }
 
   /** Se una notte scelta non è più libera per le camere selezionate, le date si azzerano. */

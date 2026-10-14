@@ -23,6 +23,7 @@ import {
 } from '../../../schemas/booking-enums';
 import {addDaysIso, formatAmount, formatStayDate, formatStayRange, nightsBetween, todayIso} from '../../../utils/booking-format';
 import {StayRange, VisibleRange} from '../../../shared/components/stay-calendar/stay-calendar';
+import {occupancyWindowOf} from '../../../utils/occupancy-window';
 import {
   EMAIL_PATTERN,
   italianMobileValidator,
@@ -611,17 +612,9 @@ export class BookingCreateForm implements OnInit {
     });
   }
 
-  /**
-   * Finestra da chiedere al backend: i mesi mostrati, senza il passato e
-   * senza superare l'ultimo giorno prenotabile. Due mesi stanno sempre
-   * sotto il limite di 92 giorni.
-   */
+  /** Finestra da chiedere al backend: i mesi mostrati, ritagliati (`occupancyWindowOf`). */
   private occupancyWindow(): VisibleRange | null {
-    if (!this.visibleRange) return null;
-    const lastDay = addDaysIso(this.today, BOOKING_RULES.MAX_ADVANCE_DAYS + BOOKING_RULES.MAX_NIGHTS);
-    const from = this.visibleRange.from < this.today ? this.today : this.visibleRange.from;
-    const to = this.visibleRange.to > lastDay ? lastDay : this.visibleRange.to;
-    return to > from ? {from, to} : null;
+    return this.visibleRange ? occupancyWindowOf(this.visibleRange, this.today) : null;
   }
 
   /**

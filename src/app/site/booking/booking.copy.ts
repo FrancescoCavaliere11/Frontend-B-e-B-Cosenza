@@ -105,7 +105,7 @@ export const BOOKING_UI = {
     title: 'Conferma della prenotazione',
     working: 'Confermiamo la vostra prenotazione…',
     success: 'Prenotazione confermata. Vi aspettiamo!',
-    missingToken: 'Il link è incompleto. Apritelo di nuovo dall\'email, o cercate la prenotazione con codice ed email.',
+    missingToken: 'Per sicurezza questa pagina non si può ricaricare: riaprite il link dall\'email. Se avete già confermato, potete ritrovare la prenotazione con codice ed email.',
   },
   manage: {
     title: 'La vostra prenotazione',
@@ -116,7 +116,7 @@ export const BOOKING_UI = {
     cancelNo: 'No, tienila',
     reason: 'Volete dirci perché? (facoltativo)',
     cancelled: 'La prenotazione è stata annullata. Vi abbiamo mandato un\'email di conferma.',
-    missingToken: 'Il link è incompleto. Apritelo di nuovo dall\'email.',
+    missingToken: 'Per sicurezza questa pagina non si può ricaricare: riaprite il link dall\'email.',
   },
   lookup: {
     title: 'Ritrova la tua prenotazione',
