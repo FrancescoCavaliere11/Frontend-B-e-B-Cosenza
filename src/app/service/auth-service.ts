@@ -1,7 +1,8 @@
 import {Injectable, signal} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpContext} from '@angular/common/http';
 import {catchError, Observable, of, switchMap, tap} from 'rxjs';
 import {Environment} from '../utils/environments';
+import {SHOWS_OWN_ERRORS} from '../security/interceptor';
 
 
 interface User {
@@ -28,6 +29,9 @@ export class AuthService {
 
     return this.http.post(`${this.apiUrl}/token`, body.toString(), {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      // La pagina di login mostra da sé i propri errori (401, 429): senza,
+      // l'avviso globale ne mostrerebbe un secondo.
+      context: new HttpContext().set(SHOWS_OWN_ERRORS, true),
     }).pipe(
       switchMap(() => this.checkCurrentUser())
     );

@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import {HttpErrorResponse, HttpStatusCode} from '@angular/common/http';
+import {errorMessageOf} from '../../security/interceptor';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {passwordStrengthValidator} from '../../validators/validators';
 import {AuthService} from '../../service/auth-service';
@@ -56,16 +58,30 @@ export class LoginPage {
         this.isLoading = false;
         // todo this.router.navigate(['/dashboard']);
       },
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         this.isLoading = false;
-
-        if (err.status === 401) {
-          alert(err.error?.detail || 'Credenziali non valide.')
-        } else {
-          alert('Errore di connessione. Riprova più tardi.')
-        }
-        console.error("Errore durante il login:", err);
+        alert(loginErrorMessage(err));
       }
     });
   }
+}
+
+/** Secondi di attesa suggeriti quando il backend non manda `Retry-After`. */
+const DEFAULT_RETRY_SECONDS = 15 * 60;
+
+/**
+ * Messaggio per un login non riuscito.
+ *
+ * - 429: troppi tentativi, con i minuti di attesa da `Retry-After` (debito #19);
+ * - rete assente: messaggio di connessione;
+ * - altro (401 compreso): il messaggio del backend.
+ */
+export function loginErrorMessage(error: HttpErrorResponse): string {
+  if (error.status === HttpStatusCode.TooManyRequests) {
+    const seconds = Number(error.headers.get('Retry-After')) || DEFAULT_RETRY_SECONDS;
+    const minutes = Math.max(1, Math.ceil(seconds / 60));
+    return `Troppi tentativi di accesso. Riprova fra ${minutes} ${minutes === 1 ? 'minuto' : 'minuti'}.`;
+  }
+  if (error.status === 0) return 'Impossibile contattare il server. Controlla la connessione e riprova.';
+  return errorMessageOf(error);
 }
