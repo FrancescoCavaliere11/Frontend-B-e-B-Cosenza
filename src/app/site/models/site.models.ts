@@ -179,3 +179,18 @@ export interface LegalSection {
   title: string;
   paragraphs: ReadonlyArray<string>;
 }
+
+/**
+ * Camera da `GET /api/v1/room/enabled` (`RoomPublicSchema` del backend):
+ * solo camere in vendita, già ordinate per numero, senza campi del back-office.
+ */
+export interface PublicRoom {
+  id: string;
+  number: number;
+  name: string;
+  capacity: number;
+  /** Decimale serializzato come stringa (`"100.00"`). */
+  price: string;
+  description: string | null;
+  services: ReadonlyArray<{id: string; name: string}>;
+}
