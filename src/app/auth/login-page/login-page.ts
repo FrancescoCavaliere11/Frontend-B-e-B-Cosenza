@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
+import {Router} from '@angular/router';
 import {HttpErrorResponse, HttpStatusCode} from '@angular/common/http';
 import {errorMessageOf} from '../../security/interceptor';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
@@ -18,11 +19,17 @@ import {AuthService} from '../../service/auth-service';
 })
 export class LoginPage {
   loginForm: FormGroup
-  isLoading = false
+  /**
+   * Signal e non campo semplice: l'app è zoneless, e un campo cambiato dentro
+   * la risposta HTTP non aggiorna la vista. Il pulsante restava disabilitato
+   * dopo un login fallito.
+   */
+  readonly isLoading = signal(false);
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -40,26 +47,24 @@ export class LoginPage {
   }
 
   onSubmit() {
-    if(this.isLoading) return
+    if(this.isLoading()) return
 
     if(this.loginForm.invalid){
       this.loginForm.markAllAsTouched()
       return;
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     const { email, password } = this.loginForm.getRawValue();
 
     this.authService.login(email, password).subscribe({
-      next: (user) => {
-        console.log("Login completato con successo per:", user);
-
-        this.isLoading = false;
-        // todo this.router.navigate(['/dashboard']);
+      next: () => {
+        this.isLoading.set(false);
+        this.router.navigate(['/admin'], {replaceUrl: true});
       },
       error: (err: HttpErrorResponse) => {
-        this.isLoading = false;
+        this.isLoading.set(false);
         alert(loginErrorMessage(err));
       }
     });

@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../service/auth-service';
 import {
   Appointment02Icon,
   BedDoubleIcon,
@@ -25,4 +27,20 @@ export class Dashboard {
   protected readonly Wifi02Icon = Wifi02Icon;
   protected readonly Login02Icon = Login02Icon;
   protected readonly LeftToRightListBulletIcon = LeftToRightListBulletIcon;
+
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  protected isLoggingOut = false;
+
+  /** «Esci»: sessione revocata dal backend, poi pagina di login. */
+  protected logout(): void {
+    if (this.isLoggingOut) return;
+    this.isLoggingOut = true;
+    this.authService.logout().subscribe({
+      complete: () => {
+        this.isLoggingOut = false;
+        this.router.navigate(['/login'], {replaceUrl: true});
+      },
+    });
+  }
 }

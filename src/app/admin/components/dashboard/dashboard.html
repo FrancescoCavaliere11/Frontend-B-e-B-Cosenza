@@ -27,7 +27,8 @@
       <p class="text-small">Servizi Extra</p>
     </li>
   </ul>
-  <li class="danger">
+  <li class="danger" role="button" tabindex="0" title="Esci"
+      (click)="logout()" (keydown.enter)="logout()" (keydown.space)="$event.preventDefault(); logout()">
     <hugeicons-icon [icon]="Login02Icon"></hugeicons-icon>
     <p>Esci</p>
   </li>

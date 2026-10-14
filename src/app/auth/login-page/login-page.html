@@ -39,8 +39,8 @@
       }
     </div>
 
-    <button class="primary" type="submit" [disabled]="isLoading">
-      @if(isLoading) { Attendere... } @else { Accedi }
+    <button class="primary" type="submit" [disabled]="isLoading()">
+      @if(isLoading()) { Attendere... } @else { Accedi }
     </button>
 
     <p class="text-small forget-link">Hai dimenticato la password? <b>Clicca qui</b></p>

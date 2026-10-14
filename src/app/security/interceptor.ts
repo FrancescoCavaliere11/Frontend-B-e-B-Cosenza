@@ -1,6 +1,6 @@
 import {HttpContextToken, HttpErrorResponse, HttpInterceptorFn, HttpStatusCode} from '@angular/common/http';
 import {Environment} from '../utils/environments';
-import {catchError, throwError} from 'rxjs';
+import {catchError, of, switchMap, throwError} from 'rxjs';
 import {AuthService} from '../service/auth-service';
 import {inject} from '@angular/core';
 import {Router} from '@angular/router';
@@ -11,6 +11,12 @@ import {Router} from '@angular/router';
  * gestito (redirect al login).
  */
 export const SHOWS_OWN_ERRORS = new HttpContextToken<boolean>(() => false);
+
+/**
+ * Richieste che non devono tentare il rinnovo della sessione su un 401: login,
+ * rinnovo e logout. Senza, un refresh fallito ne chiederebbe un altro.
+ */
+export const SKIP_SESSION_REFRESH = new HttpContextToken<boolean>(() => false);
 
 /** Prefisso delle rotte SPA protette da `adminGuard`. */
 const ADMIN_AREA_PREFIX = '/admin';
@@ -36,22 +42,36 @@ export const withCredentialsInterceptor: HttpInterceptorFn = (req, next) => {
     });
   }
 
+  /** Sessione finita davvero: utente dimenticato e, nell'area admin, ritorno al login. */
+  const endSession = (): void => {
+    authService.currentUser.set(null);
+    // Il redirect vale solo per l'area amministrativa: le pagine pubbliche
+    // possono ricevere un 401 senza che l'utente debba essere portato al login.
+    if (router.url.startsWith(ADMIN_AREA_PREFIX)) {
+      router.navigate(['/login']);
+    }
+  };
+
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === HttpStatusCode.Unauthorized) {
-        console.warn('Sessione scaduta o non valida.');
-
-        authService.currentUser.set(null);
-
-        // Il redirect vale solo per l'area amministrativa: le pagine
-        // pubbliche possono ricevere un 401 senza che l'utente debba
-        // essere portato al login.
-        if (router.url.startsWith(ADMIN_AREA_PREFIX)) {
-          router.navigate(['/login']);
-        }
+      if (error.status !== HttpStatusCode.Unauthorized) return throwError(() => error);
+      if (req.context.get(SKIP_SESSION_REFRESH)) {
+        endSession();
+        return throwError(() => error);
       }
 
-      return throwError(() => error);
+      // L'access token dura 15 minuti: si rinnova la sessione (un solo rinnovo
+      // condiviso da tutte le richieste in corso) e si ripete la richiesta.
+      // Anche se il rinnovo fallisce la si ripete una volta: un'altra scheda
+      // potrebbe aver appena rinnovato, e i cookie sono già quelli nuovi.
+      return authService.refreshSession().pipe(
+        catchError(() => of(undefined)),
+        switchMap(() => next(req)),
+        catchError((retryError: HttpErrorResponse) => {
+          if (retryError.status === HttpStatusCode.Unauthorized) endSession();
+          return throwError(() => retryError);
+        }),
+      );
     })
   );
 };
