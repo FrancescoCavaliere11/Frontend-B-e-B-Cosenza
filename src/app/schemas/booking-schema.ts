@@ -210,6 +210,9 @@ export class BookingDetailSchema {
   payment_option: PaymentOption;
   payment_status: PaymentStatus;
   payment_method: PaymentMethod | null;
+  /** Solo per i pagamenti online: circuito e ultime quattro cifre (da Stripe). */
+  card_brand: string | null;
+  card_last4: string | null;
 
   hold_expires_at: string | null;
   confirmed_at: string | null;
@@ -250,6 +253,8 @@ export class BookingDetailSchema {
     this.payment_option = data.payment_option;
     this.payment_status = data.payment_status;
     this.payment_method = data.payment_method ?? null;
+    this.card_brand = data.card_brand ?? null;
+    this.card_last4 = data.card_last4 ?? null;
 
     this.hold_expires_at = data.hold_expires_at ?? null;
     this.confirmed_at = data.confirmed_at ?? null;

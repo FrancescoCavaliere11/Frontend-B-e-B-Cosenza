@@ -1,9 +1,9 @@
 import {DestroyRef, Injectable, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {Subject, debounceTime, finalize, switchMap, tap, catchError, EMPTY, Observable} from 'rxjs';
+import {Subject, debounceTime, finalize, switchMap, tap, catchError, EMPTY, Observable, concatMap, from, takeWhile, timer} from 'rxjs';
 import {BookingAvailabilityService} from '../../service/booking-availability-service';
 import {AvailabilityResponseSchema, BOOKING_RULES} from '../../schemas/booking-schema';
-import {PaymentOption} from '../../schemas/booking-enums';
+import {BookingStatus, PaymentOption} from '../../schemas/booking-enums';
 import {GuestBookingService} from '../http/guest-booking.service';
 import {SiteError, toSiteError} from '../http/site-error';
 import {SiteRoomsService} from '../services/site-rooms.service';
@@ -41,6 +41,13 @@ const QUOTE_SAFETY_MS = 30_000;
 const DEFAULT_GUESTS = 2;
 /** Campo con cui il backend segnala un captcha rifiutato (`details[].loc`). */
 const CAPTCHA_FIELD = 'captcha_token';
+/**
+ * Attese fra una rilettura e l'altra dopo il pagamento (3 s, poi 4, poi 8:
+ * ~15 s in tutto). Il webhook di Stripe conferma di solito in 2–4 secondi.
+ * Sono poche di proposito: `/lookup` ha un limite di 10 richieste l'ora per
+ * IP, e l'ospite deve poterlo ancora usare dopo.
+ */
+const PAYMENT_RECHECK_DELAYS_MS = [3_000, 4_000, 8_000];
 
 /**
  * Stato del flusso di prenotazione dell'ospite (pattern Facade + State
@@ -263,9 +270,17 @@ export class BookingFlowStore {
 
   /* --- Passo 4: pagamento --- */
 
+  /**
+   * Pagamento accettato da Stripe. La conferma vera la fa il webhook, pochi
+   * secondi dopo: la prenotazione si rilegge finché non lascia «in attesa di
+   * pagamento», così l'esito mostrato non resta quello di prima del
+   * pagamento. Si ferma alla prima risposta definitiva, a un errore (es.
+   * 429) o alla chiusura del pannello, che distrugge lo store.
+   */
   markPaid(): void {
     this.isPaid.set(true);
     this.go('done');
+    this.recheckPaidBooking();
   }
 
   back(): void {
@@ -279,6 +294,20 @@ export class BookingFlowStore {
   }
 
   /* --- Interni --- */
+
+  private recheckPaidBooking(): void {
+    const code = this.created()?.booking.code;
+    const email = this.guestEmail();
+    if (!code || !email) return;
+
+    from(PAYMENT_RECHECK_DELAYS_MS).pipe(
+      concatMap(delay => timer(delay).pipe(switchMap(() => this.bookingApi.lookup(code, email)))),
+      tap(booking => this.created.update(created => created ? {...created, booking} : created)),
+      takeWhile(booking => booking.status === BookingStatus.PENDING_PAYMENT),
+      catchError(() => EMPTY),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe();
+  }
 
   private go(step: BookingStep): void {
     if (!TRANSITIONS[this.step()].includes(step)) return;

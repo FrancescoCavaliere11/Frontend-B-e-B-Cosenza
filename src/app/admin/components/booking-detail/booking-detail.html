@@ -210,6 +210,10 @@
             <dt>Metodo</dt>
             <dd>{{ paymentMethodLabels[b.payment_method] }}</dd>
           }
+          @if (cardLabel(); as card) {
+            <dt>Carta</dt>
+            <dd>{{ card }}</dd>
+          }
           <dt>Pagamento</dt>
           <dd>{{ paymentBadge() ? paymentLabels[paymentBadge()!] : 'Nessun incasso' }}</dd>
         </dl>

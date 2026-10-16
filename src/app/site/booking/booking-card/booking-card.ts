@@ -15,6 +15,8 @@ import {BOOKING_UI} from '../booking.copy';
 export class BookingCard {
   readonly booking = input.required<PublicBooking>();
   readonly freeUntil = input<string | null>(null);
+  /** Etichetta di stato al posto di quella della prenotazione (es. «Pagamento in verifica»). */
+  readonly statusLabel = input<string | null>(null);
 
   protected readonly ui = BOOKING_UI;
   protected readonly bookingPanel = inject(BookingPanelService);
@@ -24,7 +26,7 @@ export class BookingCard {
   protected readonly stay = computed(() => formatStayRange(this.booking().checkIn, this.booking().checkOut));
   protected readonly rooms = computed(() => this.booking().rooms.map(room => room.roomName).join(', '));
   protected readonly payment = computed(() => PAYMENT_OPTION_LABELS[this.booking().paymentOption]);
-  protected readonly status = computed(() => BOOKING_UI.status[this.booking().status]);
+  protected readonly status = computed(() => this.statusLabel() ?? BOOKING_UI.status[this.booking().status]);
   /** Il termine di cancellazione ha senso solo per una prenotazione ancora attiva. */
   protected readonly freeUntilLabel = computed(() => {
     if (this.isCancelled() || this.isExpired()) return null;

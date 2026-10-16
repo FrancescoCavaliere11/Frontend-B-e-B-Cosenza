@@ -1,6 +1,12 @@
 @if (booking(); as booking) {
   <section class="outcome">
-    @if (store.isPaid()) {
+    @if (paidOutcome() === 'confirmed') {
+      <h2 class="type-title">{{ ui.confirmedTitle }}</h2>
+      <p class="type-body-lg type-italic">{{ ui.confirmedText(store.guestEmail()) }}</p>
+    } @else if (paidOutcome() === 'released') {
+      <h2 class="type-title">{{ ui.releasedTitle }}</h2>
+      <p class="type-body-lg type-italic">{{ ui.releasedText }}</p>
+    } @else if (paidOutcome() === 'verifying') {
       <h2 class="type-title">{{ ui.paidTitle }}</h2>
       <p class="type-body-lg type-italic">{{ ui.paidText }}</p>
     } @else {
@@ -9,7 +15,7 @@
       @if (holdLabel()) { <p class="type-label-sm">{{ ui.holdUntil }} {{ holdLabel() }}</p> }
     }
 
-    <site-booking-card [booking]="booking" />
+    <site-booking-card [booking]="booking" [statusLabel]="cardStatusLabel()" />
 
     @if (devConfirmLink(); as dev) {
       <p><a class="text-action" [routerLink]="dev.path" [queryParams]="{token: dev.token}" (click)="finished.emit()">{{ ui.devLink }}</a></p>

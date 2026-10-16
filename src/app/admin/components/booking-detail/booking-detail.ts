@@ -341,6 +341,13 @@ export class BookingDetail {
   });
 
   protected readonly hasDiscount = computed(() => Number(this.booking()?.discount_amount ?? 0) > 0);
+  /** «Visa •••• 4242»: solo per i pagamenti online, `null` altrimenti. */
+  protected readonly cardLabel = computed(() => {
+    const booking = this.booking();
+    if (!booking?.card_last4) return null;
+    const brand = booking.card_brand ? booking.card_brand.charAt(0).toUpperCase() + booking.card_brand.slice(1) : 'Carta';
+    return `${brand} •••• ${booking.card_last4}`;
+  });
 
   /** Solo le date valorizzate e pertinenti allo stato attuale. */
   protected readonly keyDates = computed<KeyDate[]>(() => {

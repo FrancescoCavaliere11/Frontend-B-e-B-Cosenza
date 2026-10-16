@@ -1,6 +1,7 @@
 import {Component, OnDestroy, OnInit, computed, inject, isDevMode, output, signal} from '@angular/core';
 import {BookingFlowStore} from '../booking-flow.store';
 import {SITE_ROUTES} from '../../config/navigation.config';
+import {BookingStatus} from '../../../schemas/booking-enums';
 import {BOOKING_UI} from '../booking.copy';
 
 const CLOCK_TICK_MS = 1000;
@@ -21,6 +22,21 @@ export class BookingOutcome implements OnInit, OnDestroy {
   protected readonly store = inject(BookingFlowStore);
   protected readonly ui = BOOKING_UI.done;
   protected readonly booking = computed(() => this.store.created()?.booking ?? null);
+  /**
+   * Esito del pagamento online, aggiornato dalle riletture dello store:
+   * `verifying` finché il webhook non ha deciso, poi confermata o rilasciata
+   * (annullata o scaduta mentre si pagava: nessun addebito).
+   */
+  protected readonly paidOutcome = computed<'verifying' | 'confirmed' | 'released' | null>(() => {
+    if (!this.store.isPaid()) return null;
+    switch (this.booking()?.status) {
+      case BookingStatus.PENDING_PAYMENT: return 'verifying';
+      case BookingStatus.CANCELLED:
+      case BookingStatus.EXPIRED: return 'released';
+      default: return 'confirmed';
+    }
+  });
+  protected readonly cardStatusLabel = computed(() => this.paidOutcome() === 'verifying' ? this.ui.verifyingStatus : null);
   /** Solo in sviluppo, con le email spente: link di conferma diretto. */
   protected readonly devConfirmLink = computed(() => {
     const token = this.store.created()?.confirmationToken;

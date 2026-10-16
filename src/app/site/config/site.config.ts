@@ -48,7 +48,7 @@ export const SITE = {
  *   con `CAPTCHA_ENABLED=false`).
  */
 export const PUBLIC_KEYS = {
-  stripePublishableKey: '',
+  stripePublishableKey: 'pk_test_51UP1Yk04QCAyfJijXWLWg8QS3ZUI64Vj7XCUD4HN0MZIjeZopc2il4YgWE7qFF18dXEk2kmnA8Al92KPnFyaIwqs00noQNVneQ',
   /**
    * CHIAVE DI PROVA di Cloudflare (passa sempre): va sostituita con quella
    * vera prima della pubblicazione (debito tecnico, «Chiavi Turnstile»).
