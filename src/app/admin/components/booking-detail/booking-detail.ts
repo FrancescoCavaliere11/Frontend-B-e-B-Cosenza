@@ -341,7 +341,7 @@ export class BookingDetail {
   });
 
   protected readonly hasDiscount = computed(() => Number(this.booking()?.discount_amount ?? 0) > 0);
-  /** «Visa •••• 4242»: solo per i pagamenti online, `null` altrimenti. */
+  /** «Visa •••• 4242», solo per i pagamenti online. */
   protected readonly cardLabel = computed(() => {
     const booking = this.booking();
     if (!booking?.card_last4) return null;

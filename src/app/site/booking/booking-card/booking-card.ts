@@ -15,7 +15,7 @@ import {BOOKING_UI} from '../booking.copy';
 export class BookingCard {
   readonly booking = input.required<PublicBooking>();
   readonly freeUntil = input<string | null>(null);
-  /** Etichetta di stato al posto di quella della prenotazione (es. «Pagamento in verifica»). */
+  /** Sostituisce l'etichetta dello stato. */
   readonly statusLabel = input<string | null>(null);
 
   protected readonly ui = BOOKING_UI;

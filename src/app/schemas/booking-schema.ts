@@ -210,7 +210,7 @@ export class BookingDetailSchema {
   payment_option: PaymentOption;
   payment_status: PaymentStatus;
   payment_method: PaymentMethod | null;
-  /** Solo per i pagamenti online: circuito e ultime quattro cifre (da Stripe). */
+  /** Solo pagamenti online. */
   card_brand: string | null;
   card_last4: string | null;
 
@@ -291,14 +291,6 @@ export const BOOKING_RULES = {
   NOTES_MAX_LENGTH: 2000,
   NAME_MIN_LENGTH: 2,
   NAME_MAX_LENGTH: 50,
-  /**
-   * Cifre del numero senza prefisso: per ora **10 per ogni Paese**, e per
-   * l'Italia solo cellulari (iniziano con 3). Il backend salva il numero
-   * normalizzato (`+393331234567`) e ricontrolla la regola italiana.
-   *
-   * TODO(#40): lunghezze reali per Paese (un cellulare francese ne ha 9).
-   */
-  PHONE_DIGITS: 10,
   /** `online_payment_discount_percent`: sconto del pagamento anticipato. */
   PAY_NOW_DISCOUNT_PERCENT: 10,
   /** `occupancy_max_window_days`: ampiezza massima della finestra del calendario. */

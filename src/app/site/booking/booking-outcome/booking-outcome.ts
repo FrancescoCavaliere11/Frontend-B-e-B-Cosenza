@@ -22,11 +22,7 @@ export class BookingOutcome implements OnInit, OnDestroy {
   protected readonly store = inject(BookingFlowStore);
   protected readonly ui = BOOKING_UI.done;
   protected readonly booking = computed(() => this.store.created()?.booking ?? null);
-  /**
-   * Esito del pagamento online, aggiornato dalle riletture dello store:
-   * `verifying` finché il webhook non ha deciso, poi confermata o rilasciata
-   * (annullata o scaduta mentre si pagava: nessun addebito).
-   */
+  /** `released`: annullata o scaduta durante il pagamento, senza addebito. */
   protected readonly paidOutcome = computed<'verifying' | 'confirmed' | 'released' | null>(() => {
     if (!this.store.isPaid()) return null;
     switch (this.booking()?.status) {

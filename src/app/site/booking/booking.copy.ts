@@ -66,8 +66,7 @@ export const BOOKING_UI = {
     captchaPending: 'La verifica anti-spam non è ancora completa: attendete qualche secondo e inviate di nuovo.',
     captchaRejected: 'La verifica anti-spam non è andata a buon fine. È stata ripetuta: inviate di nuovo.',
     errors: {
-      phoneDigits: (digits: number) => `Il numero, senza prefisso, deve avere ${digits} cifre`,
-      italianMobile: 'Inserite un cellulare italiano: inizia con 3 e ha 10 cifre',
+      phoneFormat: 'Solo cifre: spazi, trattini e punti sono ammessi',
       prefix: 'Prefisso da 1 a 4 cifre, es. +351',
     },
   },

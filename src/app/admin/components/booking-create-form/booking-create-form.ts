@@ -26,19 +26,17 @@ import {StayRange, VisibleRange} from '../../../shared/components/stay-calendar/
 import {occupancyWindowOf} from '../../../utils/occupancy-window';
 import {
   EMAIL_PATTERN,
-  italianMobileValidator,
   phoneDigitsOf,
-  phoneDigitsValidator,
   stayRulesValidator,
 } from '../../../validators/validators';
 import {
   CUSTOM_PREFIX_PATTERN,
   DEFAULT_PHONE_PREFIX,
-  ITALIAN_MOBILE_FIRST_DIGIT,
   normalizePrefix,
   OTHER_PHONE_PREFIX,
   PHONE_PREFIXES,
 } from '../../../schemas/phone-prefixes';
+import {PhoneRulesService, mobilePhoneValidator, phoneFormatValidator, phoneMobileMessage} from '../../../validators/phone-rules';
 
 /** Camera proposta nel form: dalla disponibilità (date future) o dall'elenco camere (passate). */
 interface RoomOption {
@@ -150,6 +148,7 @@ export class BookingCreateForm implements OnInit {
   private readonly occupancy$ = new Subject<void>();
   private readonly quote$ = new Subject<void>();
   private readonly destroyRef = inject(DestroyRef);
+  private readonly phoneRules = inject(PhoneRulesService);
 
   constructor(
     private formBuilder: FormBuilder,
@@ -186,12 +185,7 @@ export class BookingCreateForm implements OnInit {
         // Prefisso dal menu (Italia predefinita) o scritto a mano con «Altro».
         phone_prefix: [DEFAULT_PHONE_PREFIX],
         phone_custom_prefix: [''],
-        phone_number: ['', [Validators.required, phoneDigitsValidator(BOOKING_RULES.PHONE_DIGITS)]],
-      }, {
-        // Con il prefisso italiano solo cellulari: il numero inizia con 3.
-        validators: italianMobileValidator(
-          'phone_prefix', 'phone_number', DEFAULT_PHONE_PREFIX, ITALIAN_MOBILE_FIRST_DIGIT
-        ),
+        phone_number: ['', [Validators.required, phoneFormatValidator(), mobilePhoneValidator(this.phoneRules)]],
       }),
       admin_notes: ['', Validators.maxLength(BOOKING_RULES.NOTES_MAX_LENGTH)],
     });
@@ -773,9 +767,10 @@ export class BookingCreateForm implements OnInit {
   // Ospite e note                                                       //
   // ------------------------------------------------------------------ //
 
-  /** Con «Altro prefisso» il campo del prefisso diventa obbligatorio. */
+  /** «Altro prefisso» rende obbligatorio il prefisso libero; ogni cambio di prefisso rivalida il numero. */
   private setupPhonePrefixRules(): void {
     const custom = this.guestGroup.get('phone_custom_prefix')!;
+    const phone = this.guestGroup.get('phone_number')!;
     this.guestGroup.get('phone_prefix')!.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(prefix => {
@@ -786,7 +781,10 @@ export class BookingCreateForm implements OnInit {
           custom.setValue('', {emitEvent: false});
         }
         custom.updateValueAndValidity({emitEvent: false});
+        phone.updateValueAndValidity();
       });
+    custom.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => phone.updateValueAndValidity());
+    this.phoneRules.load().then(loaded => loaded && phone.updateValueAndValidity());
   }
 
   isCustomPhonePrefix(): boolean {
@@ -800,21 +798,13 @@ export class BookingCreateForm implements OnInit {
     return `${prefix}${phoneDigitsOf(phone_number)}`;
   }
 
-  /**
-   * Errore del telefono: formato e lunghezza sono del campo, la regola del
-   * cellulare italiano è del gruppo (dipende anche dal prefisso).
-   */
+  /** Errore del telefono: obbligatorio, formato, oppure non è un cellulare del Paese scelto. */
   phoneError(): string | null {
     const control = this.guestGroup.get('phone_number');
     if (!control?.touched) return null;
     if (control.hasError('required')) return 'Il telefono è obbligatorio';
-    switch (control.getError('phoneDigits')) {
-      case 'format': return 'Solo cifre: spazi, trattini e punti sono ammessi';
-      case 'length': return `Il numero, senza prefisso, deve avere ${BOOKING_RULES.PHONE_DIGITS} cifre`;
-    }
-    return this.guestGroup.hasError('italianMobile')
-      ? 'Inserisci un cellulare italiano: inizia con 3 e ha 10 cifre'
-      : null;
+    if (control.hasError('phoneFormat')) return 'Solo cifre: spazi, trattini e punti sono ammessi';
+    return control.hasError('phoneMobile') ? phoneMobileMessage(control.getError('phoneMobile')) : null;
   }
 
   fieldError(path: string): string | null {

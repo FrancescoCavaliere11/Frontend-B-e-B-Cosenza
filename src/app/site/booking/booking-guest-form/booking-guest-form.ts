@@ -6,9 +6,10 @@ import {CaptchaService, CaptchaWidget} from '../captcha.service';
 import {BOOKING_RULES} from '../../../schemas/booking-schema';
 import {PaymentOption} from '../../../schemas/booking-enums';
 import {
-  CUSTOM_PREFIX_PATTERN, DEFAULT_PHONE_PREFIX, ITALIAN_MOBILE_FIRST_DIGIT, OTHER_PHONE_PREFIX, PHONE_PREFIXES, normalizePrefix,
+  CUSTOM_PREFIX_PATTERN, DEFAULT_PHONE_PREFIX, OTHER_PHONE_PREFIX, PHONE_PREFIXES, normalizePrefix,
 } from '../../../schemas/phone-prefixes';
-import {EMAIL_PATTERN, italianMobileValidator, phoneDigitsOf, phoneDigitsValidator} from '../../../validators/validators';
+import {EMAIL_PATTERN, phoneDigitsOf} from '../../../validators/validators';
+import {PhoneRulesService, mobilePhoneValidator, phoneFormatValidator, phoneMobileMessage} from '../../../validators/phone-rules';
 import {SITE_ROUTES} from '../../config/navigation.config';
 import {BOOKING_UI} from '../booking.copy';
 import {UI} from '../../i18n/it';
@@ -45,6 +46,7 @@ export class BookingGuestForm implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private captchaWidget: CaptchaWidget | null = null;
   private readonly captchaHost = viewChild<ElementRef<HTMLElement>>('captcha');
+  private readonly phoneRules = inject(PhoneRulesService);
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
     firstname: ['', [Validators.required, Validators.minLength(BOOKING_RULES.NAME_MIN_LENGTH), Validators.maxLength(BOOKING_RULES.NAME_MAX_LENGTH)]],
@@ -52,19 +54,21 @@ export class BookingGuestForm implements AfterViewInit {
     email: ['', [Validators.required, Validators.pattern(EMAIL_PATTERN)]],
     phone_prefix: [DEFAULT_PHONE_PREFIX],
     phone_custom_prefix: [{value: '', disabled: true}, [Validators.required, Validators.pattern(CUSTOM_PREFIX_PATTERN)]],
-    phone_number: ['', [Validators.required, phoneDigitsValidator(BOOKING_RULES.PHONE_DIGITS)]],
+    phone_number: ['', [Validators.required, phoneFormatValidator(), mobilePhoneValidator(this.phoneRules)]],
     accept_terms: [false, [Validators.requiredTrue]],
     website: [''],
-  }, {
-    validators: italianMobileValidator('phone_prefix', 'phone_number', DEFAULT_PHONE_PREFIX, ITALIAN_MOBILE_FIRST_DIGIT),
   });
 
   constructor() {
+    const phone = this.form.controls.phone_number;
     this.form.controls.phone_prefix.valueChanges.pipe(takeUntilDestroyed()).subscribe(prefix => {
       const custom = this.form.controls.phone_custom_prefix;
       if (prefix === OTHER_PHONE_PREFIX) custom.enable();
       else custom.disable();
+      phone.updateValueAndValidity();
     });
+    this.form.controls.phone_custom_prefix.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => phone.updateValueAndValidity());
+    this.phoneRules.load().then(loaded => loaded && phone.updateValueAndValidity());
   }
 
   ngAfterViewInit(): void {
@@ -89,14 +93,14 @@ export class BookingGuestForm implements AfterViewInit {
     if (serverError) return serverError;
     if (!(control.touched || this.submitted())) return null;
 
-    if (field === 'phone_number' && this.form.hasError('italianMobile')) return this.ui.errors.italianMobile;
     if (!control.errors) return null;
     if (control.hasError('required')) return field === 'accept_terms' ? this.validation.terms : this.validation.required;
     if (control.hasError('requiredTrue')) return this.validation.terms;
     if (control.hasError('minlength')) return this.validation.minLength(BOOKING_RULES.NAME_MIN_LENGTH);
     if (control.hasError('maxlength')) return this.validation.maxLength(BOOKING_RULES.NAME_MAX_LENGTH);
     if (control.hasError('pattern')) return field === 'email' ? this.validation.email : this.ui.errors.prefix;
-    if (control.hasError('phoneDigits')) return this.ui.errors.phoneDigits(BOOKING_RULES.PHONE_DIGITS);
+    if (control.hasError('phoneFormat')) return this.ui.errors.phoneFormat;
+    if (control.hasError('phoneMobile')) return phoneMobileMessage(control.getError('phoneMobile'));
     return null;
   }
 

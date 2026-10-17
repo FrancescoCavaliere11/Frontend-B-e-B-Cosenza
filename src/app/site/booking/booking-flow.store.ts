@@ -41,12 +41,7 @@ const QUOTE_SAFETY_MS = 30_000;
 const DEFAULT_GUESTS = 2;
 /** Campo con cui il backend segnala un captcha rifiutato (`details[].loc`). */
 const CAPTCHA_FIELD = 'captcha_token';
-/**
- * Attese fra una rilettura e l'altra dopo il pagamento (3 s, poi 4, poi 8:
- * ~15 s in tutto). Il webhook di Stripe conferma di solito in 2–4 secondi.
- * Sono poche di proposito: `/lookup` ha un limite di 10 richieste l'ora per
- * IP, e l'ospite deve poterlo ancora usare dopo.
- */
+/** Riletture dopo il pagamento (~15 s in tutto): poche, perché `/lookup` ha un limite orario per IP. */
 const PAYMENT_RECHECK_DELAYS_MS = [3_000, 4_000, 8_000];
 
 /**
@@ -271,11 +266,9 @@ export class BookingFlowStore {
   /* --- Passo 4: pagamento --- */
 
   /**
-   * Pagamento accettato da Stripe. La conferma vera la fa il webhook, pochi
-   * secondi dopo: la prenotazione si rilegge finché non lascia «in attesa di
-   * pagamento», così l'esito mostrato non resta quello di prima del
-   * pagamento. Si ferma alla prima risposta definitiva, a un errore (es.
-   * 429) o alla chiusura del pannello, che distrugge lo store.
+   * La conferma arriva dal webhook pochi secondi dopo: si rilegge la
+   * prenotazione finché non lascia `PENDING_PAYMENT`, fino a un errore o
+   * alla chiusura del pannello.
    */
   markPaid(): void {
     this.isPaid.set(true);
