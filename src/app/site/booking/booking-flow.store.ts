@@ -7,7 +7,7 @@ import {BookingStatus, PaymentOption} from '../../schemas/booking-enums';
 import {GuestBookingService} from '../http/guest-booking.service';
 import {SiteError, toSiteError} from '../http/site-error';
 import {SiteRoomsService} from '../services/site-rooms.service';
-import {CreatedBooking, GuestData, GuestQuote} from '../models/booking-public.models';
+import {CreatedBooking, GuestBookingRequest, GuestQuote} from '../models/booking-public.models';
 import {nightsBetween, todayIso} from '../../utils/booking-format';
 import {occupancyWindowOf} from '../../utils/occupancy-window';
 import {BOOKING_UI} from './booking.copy';
@@ -237,25 +237,22 @@ export class BookingFlowStore {
    * @param onRejected chiamata se il backend rifiuta la richiesta: il token
    *   del captcha è già stato speso e il form deve chiederne uno nuovo.
    */
-  submitGuest(guest: GuestData, captchaToken: string | null, website: string | null, onRejected?: () => void): void {
+  submitGuest(details: Omit<GuestBookingRequest, 'quote_token'>, onRejected?: () => void): void {
     const quote = this.quote();
     if (!quote || this.isBusy()) return;
 
     // Preventivo in scadenza: lo si rinnova prima di spenderlo.
     if (Date.parse(quote.quoteExpiresAt) - Date.now() < QUOTE_SAFETY_MS) {
-      this.fetchQuote(() => this.submitGuest(guest, captchaToken, website, onRejected));
+      this.fetchQuote(() => this.submitGuest(details, onRejected));
       return;
     }
 
     this.run(this.bookingApi.create({
       quote_token: quote.quoteToken,
-      guest,
-      accept_terms: true,
-      captcha_token: captchaToken,
-      website,
+      ...details,
     }), created => {
       this.created.set(created);
-      this.guestEmail.set(guest.email);
+      this.guestEmail.set(details.guest.email);
       this.go(created.booking.paymentOption === PaymentOption.PAY_NOW ? 'payment' : 'done');
     }, error => {
       onRejected?.();

@@ -253,6 +253,13 @@
         </section>
       }
 
+      @if (b.stay_notes) {
+        <section class="wide">
+          <h5>Note sul soggiorno</h5>
+          <p class="note stay-notes">{{ b.stay_notes }}</p>
+        </section>
+      }
+
       @if (b.admin_notes) {
         <section class="wide">
           <h5>Note interne</h5>

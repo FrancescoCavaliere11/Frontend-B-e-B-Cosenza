@@ -219,6 +219,7 @@ export class BookingDetailSchema {
   cancelled_at: string | null;
   cancellation_deadline: string | null;
   cancellation_reason: string | null;
+  stay_notes: string | null;
   admin_notes: string | null;
 
   created_at: string;
@@ -261,6 +262,7 @@ export class BookingDetailSchema {
     this.cancelled_at = data.cancelled_at ?? null;
     this.cancellation_deadline = data.cancellation_deadline ?? null;
     this.cancellation_reason = data.cancellation_reason ?? null;
+    this.stay_notes = data.stay_notes ?? null;
     this.admin_notes = data.admin_notes ?? null;
 
     this.created_at = data.created_at;
@@ -289,6 +291,7 @@ export const BOOKING_RULES = {
   MAX_ROOMS: 5,
   MAX_GUESTS: 100,
   NOTES_MAX_LENGTH: 2000,
+  STAY_NOTES_MAX_LENGTH: 1000,
   NAME_MIN_LENGTH: 2,
   NAME_MAX_LENGTH: 50,
   /** `online_payment_discount_percent`: sconto del pagamento anticipato. */
@@ -443,5 +446,6 @@ export interface AdminBookingCreateRequest extends StaySearch {
   };
   skip_email_confirmation: boolean;
   mark_as_paid: boolean;
+  stay_notes?: string;
   admin_notes?: string;
 }

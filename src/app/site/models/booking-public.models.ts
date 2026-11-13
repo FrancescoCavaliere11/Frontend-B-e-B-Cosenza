@@ -93,6 +93,7 @@ export interface GuestData {
 export interface GuestBookingRequest {
   quote_token: string;
   guest: GuestData;
+  stay_notes?: string;
   accept_terms: boolean;
   captcha_token: string | null;
   /** Honeypot: sempre vuoto da un utente reale. */

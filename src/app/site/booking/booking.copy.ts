@@ -56,6 +56,8 @@ export const BOOKING_UI = {
     customPrefix: 'Prefisso, es. +351',
     phone: 'Cellulare',
     phoneHelp: 'Solo per comunicazioni sul soggiorno.',
+    stayNotes: 'Note sul soggiorno (facoltative)',
+    stayNotesHelp: 'Puoi indicare, per esempio, l’orario di arrivo previsto o una richiesta per la struttura.',
     terms: 'Ho letto e accetto i',
     termsLink: 'termini di prenotazione',
     privacy: 'e l\'informativa privacy',

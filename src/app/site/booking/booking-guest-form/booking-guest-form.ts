@@ -14,7 +14,7 @@ import {SITE_ROUTES} from '../../config/navigation.config';
 import {BOOKING_UI} from '../booking.copy';
 import {UI} from '../../i18n/it';
 
-type GuestField = 'firstname' | 'lastname' | 'email' | 'phone_number' | 'phone_custom_prefix' | 'accept_terms';
+type GuestField = 'firstname' | 'lastname' | 'email' | 'phone_number' | 'phone_custom_prefix' | 'stay_notes' | 'accept_terms';
 
 /**
  * Passo 3: dati dell'ospite. Stesse regole del backend e del back-office
@@ -29,6 +29,7 @@ type GuestField = 'firstname' | 'lastname' | 'email' | 'phone_number' | 'phone_c
 export class BookingGuestForm implements AfterViewInit {
   protected readonly store = inject(BookingFlowStore);
   protected readonly captcha = inject(CaptchaService);
+  protected readonly stayNotesMaxLength = BOOKING_RULES.STAY_NOTES_MAX_LENGTH;
   protected readonly ui = BOOKING_UI.guest;
   protected readonly common = UI.common;
   protected readonly validation = UI.validation;
@@ -52,6 +53,7 @@ export class BookingGuestForm implements AfterViewInit {
     firstname: ['', [Validators.required, Validators.minLength(BOOKING_RULES.NAME_MIN_LENGTH), Validators.maxLength(BOOKING_RULES.NAME_MAX_LENGTH)]],
     lastname: ['', [Validators.required, Validators.minLength(BOOKING_RULES.NAME_MIN_LENGTH), Validators.maxLength(BOOKING_RULES.NAME_MAX_LENGTH)]],
     email: ['', [Validators.required, Validators.pattern(EMAIL_PATTERN)]],
+    stay_notes: ['', Validators.maxLength(this.stayNotesMaxLength)],
     phone_prefix: [DEFAULT_PHONE_PREFIX],
     phone_custom_prefix: [{value: '', disabled: true}, [Validators.required, Validators.pattern(CUSTOM_PREFIX_PATTERN)]],
     phone_number: ['', [Validators.required, phoneFormatValidator(), mobilePhoneValidator(this.phoneRules)]],
@@ -97,7 +99,9 @@ export class BookingGuestForm implements AfterViewInit {
     if (control.hasError('required')) return field === 'accept_terms' ? this.validation.terms : this.validation.required;
     if (control.hasError('requiredTrue')) return this.validation.terms;
     if (control.hasError('minlength')) return this.validation.minLength(BOOKING_RULES.NAME_MIN_LENGTH);
-    if (control.hasError('maxlength')) return this.validation.maxLength(BOOKING_RULES.NAME_MAX_LENGTH);
+    if (control.hasError('maxlength')) {
+      return this.validation.maxLength(field === 'stay_notes' ? this.stayNotesMaxLength : BOOKING_RULES.NAME_MAX_LENGTH);
+    }
     if (control.hasError('pattern')) return field === 'email' ? this.validation.email : this.ui.errors.prefix;
     if (control.hasError('phoneFormat')) return this.ui.errors.phoneFormat;
     if (control.hasError('phoneMobile')) return phoneMobileMessage(control.getError('phoneMobile'));
@@ -115,12 +119,19 @@ export class BookingGuestForm implements AfterViewInit {
 
     const value = this.form.getRawValue();
     const prefix = value.phone_prefix === OTHER_PHONE_PREFIX ? normalizePrefix(value.phone_custom_prefix) : value.phone_prefix;
+    const stayNotes = value.stay_notes.trim();
     this.store.submitGuest({
-      firstname: value.firstname.trim(),
-      lastname: value.lastname.trim(),
-      email: value.email.trim(),
-      phone_number: `${prefix}${phoneDigitsOf(value.phone_number)}`,
-    }, this.captchaToken(), value.website || null, () => this.captchaWidget?.reset());
+      guest: {
+        firstname: value.firstname.trim(),
+        lastname: value.lastname.trim(),
+        email: value.email.trim(),
+        phone_number: `${prefix}${phoneDigitsOf(value.phone_number)}`,
+      },
+      ...(stayNotes ? {stay_notes: stayNotes} : {}),
+      accept_terms: true,
+      captcha_token: this.captchaToken(),
+      website: value.website || null,
+    }, () => this.captchaWidget?.reset());
   }
 
   private onCaptchaToken(token: string | null): void {

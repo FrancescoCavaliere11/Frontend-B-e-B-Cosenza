@@ -231,6 +231,10 @@ dd {
   white-space: pre-line;
 }
 
+.stay-notes {
+  overflow-wrap: anywhere;
+}
+
 /*
  * Camere: stesse due colonne della griglia delle sezioni, così i prezzi
  * iniziano esattamente dove iniziano le sezioni Ospite e Date.

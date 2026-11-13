@@ -44,6 +44,14 @@
       <p id="g-phone-h" class="field__hint">{{ ui.phoneHelp }}</p>
       @if (errorOf('phone_number'); as error) { <p class="field__error">{{ error }}</p> }
     </div>
+    <div class="field guest__wide">
+      <label class="field__label" for="g-stay-notes">{{ ui.stayNotes }}</label>
+      <textarea id="g-stay-notes" class="field__input" formControlName="stay_notes" rows="3"
+                [maxlength]="stayNotesMaxLength" [attr.aria-invalid]="!!errorOf('stay_notes')"
+                [attr.aria-describedby]="errorOf('stay_notes') ? 'g-stay-notes-h g-stay-notes-e' : 'g-stay-notes-h'"></textarea>
+      <p id="g-stay-notes-h" class="field__hint">{{ ui.stayNotesHelp }}</p>
+      @if (errorOf('stay_notes'); as error) { <p id="g-stay-notes-e" class="field__error">{{ error }}</p> }
+    </div>
   </div>
 
   <!-- Trappola per i bot: invisibile e non raggiungibile da tastiera. -->

@@ -373,6 +373,17 @@
 
     <!-- 6. Note -->
     <section>
+      <h5><label for="create-stay-notes">Note sul soggiorno <span class="text-small">(facoltative)</span></label></h5>
+      <textarea id="create-stay-notes" formControlName="stay_notes" rows="3"
+                [maxlength]="rules.STAY_NOTES_MAX_LENGTH" [class.invalid]="fieldError('stay_notes')"
+                [attr.aria-invalid]="!!fieldError('stay_notes')"
+                aria-describedby="create-stay-notes-hint"></textarea>
+      <p id="create-stay-notes-hint" class="text-small" [class.error-message]="fieldError('stay_notes')">
+        {{ fieldError('stay_notes') || 'Informazioni sul soggiorno comunicate dall’ospite.' }}
+      </p>
+    </section>
+
+    <section>
       <h5>Note interne <span class="text-small">(facoltative)</span></h5>
       <textarea formControlName="admin_notes" rows="3" aria-label="Note interne"
                 [class.invalid]="fieldError('admin_notes')"></textarea>

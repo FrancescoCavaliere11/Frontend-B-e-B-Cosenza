@@ -187,6 +187,7 @@ export class BookingCreateForm implements OnInit {
         phone_custom_prefix: [''],
         phone_number: ['', [Validators.required, phoneFormatValidator(), mobilePhoneValidator(this.phoneRules)]],
       }),
+      stay_notes: ['', Validators.maxLength(BOOKING_RULES.STAY_NOTES_MAX_LENGTH)],
       admin_notes: ['', Validators.maxLength(BOOKING_RULES.NOTES_MAX_LENGTH)],
     });
   }
@@ -822,6 +823,8 @@ export class BookingCreateForm implements OnInit {
         return 'Prefisso da 1 a 4 cifre, es. +351';
       case 'payment.payment_method':
         return 'Indica il metodo con cui l\'ospite ha pagato';
+      case 'stay_notes':
+        return `Al massimo ${BOOKING_RULES.STAY_NOTES_MAX_LENGTH} caratteri`;
       case 'admin_notes':
         return `Al massimo ${BOOKING_RULES.NOTES_MAX_LENGTH} caratteri`;
       default:
@@ -884,6 +887,7 @@ export class BookingCreateForm implements OnInit {
     const stay = this.currentStay()!;
     const payment = this.paymentGroup.getRawValue();
     const guest = this.guestGroup.getRawValue();
+    const stayNotes = (this.form.get('stay_notes')?.value ?? '').trim();
     const notes = (this.notesControl.value ?? '').trim();
 
     return {
@@ -901,6 +905,7 @@ export class BookingCreateForm implements OnInit {
       },
       skip_email_confirmation: !!payment.skip_email_confirmation,
       mark_as_paid: !!payment.mark_as_paid,
+      ...(stayNotes ? {stay_notes: stayNotes} : {}),
       ...(notes ? {admin_notes: notes} : {}),
     };
   }
@@ -925,6 +930,7 @@ export class BookingCreateForm implements OnInit {
         firstname: '', lastname: '', email: '',
         phone_prefix: DEFAULT_PHONE_PREFIX, phone_custom_prefix: '', phone_number: '',
       },
+      stay_notes: '',
       admin_notes: '',
     });
     this.applyPaymentRules();
